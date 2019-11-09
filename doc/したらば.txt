@@ -1,0 +1,131 @@
+﻿"http://jbbs.shitaraba.net/bbs/write.cgi/anime/7922/1424837071/"
+
+{POST /bbs/write.cgi/anime/7922/1424837071/ HTTP/1.1
+Host: jbbs.shitaraba.net
+User-Agent: Monazilla/1.00 (chaika/1.8.1; Windows NT 6.1; Firefox/47.0.2)
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ja,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate
+DNT: 1
+Referer: http://jbbs.shitaraba.net/bbs/read.cgi/anime/7922/1424837071/
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 110
+Cookie: _ga=GA1.2.215946992.1386940425; ldsuid=58.146.2.184.1480317088210940
+Connection: keep-alive
+}
+
+"http://jbbs.shitaraba.net/anime/bbs/write.cgi"
+{POST /anime/bbs/write.cgi HTTP/1.0
+Referer: http://jbbs.shitaraba.net/anime/7922/
+Content-Length: 100
+Cookie: NAME; MAIL
+Host: jbbs.shitaraba.net
+User-Agent: Monazilla/1.00 kage/0.99.1.1212 (1000)
+Connection: close
+Pragma: no-cache
+}
+
+"http://jbbs.shitaraba.net/bbs/rawmode.cgi/anime/7922/1424837071/1-"
+{GET /bbs/rawmode.cgi/anime/7922/1424837071/1- HTTP/1.0
+Host: jbbs.shitaraba.net
+User-Agent: Monazilla/1.00 kage/0.99.1.1212 (1000)
+Connection: close
+Pragma: no-cache
+}
+
+"http://jbbs.livedoor.jp/bbs/rawmode.cgi/anime/7922/1424837071/142-n"
+{GET /bbs/rawmode.cgi/anime/7922/1424837071/1- HTTP/1.0
+Host: jbbs.livedoor.jp
+User-Agent: Monazilla/1.00 kage/0.99.1.1212 (1000)
+Connection: close
+Pragma: no-cache
+}
+
+{POST /bbs/write.cgi HTTP/1.0
+Referer: http://jbbs.livedoor.jp/anime/7922/
+Cookie: NAME; MAIL
+Host: jbbs.livedoor.jp
+User-Agent: Monazilla/1.00 kage/0.99.1.1212 (1000)
+Connection: close
+Pragma: no-cache
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 110
+}
+
+{HTTP/1.1 200 OK
+Date: Thu, 22 Dec 2016 16:30:16 GMT
+Server: Plack::Handler::Starlet
+Content-Type: text/plain; charset=EUC-JP
+Last-Modified: Thu, 22 Dec 2016 15:05:28 GMT
+Content-Length: 20573
+Set-Cookie: ldsuid=58.146.2.184.1482424216699153; path=/; expires=Wed, 22-Mar-17 16:30:16 GMT
+Connection: close
+}
+
+http://jbbs.livedoor.jp/bbs/write.cgi
+{POST /bbs/write.cgi HTTP/1.0
+Referer: http://jbbs.livedoor.jp/anime/7922/
+Cookie: NAME; MAIL; ldsuid=58.146.2.184.1482423971510186
+Host: jbbs.livedoor.jp
+User-Agent: Monazilla/1.00 kage/0.99.1.1212 (1000)
+Connection: close
+Pragma: no-cache
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 124
+}
+
+"submit=%8F%91%82%AB%8D%9E%82%DE&KEY=1424837071&NAME=&MAIL=sage&MESSAGE=test&BBS=7922&TIME=1482426262"
+"submit=%BD%F1%A4%AD%B9%FE%A4%E0&DIR=anime&BBS=7922&KEY=1424837071&TIME=1482427362&MESSAGE=test&NAME=&MAIL=sage"
+
+
+http://jbbs.livedoor.jp/anime/7922/bbs/write.cgi
+http://jbbs.shitaraba.net/anime/7922/subject.txt
+http://jbbs.livedoor.jp/bbs/write.cgi
+http://jbbs.shitaraba.net/bbs/rawmode.cgi/anime/7922/1424837071/1-
+
+
+"http://jbbs.shitaraba.net/anime/bbs/write.cgi"
+{POST /bbs/write.cgi/bbs/write.cgi/7922/1424837071/ HTTP/1.0
+Referer: http://jbbs.shitaraba.net/anime/7922/
+Content-Length: 110
+Cookie: NAME; MAIL
+Host: jbbs.shitaraba.net
+User-Agent: Monazilla/1.00 kage/0.99.1.1212 (1000)
+Connection: close
+Content-Type: application/x-www-form-urlencoded
+}
+
+"submit=%8F%91%82%AB%8D%9E%82%DE&KEY=1424837071&NAME=&MAIL=sage&MESSAGE=%83e%83X%83g&BBS=7922&TIME=1482821494"
+
+
+
+{HTTP/1.1 200 OK
+Date: Tue, 27 Dec 2016 07:14:28 GMT
+Server: Plack::Handler::Starlet
+Cache-Control: no-cache
+Content-Type: text/html; charset=EUC-JP
+Content-Length: 1028
+Set-Cookie: ldsuid=58.146.2.184.1482822866500552; path=/; expires=Mon, 27-Mar-17 07:14:26 GMT
+Connection: close
+}
+
+<!DOCTYPE html>\n<html lang=\"ja\">\n  <head>\n    <meta name=\"robots\" content=\"noarchive,noindex\">\n    <meta charset=\"EUC-JP\">\n    <meta http-equiv=\"Cache-Control\" content=\"no-cache\">\n    <meta http-equiv=\"Pragma\" content=\"no-cache\">\n    <meta http-equiv=\"Refresh\" content=\"10;url=http://jbbs.shitaraba.net/anime/7922/\">\n    <script>\n      (function(name, mail) {\n          var date = new Date();\n          date.setMonth(date.getMonth() + 1); // + one month\n          var cf = ';expires=' + date.toGMTString() + '; path=/';\n          if (\"checked\" == \"checked\"){\n              document.cookie = 'NAME=' + escape(name) + cf;\n          }\n          if (\"checked\" == \"checked\"){\n              document.cookie = 'MAIL=' + escape(mail) + cf;\n          }\n      })(\"\", \"sage\");\n    </script>\n    <title>書きこみました</title>\n  </head>\n  <body>\n    書きこみが終りました。<br><br>\n    画面を切り替えるまでしばらくお待ち下さい。<br><br>\n    <br>\n    <a href=\"http://jbbs.shitaraba.net/anime/7922/\">掲示板に戻る</a>\n    <br>\n  </body>\n</html>\n
+
+<!DOCTYPE html>\n<html lang=\"ja\">\n  <head>\n    <meta name=\"robots\" content=\"noarchive,noindex\">\n    <meta charset=\"EUC-JP\">\n    <meta http-equiv=\"Cache-Control\" content=\"no-cache\">\n    <meta http-equiv=\"Pragma\" content=\"no-cache\">\n    <meta http-equiv=\"Refresh\" content=\"10;url=http://jbbs.shitaraba.net/anime/7922/\">\n    <script>\n      (function(name, mail) {\n          var date = new Date();\n          date.setMonth(date.getMonth() + 1); // + one month\n          var cf = ';expires=' + date.toGMTString() + '; path=/';\n          if (\"checked\" == \"checked\"){\n              document.cookie = 'NAME=' + escape(name) + cf;\n          }\n          if (\"checked\" == \"checked\"){\n              document.cookie = 'MAIL=' + escape(mail) + cf;\n          }\n      })(\"\", \"sage\");\n    </script>\n    <title>書きこみました。</title>\n  </head>\n  <body>\n    書きこみが終りました。<br><br>\n    画面を切り替えるまでしばらくお待ち下さい。<br><br>\n    <br>\n    <a href=\"http://jbbs.shitaraba.net/anime/7922/\">掲示板に戻る</a>\n    <br>\n  </body>\n</html>\n
+
+
+<!DOCTYPE html><head><title>書きこみました。</title> </head>\n  <body>書きこみが終りました。<br><br>画面を切り替えるまでしばらくお待ち下さい。<br><br><br><a>掲示板に戻る</a><br></body></html>
+
+<html lang="ja">
+<head>
+<title>書きこみました。</title>
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<meta content=1;URL=http://potato.2ch.net/test/read.cgi/software/1475917645/l50 http-equiv=refresh>
+</head>
+<body>書きこみが終わりました。 [0.183750 sec.]<br><br>
+画面を切り替えるまでしばらくお待ち下さい。<br><br>
+<br><br><br><br><br>
+<center>
+</center>
+</body>
+</html>

@@ -1,0 +1,7 @@
+﻿dat落ちリスト、過去1000件
+溢れると古いものから削除
+http://potato.2ch.net/software/pastdat.txt
+
+dat落ちリスト、URL付
+番号範囲ごとにkako0000をインクリメント
+http://hitomi.2ch.net/poverty/kako/kako0000.html

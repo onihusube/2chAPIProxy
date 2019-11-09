@@ -1,0 +1,116 @@
+差分取得
+{GET /streaming/dat/1424450777.dat HTTP/1.1
+Host: anago.2ch.net
+User-Agent: Monazilla/1.00 (chaika/1.7.3; Windows NT 6.1; Firefox/35.0.1)
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ja,en-us;q=0.7,en;q=0.3
+DNT: 1
+If-Modified-Since: Thu, 26 Feb 2015 14:21:22 GMT
+Range: bytes=229633-
+Cookie: HAP=FOXdayo53616c7465645f5f4fdc89a1a2f7abbcec49c2c97f69ca6dba554b6035b7b5358c9f6e8862a0b988500d58ea16f4a48522dcb102dd2daf920cf7de02148a8cc173764f174a385cac62dfe0f7ab4e24eee8cbd5cc1e517e8e75f7b6b7c7c422df893756dc5239b733d3c6ef7f153a8ab7ee21ac640a414d390c61168bd3bb972041cc3a12b9c971b5022d537b19382d05351e422251f6270611862d2d670c856e98514a89f85f54847fa18c4ee1f94fc78a59c54c1bc80d41b0a6e1832678ab28603f0d359ed3fdb2539b9e5dc81276a6; PREN=%96%bc%96%b3%82%b5%82%b3%82%f1%81%97%82%a8%95%a0%82%a2%82%c1%82%cf%82%a2%81B; __gads=ID=94e136c616971e1e:T=1379070619:S=ALNI_MYZ-fdWm083gjMUdyy1jjNkU0SJJA; READJS="off"; PON=h058-146-002-184.user.starcat.ne.jp; yuki=akari; __cfduid=d567d73f7d4e9c14300308126d730cecb1421162367; PREN=%96%bc%96%b3%82%b5%82%b3%82%f1%81%97%82%a8%95%a0%82%a2%82%c1%82%cf%82%a2%81B; _ga=GA1.2.283881490.1422630240; yuki=akari
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+}
+全件取得
+{GET /streaming/dat/1423420952.dat HTTP/1.1
+Host: anago.2ch.net
+User-Agent: Monazilla/1.00 (chaika/1.7.3; Windows NT 6.1; Firefox/35.0.1)
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ja,en-us;q=0.7,en;q=0.3
+Accept-Encoding: gzip
+DNT: 1
+Cookie: HAP=FOXdayo53616c7465645f5f4fdc89a1a2f7abbcec49c2c97f69ca6dba554b6035b7b5358c9f6e8862a0b988500d58ea16f4a48522dcb102dd2daf920cf7de02148a8cc173764f174a385cac62dfe0f7ab4e24eee8cbd5cc1e517e8e75f7b6b7c7c422df893756dc5239b733d3c6ef7f153a8ab7ee21ac640a414d390c61168bd3bb972041cc3a12b9c971b5022d537b19382d05351e422251f6270611862d2d670c856e98514a89f85f54847fa18c4ee1f94fc78a59c54c1bc80d41b0a6e1832678ab28603f0d359ed3fdb2539b9e5dc81276a6; PREN=%96%bc%96%b3%82%b5%82%b3%82%f1%81%97%82%a8%95%a0%82%a2%82%c1%82%cf%82%a2%81B; __gads=ID=94e136c616971e1e:T=1379070619:S=ALNI_MYZ-fdWm083gjMUdyy1jjNkU0SJJA; READJS="off"; PON=h058-146-002-184.user.starcat.ne.jp; yuki=akari; __cfduid=d567d73f7d4e9c14300308126d730cecb1421162367; PREN=%96%bc%96%b3%82%b5%82%b3%82%f1%81%97%82%a8%95%a0%82%a2%82%c1%82%cf%82%a2%81B; _ga=GA1.2.283881490.1422630240; yuki=akari
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+}
+
+更新なし、レスポンス
+{HTTP/1.1 304 Not Modified
+Date: Thu, 26 Feb 2015 16:26:44 GMT
+Connection: keep-alive
+ETag: "10c8b18-416d-5100032454c40"
+Server: cloudflare-nginx
+CF-RAY: 1bed818790bb0449-NRT
+}
+
+更新あり、レスポンス
+{HTTP/1.1 206 Partial Content
+Date: Thu, 26 Feb 2015 16:26:04 GMT
+Content-Type: text/plain
+Content-Length: 95
+Connection: keep-alive
+Last-Modified: Thu, 26 Feb 2015 16:25:13 GMT
+ETag: "10c8b18-416d-5100032454c40"
+Accept-Ranges: bytes
+Content-Range: bytes 16654-16748/16749
+Server: cloudflare-nginx
+CF-RAY: 1bed809112df0449-NRT
+}
+
+dat落ち
+{HTTP/1.1 302 Found
+Date: Thu, 26 Feb 2015 18:25:59 GMT
+Content-Type: text/html; charset=iso-8859-1
+Transfer-Encoding: chunked
+Connection: keep-alive
+Location: http://www2.2ch.net/live.html
+Server: cloudflare-nginx
+CF-RAY: 1bee30397270044f-NRT
+}
+
+dat落ち(api)
+{Connection: close
+User-Status: 1
+CF-RAY: 1bee3678d4d91311-NRT
+Accept-Ranges: bytes
+Content-Length: 3
+Content-Type: text/plain
+Date: Thu, 26 Feb 2015 18:30:15 GMT
+Set-Cookie: __cfduid=dc9dacb743a022d42ad5fefb6d204d2ca1424975415; expires=Fri, 26-Feb-16 18:30:15 GMT; path=/; domain=.2ch.net; HttpOnly
+Server: cloudflare-nginx
+}
+"ISO-8859-1"
+
+{Connection: close
+User-Status: 1
+CF-RAY: 1bee5f28da360b6e-NRT
+Accept-Ranges: bytes
+Content-Length: 3
+Content-Type: text/plain
+Date: Thu, 26 Feb 2015 18:58:02 GMT
+ETag: "10c8b18-74eb-5100225942c80"
+Set-Cookie: __cfduid=d2738c182a41e89334344ebe7b8b847831424977081; expires=Fri, 26-Feb-16 18:58:01 GMT; path=/; domain=.2ch.net; HttpOnly
+Server: cloudflare-nginx
+}
+
+SID期限切れ
+キー	値
+応答	HTTP/1.1 401 Unauthorized
+Server	cloudflare-nginx
+Date	Fri, 06 Mar 2015 13:50:53 GMT
+Content-Type	text/plain
+Content-Length	19
+Connection	close
+User-Status	0
+CF-RAY	1c2e8841876f0b50-NRT
+
+ng (not authorized)
+
+差分取得、応答（api）
+{Connection: close
+Content-Range: bytes 172877-173859/173860
+Thread-Status: 1
+User-Status: 1
+CF-RAY: 1c3000dac17f1305-NRT
+Accept-Ranges: bytes
+Content-Length: 983
+Content-Type: text/plain
+Date: Fri, 06 Mar 2015 18:07:59 GMT
+ETag: "1663da4-2a724-510a28f088580"
+Last-Modified: Fri, 06 Mar 2015 18:07:34 GMT
+Set-Cookie: __cfduid=d35f48016342593f3a1b70241d716ae131425665279; expires=Sat, 05-Mar-16 18:07:59 GMT; path=/; domain=.2ch.net; HttpOnly
+Server: cloudflare-nginx
+
+}

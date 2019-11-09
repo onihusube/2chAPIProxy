@@ -1,0 +1,10 @@
+﻿新read.cgi
+<div class="stoplight">レス数が1000を超えています。これ以上書き込みはできません。</div>
+
+<div class="stoplight">■ このスレッドは過去ログ倉庫に格納されています</div>
+
+
+従来read.cgi
+<div style="background-color:red;color:white;line-height:3em;margin:1px;padding:1px;">レス数が1000を超えています。残念ながら全部は表示しません。</div>
+
+<div style="background-color:red;color:white;line-height:3em;margin:1px;padding:1px;">■ このスレッドは過去ログ倉庫に格納されています</div>

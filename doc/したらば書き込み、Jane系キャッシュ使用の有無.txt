@@ -1,0 +1,54 @@
+﻿{POST /bbs/write.cgi HTTP/1.0
+Connection: close
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 110
+Cache-control: no-cache
+Pragma: no-cache
+Host: jbbs.shitaraba.net
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: identity
+Referer: http://jbbs.shitaraba.net/anime/7922/
+User-Agent: Monazilla/1.00 (JaneView/1507130036)
+Cookie: ldsuid=180.14.89.82.1499524154714591
+}
+
+{POST /bbs/write.cgi HTTP/1.0
+Connection: close
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 113
+Host: jbbs.shitaraba.net
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: identity
+Referer: http://jbbs.shitaraba.net/anime/7922/
+User-Agent: Monazilla/1.00 (JaneView/1507130036)
+Cookie: ldsuid=180.14.89.82.1499524154714591
+}
+
+{HTTP/1.1 200 OK
+Date: Sat, 08 Jul 2017 14:30:11 GMT
+Server: Plack::Handler::Starlet
+Cache-Control: no-cache
+Content-Type: text/html; charset=EUC-JP
+Content-Length: 1028
+Connection: close
+}
+
+
+
+690 名無しさん＠お腹いっぱい。 sage 2015/03/17(火) 00:39:20.88 xPcKRjb70
+
+>>657に関連してだけど、view側のプロクシ設定で
+「プロクシ使用時にキャッシュを使用しない」にチェックを入れていると
+したらば掲示板への初回書き込みで
+--------------------
+書込み中・・・
+--------------------
+書込みに失敗した模様
+--------------------
+HTTP/1.1 504 Fiddler - Receive Failure
+--------------------
+というエラーが返されるみたい
+
+この動作は正常な動作なのか、専ブラ側または2chAPIProxyの問題なのかは不明
+上記設定をチェックオフすればエラーは出ないようなので
+とりあえずチェックオフで運用してみる

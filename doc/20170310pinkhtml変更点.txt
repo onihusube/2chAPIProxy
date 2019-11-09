@@ -1,0 +1,16 @@
+﻿旧html
+<div class="post" id="134" data-date="NG" data-userid="ID:kYHBYqBg0" data-id="134">
+<div class="number">134 : </div>
+<div class="name"><b>名無しさん＠お腹いっぱい。 </b>(ﾜｯﾁｮｲ a54b-Vm/o)<b></b></div>
+<div class="date">2017/02/20(月) 23:28:28.09 ID:kYHBYqBg0</div>
+<div class="message"> <a href="../test/read.cgi/streaming/1487431046/108" rel="noopener noreferrer" target="_blank">&gt;&gt;108</a> <br> まとめ乙 </div></div>
+
+新html
+<dl class="post" id="9" data-date="NG" data-userid="ID:OrJDaKYF0" data-id="9">
+<dt class="">
+<span class="number">9 : </span>
+<span class="name"><b><font color="green">名無したちの午後 </b>(ﾜｯﾁｮｲ 4f62-AZYz)<b></font></b></span>
+<span class="date">2017/02/01(水) 11:43:46.06 ID:OrJDaKYF0</span></dt><dd class="thread_in"> ヌヌヌンオオオオオオオゥーーｻﾞｰゥ <br> ＼　　＼＼　　＼ヾ＼＼､,,　＼,'　,　＼　　 <br> 　　＼　　　＼　　＼　 ､∠二二､ヽ&quot;　＼　ヽ＼　＼　＼ <br> 　＼＼＼　＼　＼　　 （（＞ω＜｀）)　/　＼　　　　　大偏な大雨です！何も聞こえませ--------　　　ん <br> ＼　　＼＼ヽ　＼＼　 ､/つ~~ ：~~＼,＼＼＼　＼　　＼　 <br> はい！OKでーえすう　＞ <br>  <br>  <br>  <br>  <br> 　　＼サ～　　　　　　　　　　　　　　　　　＼　＼ 　シトシト～ <br> ＼　　＼＼　　　　　　　　　　　　　　　　　,　＼　＼＼　丿＼＼　＼ <br> 　　＼　　　＼　　　　　　　　　　　　　　　　＼　ヽ＼　＼　＼ <br> 　＼＼＼　＼　＼　　(＾・∀・`)　＜おつかれさまでーす♪ <br> ＼　　＼＼ヽ　＼＼　 ､/~~ ：~~＼。　 </dd></dl>
+
+目欄ありの場合の名前
+<span class="name"><b><a href="mailto:sage">名無したちの午後 <small>転載ダメ&#169;bbspink.com</small> </b>(ｱｳｱｳｶｰ Saaf-kXRS)<b></a></b></span>

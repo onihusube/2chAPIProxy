@@ -1,0 +1,56 @@
+﻿・edge投稿時
+名前	プロトコル	メソッド	結果	コンテンツの種類	受信	時間	イニシエーター
+http://potato.2ch.net/test/bbs.cgi	HTTP	POST	200	text/html		772.1 ミリ秒	document
+
+Accept: text/html, application/xhtml+xml, image/jxr, */*
+Accept-Encoding: gzip, deflate
+Accept-Language: ja-JP
+Cache-Control: no-cache
+Connection: Keep-Alive
+Content-Length: 126
+Content-Type: application/x-www-form-urlencoded
+Cookie: __cfduid=d97529297e8595caf225d3008ebc77b181489310401
+DNT: 1
+Host: potato.2ch.net
+Referer: http://potato.2ch.net/test/read.cgi/software/1475917645/
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393
+
+
+   bbs: software
+   FROM: 
+   key: 1475917645
+   mail: sage
+   MESSAGE: kakikotest
+   oekaki_thread1: 
+   submit: %8F%91%82%AB%8D%9E%82%DE
+   time: 1489622460
+
+
+CF-RAY: 340370c6710d6ebd-NRT
+Connection: keep-alive
+Content-Encoding: gzip
+Content-Type: text/html; charset=Shift_JIS
+Date: Thu, 16 Mar 2017 00:01:54 GMT
+Server: cloudflare-nginx
+Set-Cookie: PON=58.146.2.184; expires=Thu, 09-Mar-2017 00:00:00 GMT; path=/;
+Set-Cookie: PON=58.146.2.184; expires=Thu, 09-Mar-2017 00:00:00 GMT; path=/; domain=.2ch.net
+Set-Cookie: yuki=akari; expires=Thu, 23-Mar-2017 00:00:00 GMT; path=/; domain=.2ch.net
+Transfer-Encoding: chunked
+Vary: Accept-Encoding
+
+
+・IE投稿時
+Accept: text/html, application/xhtml+xml, image/jxr, */*
+Accept-Encoding: gzip, deflate
+Accept-Language: ja-JP
+Cache-Control: no-cache
+Connection: Keep-Alive
+Content-Length: 677
+Content-Type: application/x-www-form-urlencoded
+Cookie: __cfduid=d65a64c1f68eb2dbd503656a147b222a61489136929; yuki=akari
+DNT: 1
+Host: potato.2ch.net
+Referer: http://potato.2ch.net/test/bbs.cgi
+UA-CPU: AMD64
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; Trident/7.0; rv:11.0) like Gecko
+

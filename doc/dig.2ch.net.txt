@@ -1,0 +1,519 @@
+﻿"http://dig.5ch.net/?keywords=%E3%83%8B%E3%82%B3%E3%83%8B%E3%82%B3%E5%8B%95%E7%94%BB&AndOr=0&maxResult=5&atLeast=1&Sort=5&Link=1&Bbs=all&924=1&json=1"
+
+
+<!DOCTYPE html>
+<HTML lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=320, initial-scale=1.0, minimum-scale=1.0, maximum-scale=3.0, user-scalable=1" />
+
+<meta name="robots" content="noopenner">
+<meta name="robots" content="noarchive">
+<link href="/CDN/img/apt.png" rel="apple-touch-icon">
+<link href="/favicon.ico" rel="shortcut icon">
+<link rel="canonical" href="https://dig.5ch.net/?keywords=アニメ雑談スレ&Link=8&Bbs=all" />
+<link rel="up" href="https://dig.5ch.net/" title="スレタイ検索 dig ＠ ５ちゃんねる">
+<meta name="referrer" content="origin">
+<title>アニメ雑談スレ | スレタイ検索 dig ＠ ５ちゃんねる op[0:50:1:1:8:all:0]</title>
+<link rel="alternate" type="application/atom+xml" href="/dig2014.atom" title="Atom">
+<META NAME="keywords" itemprop="keywords" CONTENT="アニメ雑談スレ,スレタイ検索,５ちゃんねる,5ch,dig">
+<META NAME="news_keywords" CONTENT="アニメ雑談スレ,スレタイ検索,５ちゃんねる,5ch,dig">
+<meta name="classification" content="5ch,search,title">
+<meta name="description" itemprop="description" content="スレタイ検索【アニメ雑談スレ】を、５ちゃんねるから掘りますた(dig) アニメ雑談スレの話題は今日は５ちゃんねるのここでやってます。貴方も参加する? そっ閉じ? 人気板順・急上昇順・勢い順・レス数順・最新スレ順・最古スレ順・最新投稿順・板別・ジャンル別・・ op[0:50:1:1:8:all:0]">
+<meta name="application-name" content="スレタイ検索 dig ＠ ５ちゃんねる">
+<meta name="date" content="2017-10-08T21:19:23+09:00">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!--[if lt IE 9]>
+<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<meta http-equiv="Content-Language" content="ja" />
+<meta name="language" content="Japanese">
+<meta name="author" content="FOX★A">
+<meta name="application-name" content="スレタイ検索 dig ＠ ５ちゃんねる">
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-55034357-14"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments)};
+  gtag('js', new Date());
+  gtag('config', 'UA-55034357-14');
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage":{
+    "@type":"WebPage",
+    "@id":"https://dig.5ch.net/"
+  },
+  "headline": "アニメ雑談スレ スレタイ検索 dig ＠ ５ちゃんねる",
+  "image": {
+    "@type": "ImageObject",
+    "url": "http://bintan.ula.cc/apple-touch-icon.png",
+    "height": "144",
+    "width": "144"
+  },
+  "datePublished": "2017-10-08T21:19:23+09:00",
+  "dateModified": "2017-10-08T21:19:23+09:00",
+  "author": {
+    "@type": "Person",
+    "name": "fox"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "スレタイ検索 dig ＠ ５ちゃんねる",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://bintan.ula.cc/apple-touch-icon.png",
+      "height": "144",
+      "width": "144"
+    }
+  },
+  "description": "アニメ雑談スレ スレタイ検索 dig ＠ ５ちゃんねる"
+}
+</script>
+<style type="text/css">
+<!--
+body{font-size:1.0em;line-height:1.9em;background: #eeeeee; }
+nav#pankuzuMaido3 ol li { display: inline; list-style-type: none; }
+nav#pankuzuMaido3 ol li:before { content: " > "; }
+nav#pankuzuMaido3 ol li:first-child:before { content:""; }
+h1 { font-size: 1.125em; }
+h2 { font-size: 1.075em; }
+h3 { font-size: 1.025em; }
+.url { font-size: 60%;  }
+.mae { color: crimson;  }
+.motoT  { font-size: 70%;  font-style: normal; }
+.resFooter { text-shadow:none ; font-size:20px; color: #000000; background: #ddeeff; border-bottom:none;border-top:none; text-align: left; }
+..kanrenn{
+font-size: 90%;
+	word-break: break-all;
+	 word-wrap: break-word;
+}
+.digRes1
+{
+	margin : 10px 2px 10px 2px;
+	padding : 5px 5px 5px 5px;
+width: initial;
+	word-break: break-all;
+	 word-wrap: break-word;
+	line-height: 1.66;
+	color: #000;
+	background-color:#f0fff0;
+border: ridge #0000ff;
+	border-radius: 5px;        /* CSS3草案 */
+	-webkit-border-radius: 5px;    /* Safari,Google Chrome用 */  
+	-moz-border-radius: 5px;   /* Firefox用 */  
+}
+.digRes1 dl
+{
+	margin  : 0px 0px 0px 0px;
+	padding : 0px 0px 0px 0px;
+}
+.DigTop table {background: #ddeeff;border-collapse: collapse;margin:2px 10px;}
+.DigTop table,
+.DigTop td {border:0px solid #666; }
+a:link { text-decoration: underline; }
+a:visited { text-decoration: underline; }
+a:hover { text-decoration: underline; }
+a:active { text-decoration: underline; }
+li { margin-bottom: 18px; }
+ul.odai
+{
+padding: 0px 0px 0px 0px;
+}
+ul.odai li
+{
+display: inline;
+margin: 0px 4px 0px 4px;
+padding: 0px 0px 0px 0px;
+color: #dc143c;
+}
+ul.odai li:first-child {color: #000000;}
+ul.resultUL
+{
+	marin:8px 0px 8px 0px;
+	padding:2px 2px 2px 2px;
+list-style:none;
+}
+-->
+</style>
+</head>
+<body>
+
+<header>
+<div class="DigTop">
+<table><tr><td>
+<a href="https://dig.5ch.net/"><img width=57 height=57 src="/apt.png" alt="スレタイ検索 dig ＠ ５ちゃんねる"></a>
+</td><td>
+<strong>アニメ雑談スレ</strong> 掘りますた dug＠<a href="https://dig.5ch.net/j/t/">５ちゃんねる</a>
+</td></tr></table>
+</div>
+</header>
+
+<aside>
+<form method=GET action="https://dig.5ch.net/" accept-charset="UTF-8">
+<div>
+<input id="dig_text" type=text name="keywords" value="アニメ雑談スレ" placeholder="検索キーワードを入力 dig" style="width:96%;height:30px;">
+</div>
+<input id="dig_submit" type=submit value="スレタイ検索">　
+<select id="dig_select" name="AndOr">
+<option value="0" selected>AND検索</option>
+<option value="1">OR検索</option>
+</select>　
+最大<select id="dig_select" name="maxResult">
+<option value="1">1</option>
+<option value="5">5</option>
+<option value="50" selected>50</option>
+<option value="100">100</option>
+<option value="200">200</option>
+<option value="300">300</option>
+<option value="500">500</option>
+</select>件表示　
+<select id="dig_select" name="atLeast">
+<option value="1" selected>1</option>
+<option value="5">5</option>
+<option value="50">50</option>
+<option value="100">100</option>
+<option value="200">200</option>
+<option value="300">300</option>
+<option value="500">500</option>
+<option value="1000">1000</option>
+</select>レス未満非表示
+<select id="dig_select" name="Sort">
+<option value="0">人気板順</option>
+<option value="1" selected>勢い順</option>
+<option value="2">レス数順</option>
+<option value="4">最新スレ順</option>
+<option value="3">最古スレ順</option>
+<option value="5">最新投稿順</option>
+</select>　
+<select id="dig_select" name="Link">
+<option value="1">PC用</option>
+<option value="8" selected>スマホ用</option>
+<option value="3">ガラk用</option>
+</select>のリンク生成
+<select id="dig_select" name="Bbs">
+<option value="all" selected>全ての板</option>
+<option value="poverty">嫌儲</option>
+<option value="newsplus">速＋</option>
+<option value="mnewsplus">芸＋</option>
+<option value="U_plus">＋全部</option>
+<option value="U_live">実況全部</option>
+<option value="G_game">ゲームG</option>
+<option value="G_entame">芸能・テレビG</option>
+<option value="G_subcal">サブカルG</option>
+<option value="G_base">野球G</option>
+<option value="G_soccer">サッカーG</option>
+<option value="G_pc">PC関係G</option>
+<option value="G_academy">学問・文化G</option>
+<option value="G_female">女性向けG</option>
+<option value="G_world">国際G</option>
+<option value="G_eastasia">国際・東亜G</option>
+<option value="G_fareast">極東G</option>
+<option value="G_operate">運営G</option>
+<option value="S_bbspink">ぴんく鯖</option>
+<option value="morningcoffee">狼。</option>
+<option value="poverty">嫌儲</option>
+</select>板で絞込み
+924を<select id="dig_select" name="924">
+<option value="1">出す</option>
+<option value="0" selected>消す</option>
+</select>　
+</form>
+</aside>
+<main>
+<div> 
+[板絞込解除中]&emsp;<a rel="noopenner" href="/?maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&924=0&password=dig&Bbs=all&keywords=">検索語reset</a>&emsp;<a href="https://dig.5ch.net/">Topに戻る</a>
+</div> 
+<div> 
+0.4478[秒]6件発見/全 418246 スレッド中
+</div> 
+<article> 
+<h1>アニメ雑談スレ の検索結果</h1>
+<ul class="resultUL">
+<li class="digRes1"> 
+<DL>
+<DT>
+<span id="ch"> 1</span>
+<span id="title"><a href="http://bintan.ula.cc/2ch/YouTube/egg.5ch.net/1506347367/L" rel="nofollow">ニコニコ動画 <strong>アニメ雑談スレ</strong>2896(803)</a></span>
+</DT>
+<DD>
+<span class="mae">1 時間前</span>
+勢い 62
+</DD>
+<DD>
+<a href="http://bintan.ula.cc/2ch/YouTube/?narabi=ikioi" rel="nofollow">YouTube</a>&ensp;板&emsp;<span class="itashiboriX">[<a rel="noopenner" href="./?Bbs=streaming&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&924=0&password=dig&keywords=%E3%82%A2%E3%83%8B%E3%83%A1%E9%9B%91%E8%AB%87%E3%82%B9%E3%83%AC">板で絞込</a>]</span> </DD>
+<DD class="kanren">
+<ul class="odai">
+<li>関連検索</li>
+<li>#<a href="https://dig.5ch.net/?keywords=ニコニコ&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">ニコニコ</a></li>
+<li>#<a href="https://dig.5ch.net/?keywords=アニメ&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">アニメ</a></li>
+<li>#<a href="https://dig.5ch.net/?keywords=動画&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">動画</a></li>
+<li>#<a href="https://dig.5ch.net/?keywords=雑談&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">雑談</a></li>
+</ul>
+</DD>
+<DD><span class="url">http://egg.5ch.net/test/read.cgi/streaming/1506347367/</span></DD>
+<DD><span class="motoT">
+<a href="http://egg.5ch.net/test/read.cgi/streaming/1506347367/l10">元スレ</a>&emsp;
+</span></DD>
+</DL>
+</li> 
+
+<li class="digRes1"> 
+<DL>
+<DT>
+<span id="ch"> 2</span>
+<span id="title"><a href="http://bintan.ula.cc/2ch/801サロン/phoebe.bbspink.com/1504699748/L" rel="nofollow"><strong>アニメ雑談スレ</strong>＠801サロン Part11 (662)</a></span>
+</DT>
+<DD>
+<span class="mae">10 分前</span>
+勢い 21
+</DD>
+<DD>
+<a href="http://bintan.ula.cc/2ch/801サロン/?narabi=ikioi" rel="nofollow">801サロン</a>&ensp;板&emsp;<span class="itashiboriX">[<a rel="noopenner" href="./?Bbs=801saloon&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&924=0&password=dig&keywords=%E3%82%A2%E3%83%8B%E3%83%A1%E9%9B%91%E8%AB%87%E3%82%B9%E3%83%AC">板で絞込</a>]</span> </DD>
+<DD class="kanren">
+<ul class="odai">
+<li>関連検索</li>
+<li>#<a href="https://dig.5ch.net/?keywords=アニメ&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">アニメ</a></li>
+<li>#<a href="https://dig.5ch.net/?keywords=サロン&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">サロン</a></li>
+<li>#<a href="https://dig.5ch.net/?keywords=雑談&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">雑談</a></li>
+</ul>
+</DD>
+<DD><span class="url">http://phoebe.bbspink.com/test/read.cgi/801saloon/1504699748/</span></DD>
+<DD><span class="motoT">
+<a href="http://phoebe.bbspink.com/test/read.cgi/801saloon/1504699748/l10">元スレ</a>&emsp;
+</span></DD>
+</DL>
+</li> 
+<li class="digRes1"> 
+<DL>
+<DT>
+<span id="ch"> 3</span>
+<span id="title"><a href="http://bintan.ula.cc/2ch/MANGO/agree.5ch.net/1491580972/L" rel="nofollow"><strong>アニメ雑談スレ</strong>(118)</a></span>
+</DT>
+<DD>
+<span class="mae">23 時間前</span>
+勢い 1
+</DD>
+<DD>
+<a href="http://bintan.ula.cc/2ch/MANGO/?narabi=ikioi" rel="nofollow">MANGO</a>&ensp;板&emsp;<span class="itashiboriX">[<a rel="noopenner" href="./?Bbs=mango&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&924=0&password=dig&keywords=%E3%82%A2%E3%83%8B%E3%83%A1%E9%9B%91%E8%AB%87%E3%82%B9%E3%83%AC">板で絞込</a>]</span> </DD>
+<DD class="kanren">
+<ul class="odai">
+<li>関連検索</li>
+<li>#<a href="https://dig.5ch.net/?keywords=アニメ&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">アニメ</a></li>
+<li>#<a href="https://dig.5ch.net/?keywords=雑談&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">雑談</a></li>
+</ul>
+</DD>
+<DD><span class="url">http://agree.5ch.net/test/read.cgi/mango/1491580972/</span></DD>
+<DD><span class="motoT">
+<a href="http://agree.5ch.net/test/read.cgi/mango/1491580972/l10">元スレ</a>&emsp;
+</span></DD>
+</DL>
+</li> 
+<li class="digRes1"> 
+<DL>
+<DT>
+<span id="ch"> 4</span>
+<span id="title"><a href="http://bintan.ula.cc/2ch/懐アニ昭和/mao.5ch.net/1372546275/L" rel="nofollow">【総合】昭和ロボット<strong>アニメ雑談スレ</strong> ２号機(206)</a></span>
+</DT>
+<DD>
+<span class="mae">19 日前</span>
+勢い 0
+</DD>
+<DD>
+<a href="http://bintan.ula.cc/2ch/懐アニ昭和/?narabi=ikioi" rel="nofollow">懐アニ昭和</a>&ensp;板&emsp;<span class="itashiboriX">[<a rel="noopenner" href="./?Bbs=ranime&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&924=0&password=dig&keywords=%E3%82%A2%E3%83%8B%E3%83%A1%E9%9B%91%E8%AB%87%E3%82%B9%E3%83%AC">板で絞込</a>]</span> </DD>
+<DD class="kanren">
+<ul class="odai">
+<li>関連検索</li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=総合&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">総合</a></li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=ロボットアニメ&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">ロボットアニメ</a></li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=昭和&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">昭和</a></li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=雑談&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">雑談</a></li>
+</ul>
+</DD>
+<DD><span class="url">http://mao.5ch.net/test/read.cgi/ranime/1372546275/</span></DD>
+<DD><span class="motoT">
+<a href="http://mao.5ch.net/test/read.cgi/ranime/1372546275/l10">元スレ</a>&emsp;
+</span></DD>
+</DL>
+</li> 
+<li class="digRes1"> 
+<DL>
+<DT>
+<span id="ch"> 5</span>
+<span id="title"><a href="http://bintan.ula.cc/2ch/携帯コンテンツ/lavender.5ch.net/1214129123/L" rel="nofollow">ニコニコ動画モバイル <strong>アニメ雑談スレ</strong>part3(425)</a></span>
+</DT>
+<DD>
+<span class="mae">3 ヶ月前</span>
+勢い 0
+</DD>
+<DD>
+<a href="http://bintan.ula.cc/2ch/携帯コンテンツ/?narabi=ikioi" rel="nofollow">携帯コンテンツ</a>&ensp;板&emsp;<span class="itashiboriX">[<a rel="noopenner" href="./?Bbs=chakumelo&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&924=0&password=dig&keywords=%E3%82%A2%E3%83%8B%E3%83%A1%E9%9B%91%E8%AB%87%E3%82%B9%E3%83%AC">板で絞込</a>]</span> </DD>
+<DD class="kanren">
+<ul class="odai">
+<li>関連検索</li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=ニコニコ&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">ニコニコ</a></li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=モバイル&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">モバイル</a></li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=アニメ&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">アニメ</a></li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=動画&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">動画</a></li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=雑談&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">雑談</a></li>
+</ul>
+</DD>
+<DD><span class="url">http://lavender.5ch.net/test/read.cgi/chakumelo/1214129123/</span></DD>
+<DD><span class="motoT">
+<a href="http://lavender.5ch.net/test/read.cgi/chakumelo/1214129123/l10">元スレ</a>&emsp;
+</span></DD>
+</DL>
+</li> 
+<li>
+<div style="height:90px;"><script type="text/javascript">var microadCompass = microadCompass || {};microadCompass.queue = microadCompass.queue || [];</script><script type="text/javascript" charset="UTF-8" src="//j.microad.net/js/compass.js" onload="new microadCompass.AdInitializer().initialize();" async></script><div id="192081ae85f89fc5225d443df76998d8"> <script type="text/javascript">		microadCompass.queue.push({			"spot": "192081ae85f89fc5225d443df76998d8",			"url": "${COMPASS_EXT_URL}",			"referrer": "${COMPASS_EXT_REF}"		});	</script></div></div></li>
+<li class="digRes1"> 
+<DL>
+<DT>
+<span id="ch"> 6</span>
+<span id="title"><a href="http://bintan.ula.cc/2ch/エロアニメ等/mercury.bbspink.com/1134655290/L" rel="nofollow">【乳出しOK】R-15系<strong>アニメ雑談スレ</strong>【パンチラ】 (262)</a></span>
+</DT>
+<DD>
+<span class="mae">20 日前</span>
+勢い 0
+</DD>
+<DD>
+<a href="http://bintan.ula.cc/2ch/エロアニメ等/?narabi=ikioi" rel="nofollow">エロアニメ等</a>&ensp;板&emsp;<span class="itashiboriX">[<a rel="noopenner" href="./?Bbs=eroanime&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&924=0&password=dig&keywords=%E3%82%A2%E3%83%8B%E3%83%A1%E9%9B%91%E8%AB%87%E3%82%B9%E3%83%AC">板で絞込</a>]</span> </DD>
+<DD class="kanren">
+<ul class="odai">
+<li>関連検索</li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=乳出しOK&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">乳出しOK</a></li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=パンチラ&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">パンチラ</a></li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=アニメ&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">アニメ</a></li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=乳出&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">乳出</a></li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=雑談&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">雑談</a></li>
+<li>#<a rel="nofollow" href="https://dig.5ch.net/?keywords=R-15&maxResult=50&atLeast=1&Link=8&AndOr=0&Sort=1&Bbs=all&924=0&password=dig&2ch=happy">R-15</a></li>
+</ul>
+</DD>
+<DD><span class="url">http://mercury.bbspink.com/test/read.cgi/eroanime/1134655290/</span></DD>
+<DD><span class="motoT">
+<a href="http://mercury.bbspink.com/test/read.cgi/eroanime/1134655290/l10">元スレ</a>&emsp;
+</span></DD>
+</DL>
+</li> 
+</ul>
+</article> 
+</main>
+<aside>
+<br>
+サイトマップ<br>
+<UL>
+<LI><a href="https://dig.5ch.net/5nn/trend/">トレンド 急上昇キーワード</a></LI>
+<LI><a href="https://dig.5ch.net/j/a/">ソースは?</a></LI>
+<LI><a href="https://dig.5ch.net/j/k/">AV 女優</a></LI>
+<LI><a href="https://dig.5ch.net/j/t/">ちょっと通りますよ</a></LI>
+</UL>
+<br>
+</aside>
+<UL>
+<LI>dig ★</LI>
+<LI>all rights reserved. since 2014</LI>
+<LI>ver 0.10 2016/01/22</LI>
+<LI><a href="http://5ch.net/">５ちゃんねる</a>に感謝</LI>
+</UL>
+</BODY>
+</HTML>
+
+
+JSON(2chAPIProxy、5ch/https置換済み)
+※UTF-8エンコーディング
+"{
+	"project" : "dig.5ch.net" ,
+	"copyRights" : "All rights reserved. 2014" ,
+	"auth" : "dig ★" ,
+	"version" : "0.20 2017/10/10" ,
+	"query" : "アニメ雑談スレ" ,
+	"time" : "1.1681" ,
+	"found" : "6" ,
+	"totalThreads" : "417855" ,
+	"date" : "2017/10/13 19:49:16" ,
+	"result" : [
+		{
+			"url" : "http://egg.2ch.net/test/read.cgi/streaming/1507716558/" , 
+			"subject" : "ニコニコ動画 アニメ雑談スレ2897 " ,  
+			"server" : "egg.5ch.net" ,  
+			"bbs" : "streaming" ,  
+			"ita" : "streaming" ,  
+			"category" : "0" ,  
+			"key" : "1507716558" ,  
+			"resno" : "126" , 
+			"lastupdate" : "1507891351" , 
+			"ikioi" : "62" , 
+			"dig" : "dug" 
+		} , 
+		{
+			"url" : "http://phoebe.bbspink.com/test/read.cgi/801saloon/1504699748/" , 
+			"subject" : "アニメ雑談スレ＠801サロン Part11  " ,  
+			"server" : "phoebe.bbspink.com" ,  
+			"bbs" : "801saloon" ,  
+			"ita" : "801saloon" ,  
+			"category" : "0" ,  
+			"key" : "1504699748" ,  
+			"resno" : "788" , 
+			"lastupdate" : "1507886656" , 
+			"ikioi" : "21" , 
+			"dig" : "dug" 
+		} , 
+		{
+			"url" : "http://agree.2ch.net/test/read.cgi/mango/1491580972/" , 
+			"subject" : "アニメ雑談スレ" ,  
+			"server" : "agree.5ch.net" ,  
+			"bbs" : "mango" ,  
+			"ita" : "mango" ,  
+			"category" : "0" ,  
+			"key" : "1491580972" ,  
+			"resno" : "118" , 
+			"lastupdate" : "1507380068" , 
+			"ikioi" : "1" , 
+			"dig" : "dug" 
+		} , 
+		{
+			"url" : "http://mao.2ch.net/test/read.cgi/ranime/1372546275/" , 
+			"subject" : "【総合】昭和ロボットアニメ雑談スレ ２号機" ,  
+			"server" : "mao.5ch.net" ,  
+			"bbs" : "ranime" ,  
+			"ita" : "ranime" ,  
+			"category" : "0" ,  
+			"key" : "1372546275" ,  
+			"resno" : "206" , 
+			"lastupdate" : "1505745300" , 
+			"ikioi" : "0" , 
+			"dig" : "dug" 
+		} , 
+		{
+			"url" : "http://mercury.bbspink.com/test/read.cgi/eroanime/1134655290/" , 
+			"subject" : "【乳出しOK】R-15系アニメ雑談スレ【パンチラ】 " ,  
+			"server" : "mercury.bbspink.com" ,  
+			"bbs" : "eroanime" ,  
+			"ita" : "eroanime" ,  
+			"category" : "0" ,  
+			"key" : "1134655290" ,  
+			"resno" : "262" , 
+			"lastupdate" : "1505700229" , 
+			"ikioi" : "0" , 
+			"dig" : "dug" 
+		} , 
+		{
+			"url" : "http://lavender.2ch.net/test/read.cgi/chakumelo/1214129123/" , 
+			"subject" : "ニコニコ動画モバイル アニメ雑談スレpart3" ,  
+			"server" : "lavender.5ch.net" ,  
+			"bbs" : "chakumelo" ,  
+			"ita" : "chakumelo" ,  
+			"category" : "0" ,  
+			"key" : "1214129123" ,  
+			"resno" : "425" , 
+			"lastupdate" : "1498116039" , 
+			"ikioi" : "0" , 
+			"dig" : "dug" 
+		}
+	]
+}
+"

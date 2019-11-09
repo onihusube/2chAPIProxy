@@ -1,0 +1,76 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:local="clr-namespace:_2chAPIProxy" mc:Ignorable="d" x:Class="_2chAPIProxy.MainWindow"
+        Title="2chAPIProxy Ver:2018.09.22" Height="480" Width="640"
+        Icon="icon3xp.ico" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" d:DataContext="{d:DesignInstance {x:Type local:ViewModel}}" KeyboardNavigation.TabNavigation="Local">
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveSetting}"/>
+    </Window.InputBindings>
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12px"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="FontSize" Value="12px"/>
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="FontSize" Value="12px"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="FontSize" Value="12px"/>
+        </Style>
+        <Style TargetType="GroupBox">
+            <Setter Property="FontSize" Value="12px"/>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Button x:Name="Start" HorizontalAlignment="Left" Height="25" Margin="313.537,9.2,0,0" VerticalAlignment="Top" Width="85" RenderTransformOrigin="0.55,-0.934" ToolTip="与えられたポートで待機するプロクシとしての動作を開始/終了します" Command="{Binding OnClick}" CommandParameter="Start" TabIndex="2">
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="FontSize" Value="12px"/>
+                    <Setter Property="Content" Value="開始"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding NowStart}" Value="True">
+                            <Setter Property="Content" Value="停止"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+        <GroupBox Header="動作ログ" Margin="10,0,10,10" Height="158.4" VerticalAlignment="Bottom">
+            <TextBox x:Name="OutText" Margin="10,10,10,5.4" TextWrapping="NoWrap" SpellCheck.IsEnabled="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnlyCaretVisible="True" Text="{Binding SystemLog, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="21"/>
+        </GroupBox>
+        <TextBox x:Name="portnum" Height="25" Margin="133.537,9.2,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="175" HorizontalAlignment="Left"  ToolTip="プロクシとしてアクセスを受け付けるポート番号を指定。分からない場合は自動選択にチェック" Text="{Binding PortNumber, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, StringFormat=\{0:D\}, UpdateSourceTrigger=LostFocus, ValidatesOnExceptions=True}" TabIndex="1"/>
+        <TextBox x:Name="appkey" HorizontalAlignment="Left" Height="25" Margin="133.537,74,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="360" ToolTip="AppKey入力欄、変更後は&quot;変更を適用&quot;を押してください" Text="{Binding Appkey, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="9"/>
+        <TextBox x:Name="hmkey" HorizontalAlignment="Left" Height="25" Margin="133.537,104,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="360" ToolTip="HMKey入力欄、変更後は&quot;変更を適用&quot;を押してください" Text="{Binding HMkey, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="10"/>
+        <TextBox x:Name="ua1" HorizontalAlignment="Left" Height="25" Margin="133.537,134,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="150" ToolTip="SessionID取得時認証用のX-2cUA、変更後は&quot;変更を適用&quot;を押してください" Text="{Binding UserAgent1, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="11"/>
+        <Button x:Name="UpdateKey" Content="変更を適用" HorizontalAlignment="Left" Height="25" Margin="133.274,39.145,0,0" VerticalAlignment="Top" Width="85" ToolTip="以下5つのkeyの変更を反映し保存します" Command="{Binding OnClick}" CommandParameter="UpdateKey" TabIndex="6"/>
+        <Button x:Name="UpdateSIS" Content="SID更新" HorizontalAlignment="Left" Height="25" Margin="223.537,39.2,0,0" VerticalAlignment="Top" Width="85" ToolTip="現在使用しているSessionIDを更新" Command="{Binding OnClick}" CommandParameter="UpdateSID" TabIndex="7"/>
+        <TextBox x:Name="ua2" HorizontalAlignment="Left" Height="25" Margin="343.274,134,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="150" ToolTip="dat取得時のUA、変更後は&quot;変更を適用&quot;を押してください" Text="{Binding UserAgent2, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="12"/>
+        <TextBox x:Name="SenburaPath" HorizontalAlignment="Left" Height="25" Margin="133.537,224,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="270" ToolTip="同時起動する専ブラexeファイルへのパス。同時起動しない時は空欄に" AcceptsReturn="False" Text="{Binding SenburaPath, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="17"/>
+        <Button x:Name="SenburaChoose" Content="専ブラ選択" HorizontalAlignment="Left" Height="25" Margin="408.537,224,0,0" VerticalAlignment="Top" Width="85" ToolTip="同時起動する専ブラを選択します" Command="{Binding OnClick}" CommandParameter="SenburaChoose" TabIndex="18"/>
+        <TextBox x:Name="RouninID" HorizontalAlignment="Left" Height="25" Margin="133.537,194,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="150" ToolTip="浪人のID、保存時は暗号化されます" Text="{Binding RouninID, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="15"/>
+        <PasswordBox x:Name="RouninPW" HorizontalAlignment="Left" Height="25" Margin="343.274,194,0,0" VerticalAlignment="Top" Width="150" ToolTip="浪人のPW、保存時は暗号化されます" local:PasswordBoxHelper.IsAttached="True" local:PasswordBoxHelper.Password="{Binding RouninPW, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="16"/>
+        <TextBox x:Name="ProxyAddress" HorizontalAlignment="Left" Height="25" Margin="133.274,254,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="360" ToolTip="2chAPIPRoxyが接続に使用するプロクシの設定。アドレス:ポート番号のように入力" Text="{Binding ProxyAddress, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus, ValidatesOnExceptions=True}" TabIndex="20"/>
+        <TextBox x:Name="ua3" HorizontalAlignment="Left" Height="25" Margin="343.274,164,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="150" ToolTip="書き込み時に使用するUseAgent。空欄なら元のUAをそのまま利用します" Text="{Binding UserAgent3, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="14"/>
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Center" Margin="65,17,0,0"><Run Language="ja-jp" Text="ポート番号"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Center" Margin="80,79,0,0"><Run Language="ja-jp" Text="AppKey"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Center" Margin="80,108,0,0"><Run Language="ja-jp" Text="HMKey"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Center" Margin="80,138,0,0" Text="X2chUA"/>
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="292,138,0,0"><Run Language="ja-jp" Text="UA(dat)"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10.667" Margin="292,169.449,0,0"><Run Language="ja-jp" Text="カキコUA"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="80,197,0,0"><Run Language="ja-jp" Text="浪人ID"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="292,197,0,0"><Run Language="ja-jp" Text="浪人PW"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="80,228,0,0"><Run Language="ja-jp" Text="同時起動"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Text="串設定" Margin="80,258,0,0"/>
+        <CheckBox x:Name="AutoStart" Content="起動と同時に開始" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="起動時に自動でプロクシとして動作を開始します。次の起動時から有効" IsChecked="{Binding AutoStart, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="3" Margin="404,15,0,0"/>
+        <CheckBox x:Name="AutoSelect" Content="ポートを自動選択" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="空いているポートを自動選択、ポート番号欄に選択されたポート番号が表示されます" IsChecked="{Binding AutoSelect, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="5" Margin="404,35,0,0"/>
+        <CheckBox x:Name="KakotoHTML" Content="過去ログ取得" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="過去ログをhtmlから変換して取得します" IsChecked="{Binding KakotoHTML, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="4" Margin="519,15,0,0"/>
+        <CheckBox x:Name="SyncEnd" Content="終了を同期" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="専ブラと2chAPIProxyの片方が終了したらもう片方も終了させる場合はチェック" IsChecked="{Binding SyncEnd, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="19" Margin="498,227,0,0"/>
+        <!--<CheckBox Content="2ch→5chへ置換" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="404,35.098,0,0" RenderTransformOrigin="0.634,-0.003" IsChecked="{Binding Use5chnet, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" ToolTip="2ch.netへのすべてのアクセスを5ch.netへ振り替えます。" TabIndex="5"/>-->
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Center" Margin="80,167.676,0,0"><Run Language="ja-jp" Text="UA(SID)"/></TextBlock>
+        <TextBox x:Name="ua1_Copy" HorizontalAlignment="Left" Height="25" Margin="133.274,164,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="150" ToolTip="SessionID取得時のUA、変更後は&quot;変更を適用&quot;を押してください" TabIndex="13" Text="{Binding UserAgent0, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}"/>
+        <Button x:Name="KeyReset" Content="Key/UAリセット" HorizontalAlignment="Left" Height="25" Margin="314,39,0,0" VerticalAlignment="Top" Width="85" ToolTip="SID取得に必要なAPIキーとUAを最新のデフォルト設定にリセットします。SIDやdatが取得できない場合に試してみてください。" Command="{Binding OnClick}" CommandParameter="KeyReset" TabIndex="8"/>
+    </Grid>
+</Window>

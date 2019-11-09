@@ -1,0 +1,13 @@
+﻿8/23版でhtml変換で生成されたdatのサイズがAPIから取得したものより大きくなる現象があったので確認したところ、
+(検証元:https://mevius.5ch.net/test/read.cgi/train/1533128216/)
+■レスアンカーに
+API:<a href="../test/read.cgi/train/1533128216/5" rel="noopener noreferrer" target="_blank">>>5</a>
+HTML:<a href="../test/read.cgi/train/1533128216/5" rel="noopener noreferrer" target="_blank" class="reply_link">>>5</a> <br>
+｢ class="reply_link"｣の文字列が追加
+■一部のレス本文冒頭に <span class="AA">、末尾に</span>が付加(付加されないレスもあり) 
+
+<div class="message"><span class="escaped"><span class="AA"> 東洋経済が調査している住みよさランキングの </span></span></div></div>
+
+<div class="message"><span class="escaped"> 糞、いやクソ暑いのにまだやんの？このスレ </span></div></div>
+
+<div class="message"><span class="escaped"> <a href="../test/read.cgi/train/1533128216/4" rel="noopener noreferrer" target="_blank" class="reply_link">&gt;&gt;4</a> <br> 何だその何の関係もない無理過ぎな苦言は <br> 酔って書いたのかよw </span></div></div>
