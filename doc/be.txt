@@ -1,0 +1,105 @@
+﻿live2ch
+"http://be.2ch.net/index.php"
+
+{POST /index.php HTTP/1.1
+Host: be.2ch.net
+User-Agent: Monazilla/1.00 Live2ch/1.33
+Referer: http://be.2ch.net/test/login.php
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 50
+}
+
+
+chika
+"http://be.2ch.net/test/login.php"
+
+{POST /test/login.php HTTP/1.1
+Host: be.2ch.net
+User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:42.0) Gecko/20100101 Firefox/42.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ja,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate
+DNT: 1
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+Content-Length: 59
+Cookie: __cfduid=dd10313f0b3f71eb51bad13d8ba2b6f491453476455; PREN=%96%bc%96%b3%82%b5%82%b3%82%f1%81%97%82%a8%95%a0%82%a2%82%c1%82%cf%82%a2%81B; _ga=GA1.2.283881490.1422630240; READJS="off"; __gads=ID=9303d74e0b4d88d1:T=1443375168:S=ALNI_Mb4BKc0NNuKuU0FnoJRBZQi_XKnTQ; PHPSESSID=qbp73gstq1tams2digdai8brd7; yuki=akari; HAP=robot
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+}
+
+
+データ
+ギコ："m=mail@address.jp&p=password"
+Live2ch："mail=mail@address.jp&pass=password&login="
+Xeno:"m=mail%40address.jp&p=password&submit=%C5%D0%CF%BF"
+
+新beログイン(火狐)
+https://be.2ch.net/log
+リクエストヘッダ
+Host: be.2ch.net
+User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:47.0) Gecko/20100101 Firefox/47.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ja,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate, br
+DNT: 1
+Referer: https://be.2ch.net/
+Cookie: __cfduid=d465bad982055858a5f7b2f812df180301481182533; _ga=GA1.2.283881490.1422630240; __gads=ID=9303d74e0b4d88d1:T=1443375168:S=ALNI_Mb4BKc0NNuKuU0FnoJRBZQi_XKnTQ; READJS="off"; PREN=%96%bc%96%b3%82%b5%82%b3%82%f1%81%97%82%a8%95%a0%82%a2%82%c1%82%cf%82%a2%81B
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 52
+
+mail=mail%40address.jp&pass=password&login=
+レスポンスヘッダ
+CF-RAY: 30de8c615c022e1b-NRT
+Content-Type: text/html; charset=utf-8
+Date: Thu, 08 Dec 2016 07:36:47 GMT
+Location: http://be.2ch.net/status
+Server: cloudflare-nginx
+Set-Cookie: DMDM=2c3b5b74891e91cf11b69ef5eadd61196b5d8f0f336abf7dfb3da437333c3aa7; Domain=.2ch.net; Expires=Thu, 08-Dec-2016 16:35:41 GMT; Path=/
+MDMD=10cce5498330e0aa2d340e04398ec186493788cc3e9979387436bf32abb9a76e; Domain=.2ch.net; Expires=Thu, 08-Dec-2016 16:35:41 GMT; Path=/
+X-Firefox-Spdy: 3.1
+
+Live2ch、レスポンスヘッダ
+{HTTP/1.1 302 FOUND
+Date: Thu, 08 Dec 2016 11:39:17 GMT
+Content-Type: text/html; charset=utf-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+Set-Cookie: __cfduid=db6bc003ab4f4c44cc9ad6001cdcc878c1481197157; expires=Fri, 08-Dec-17 11:39:17 GMT; path=/; domain=.2ch.net; HttpOnly
+Location: http://be.2ch.net/status
+Set-Cookie: DMDM=2c3b5b74891e91cf11b69ef5eadd61196b5d8f0f336abf7dfb3da437333c3aa7; Domain=.2ch.net; Expires=Thu, 08-Dec-2016 20:38:11 GMT; Path=/
+Set-Cookie: MDMD=10cce5498330e0aa2d340e04398ec186493788cc3e9979387436bf32abb9a76e; Domain=.2ch.net; Expires=Thu, 08-Dec-2016 20:38:11 GMT; Path=/
+Server: cloudflare-nginx
+CF-RAY: 30dfef99b2c92e3f-NRT
+}
+
+
+
+be.5ch.net(火狐)
+mail=mail@address,jp
+pass=password
+login
+
+POST /log HTTP/1.1
+Host: be.5ch.net
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:52.0) Gecko/20100101 Firefox/52.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ja,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate, br
+Referer: https://be.5ch.net/
+Cookie: __cfduid=ddfc375b572168139a87f02e4472d82651511020975; READJS="off"
+DNT: 1
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+
+
+HTTP/2.0 302 Found
+Date: Thu, 08 Feb 2018 15:30:27 GMT
+Content-Type: text/html; charset=utf-8
+Location: http://be.5ch.net/status
+Set-Cookie: DMDM=2c3b5b74891e91cf11b69ef5eadd61196b5d8f0f336abf7dfb3da437333c3aa7; Domain=.5ch.net; Expires=Fri, 09-Feb-2018 00:15:07 GMT; Path=/
+MDMD=10cce5498330e0aa2d340e04398ec186493788cc3e9979387436bf32abb9a76e; Domain=.5ch.net; Expires=Fri, 09-Feb-2018 00:15:07 GMT; Path=/
+expect-ct: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Server: cloudflare
+CF-RAY: 3e9fa15a8a179541-NRT
+X-Firefox-Spdy: h2
