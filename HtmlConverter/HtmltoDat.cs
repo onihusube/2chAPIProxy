@@ -466,11 +466,23 @@ namespace _2chAPIProxy.HtmlConverter
 
             honbun:     //本文取得
             var ResBody = new StringBuilder(5 * 1024);
-            //temp = "";
             temp = Regex.Match(res, @".+<dd>(\s.+\s|.{2}～ん)<br><br>$").Groups[1].Value;
             if (String.IsNullOrEmpty(temp))
             {
-                ResBody.Append(Regex.Match(res, @".+やっと出た<dd>(.+?)<br><br>$").Groups[1].Value);
+                //特殊処理 : https://choco.5ch.net/test/read.cgi/download/978600696/
+                //本文先頭にスペースが無い、末尾にスペースがあったりなかったり
+                const string Pattern = @".+<dd>(.+)<br><br>$";
+                if (Regex.IsMatch(res, Pattern))
+                {
+                    //スペースを補うのは後続の処理のため
+                    //この時代にBeアイコンや絵文字リンクが無いならいらない？
+                    temp = " " + Regex.Match(res, Pattern).Groups[1].Value;
+                    ResBody.Append(temp);
+                }
+                else
+                {
+                    ResBody.Append(Regex.Match(res, @".+やっと出た<dd>(.+?)<br><br>$").Groups[1].Value);
+                }
             }
             else
             {
