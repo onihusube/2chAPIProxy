@@ -227,15 +227,20 @@ namespace _2chAPIProxy
             {
                 FiddlerApplication.BeforeResponse -= MRHandler;
                 var html = ooSession.GetResponseBodyAsString();
+                //板一覧の板URLの前後に""があった場合に消す（大丈夫そうならいらない？）
                 var ItaMatches = Regex.Matches(html, $@"<(?:A HREF|a href)={'"'}(?:https?:)?(//\w+?\.(?:2ch\.net|5ch\.net|bbspink\.com)/\w+/?){'"'}>(.+)</(?:A|a)>");
                 foreach (Match ita in ItaMatches)
                 {
                     String replace = $"<A HREF=http:{ita.Groups[1].Value}>{ita.Groups[2].Value}</A>";
                     html.Replace(ita.Value, replace);
                 }
-                html = Regex.Replace(html, $@"<(?:A HREF|a href)={'"'}(?:https?:)?(//.+?){'"'}>(.+?)</(?:A|a)>", "<A HREF=http:$1>$2</A>");
+                //これがなんだったのか分からないけどバグっぽい
+                //html = Regex.Replace(html, $@"<(?:A HREF|a href)={'"'}(?:https?:)?(//.+?){'"'}>(.+?)</(?:A|a)>", "<A HREF=http:$1>$2</A>");
+
                 if (is2ch) html = html.Replace(".5ch.net/", ".2ch.net/");
-                 ooSession.ResponseBody = Encoding.GetEncoding("shift_jis").GetBytes(html);
+                //板のhttpsリンクをhttpにする
+                if (ViewModel.Setting.ReplaceHttpsLink) html = html.Replace("https", "http");
+                ooSession.ResponseBody = Encoding.GetEncoding("shift_jis").GetBytes(html);
             };
             FiddlerApplication.BeforeResponse += MRHandler;
             if (AllUAReplace) oSession.oRequest.headers["User-Agent"] = WriteUA;
