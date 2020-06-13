@@ -65,7 +65,7 @@ namespace _2chAPIProxy.APIMediator
             private set { this.SetProperty(ref m_SID, value, nameof(SessionID)); }
         }
 
-        readonly object m_SyncObj = new object();
+        private readonly object m_SyncObj = new object();
 
         string m_CurrentError = "";
         /// <summary>
@@ -118,15 +118,26 @@ namespace _2chAPIProxy.APIMediator
 
         public APIAccess()
         {
-            //可能であればTLS1.1/1.2を使用するように
+            //可能であればTLS1.1/1.2/1.3を使用するように
             try
             {
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | (SecurityProtocolType)768 | (SecurityProtocolType)3072;
+                try
+                {
+                    //可能であればTLS1.2/1.3を使用するように
+                    ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)12288;
+                }
+                catch
+                {
+                    //だめならTLS1.0/1.1/1.2を使用するように
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | (SecurityProtocolType)768 | (SecurityProtocolType)3072;
+                    CurrentError = "APIへのアクセスにTLS1.0/1.1/1.2を使用";
+                }
             }
             catch
             {
-                System.Diagnostics.Debug.WriteLine("SSL3.0,TLS1.0を使用。");
+                //最終手段
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
+                CurrentError = "APIへのアクセスにSSL3.0/TLS1.0を使用";
             }
 
             //SID自動更新タイマー開始
