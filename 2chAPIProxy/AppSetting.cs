@@ -355,4 +355,9 @@ namespace _2chAPIProxy
             }
         }
     }
+
+    public class BoardSettings
+    {
+        public string UserAgent { get; set; }
+    }
 }

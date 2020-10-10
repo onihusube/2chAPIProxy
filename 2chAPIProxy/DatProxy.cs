@@ -44,6 +44,7 @@ namespace _2chAPIProxy
         public IHtmlConverter HtmlConverter { get; set; }
 
         public Dictionary<string, string> WriteHeader { get; set; }
+        public Dictionary<string, BoardSettings> BoardSettings { get; set; }
         //public HTMLtoDat htmlconverter { get; set; }
         public String Proxy { get; set; }
         public String WriteUA { get; set; }
@@ -637,7 +638,7 @@ namespace _2chAPIProxy
                 ReqBody = ReqBody.Replace("subject=&", "");
                 //主にギコナビ、submitに改行が入っている
                 ReqBody = ReqBody.Replace("\r\n", "");
-                bool ResPost = !ReqBody.Contains("subject=");
+                bool IsResPost = !ReqBody.Contains("subject=");
                 if (oSession.fullUrl.Contains("subbbs.cgi"))
                 {
                     oSession.fullUrl = oSession.fullUrl.Replace("subbbs.cgi", "bbs.cgi");
@@ -729,6 +730,24 @@ namespace _2chAPIProxy
                         }
                     }
                 }
+                //板毎の設定（UA）を適用
+                if (0 < BoardSettings.Count())
+                {
+                    // 板名を抽出
+                    var bbs_match = Regex.Match(ReqBody, @"bbs=(\w+)");
+                    if (bbs_match.Success)
+                    {
+                        var bbs = bbs_match.Groups[1].Value;
+                        // UA設定を引き当て
+                        if (BoardSettings.ContainsKey(bbs))
+                        {
+                            var setting = BoardSettings[bbs];
+                            Write.UserAgent = setting.UserAgent;
+                            System.Diagnostics.Debug.WriteLine($"{bbs}のUA設定を{setting.UserAgent}に変更");
+                        }
+                    }
+                }
+
                 String referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net");
                 Write.Referer = referer.Replace("http:", "https:");
 
@@ -767,7 +786,7 @@ namespace _2chAPIProxy
                     ReqBody = Regex.Replace(ReqBody, @"&$", "");
                 }
                 //お絵かき用のデータ追加
-                if (ResPost && !ReqBody.Contains("&oekaki_thread") && !oSession.host.Contains("qb5.5ch.net"))
+                if (IsResPost && !ReqBody.Contains("&oekaki_thread") && !oSession.host.Contains("qb5.5ch.net"))
                 {
                     ReqBody = ReqBody.Replace("\r\n", "");
                     ReqBody += "&oekaki_thread1=";
