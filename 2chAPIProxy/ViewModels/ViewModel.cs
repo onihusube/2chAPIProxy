@@ -180,7 +180,6 @@ namespace _2chAPIProxy
                 this.SystemLog = "書き込み時には外部定義ヘッダを使用します";
             }
             //板毎設定の読み込み
-            var boradsettings = new Dictionary<string, BoardSettings>();
             if (File.Exists("./BoardSettings.yaml"))
             {
                 using (var stream = File.OpenText("./BoardSettings.yaml"))
@@ -188,16 +187,16 @@ namespace _2chAPIProxy
                     try
                     {
                         var deserializer = new YamlDotNet.Serialization.Deserializer();
-                        boradsettings = deserializer.Deserialize<Dictionary<string, BoardSettings>>(stream);
+                        DatProxy.BoardSettings = deserializer.Deserialize<Dictionary<string, BoardSettings>>(stream);
                     }
                     catch(Exception err)
                     {
                         this.SystemLog = "YAMLファイルの書式が間違っているようです。\n" + err.ToString();
                     }
                 }
-                this.SystemLog = $"{boradsettings.Count()}板分の設定を読み込みました。";
             }
-            DatProxy.BoardSettings = boradsettings;
+            DatProxy.BoardSettings ??= new Dictionary<string, BoardSettings>();
+            this.SystemLog = $"{DatProxy.BoardSettings.Count()}板分の設定を読み込みました。";
 
             //外部コードのコンパイル
             if (CEExternalRead) CEResultView = DatProxy.HtmlConverter.Compile(CESrcfilePath);
