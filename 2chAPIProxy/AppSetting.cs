@@ -38,6 +38,7 @@ namespace _2chAPIProxy
         bool _Replace5chURI = true;
         bool _ReplaceHttpsLink = false;
         bool _PostNoReplace = false;
+        bool _SetReferrer = false;
         String _HMkey = "hO2QHdapzbqbTFOaJgZTKXgT2gWqYS";
         String _Appkey = "JYW2J6wh9z8p8xjGFxO3M2JppGCyjQ";
         String _UserAgent0 = "";
@@ -214,7 +215,13 @@ namespace _2chAPIProxy
             get { return _PostNoReplace; }
             set { _PostNoReplace = value; change = true; }
         }
-        
+
+        public bool SetReferrer
+        {
+            get { return _SetReferrer; }
+            set { _SetReferrer = value; change = true; }
+        }
+
         public String HMkey
         {
             get { return _HMkey; }

@@ -87,6 +87,7 @@ namespace _2chAPIProxy
             _Use5chnet = Setting.Use5chnet;
             _Replace5chURI = Setting.Replace5chURI;
             _ReplaceHttpsLink = Setting.ReplaceHttpsLink;
+            _SetReferrer = Setting.SetReferrer;
             _PortNumber = Setting.PortNumber;
             _Appkey = Setting.Appkey;
             _HMkey = Setting.HMkey;
@@ -217,6 +218,7 @@ namespace _2chAPIProxy
             DatProxy.KakolinkPerm    = KakolinkPermutation;
             DatProxy.AllUAReplace    = (UserAgent3 == "") ? (false) : (AllUAReplace);
             DatProxy.BeLogin         = BeLogin;
+            DatProxy.SetReferrer     = SetReferrer;
 
             //設定の適用、APIアクセスクラス
             DatProxy.APIMediator.AppKey       = this.Appkey;
@@ -803,6 +805,20 @@ namespace _2chAPIProxy
                 {
                     Setting.PostNoReplace = _PostNoReplace = value;
                     NoticePropertyChanged("PostNoReplace");
+                }
+            }
+        }
+
+        bool _SetReferrer;
+        public bool SetReferrer
+        {
+            get { return _SetReferrer; }
+            set
+            {
+                if (_SetReferrer != value)
+                {
+                    Setting.SetReferrer = _SetReferrer = DatProxy.SetReferrer = value;
+                    NoticePropertyChanged("SetReferrer");
                 }
             }
         }

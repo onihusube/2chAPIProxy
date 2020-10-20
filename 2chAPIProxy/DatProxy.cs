@@ -63,6 +63,7 @@ namespace _2chAPIProxy
         public bool KakolinkPerm { get; set; }
         public bool AllUAReplace { get; set; }
         public bool BeLogin { get; set; }
+        public bool SetReferrer { get; set; }
 
         public DatProxy(String Akey, String Hkey, String ua1, String sidUA, String ua2, String RID, String RPW, String ProxyAddrese)
         {
@@ -663,7 +664,8 @@ namespace _2chAPIProxy
                     System.Diagnostics.Debug.WriteLine("Styleヘッダを設定");
 
                     Write.ProtocolVersion = HttpVersion.Version10;
-                    Write.UserAgent = (String.IsNullOrEmpty(WriteUA)) ? ("Monazilla/1.00 JaneStyle/4.00 Windows/6.1.7601 Service Pack 1") : (WriteUA);
+                    //Write.UserAgent = (String.IsNullOrEmpty(WriteUA)) ? ("Monazilla/1.00 JaneStyle/4.00 Windows/6.1.7601 Service Pack 1") : (WriteUA);
+                    Write.UserAgent = (String.IsNullOrEmpty(WriteUA)) ? ("Monazilla/1.00 JaneStyle/4.00 Windows/10.0.19041") : (WriteUA);
                     Write.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
                     Write.Headers.Add("Accept-Encoding", "gzip, identity");
                     Write.ContentType = "application/x-www-form-urlencoded";
@@ -748,8 +750,19 @@ namespace _2chAPIProxy
                     }
                 }
 
-                String referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net");
-                Write.Referer = referer.Replace("http:", "https:");
+                // referer調整
+                String referer = oSession.oRequest.headers["Referer"];
+                if (SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
+                {
+                    var bbs = Regex.Match(ReqBody, @"bbs=(\w+)").Groups[1].Value;
+                    var key = Regex.Match(ReqBody, @"key=(\w+)").Groups[1].Value;
+                    referer = @$"https://{Write.Host}/test/read.cgi/{bbs}/{key}/";
+                }
+                else
+                {
+                    referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net").Replace("http:", "https:");
+                }
+                Write.Referer = referer;
 
                 if (Proxy != "") Write.Proxy = new WebProxy(Proxy);
                 Write.CookieContainer = new CookieContainer();
