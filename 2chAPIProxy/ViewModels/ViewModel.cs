@@ -141,46 +141,7 @@ namespace _2chAPIProxy
                     return;
                 }
             }
-            //書き込みヘッダ定義ファイルの読み込み
-            Dictionary<String, String> header = new Dictionary<string, string>();
-            if (File.Exists("./WriteRequestHeader.txt"))
-            {
-                using (StreamReader sr = new StreamReader("./WriteRequestHeader.txt", System.Text.Encoding.UTF8))
-                {
-                    while(sr.EndOfStream == false)
-                    {
-                        try
-                        {
-                            string line = sr.ReadLine();
-                            if (line.IndexOf("//") == 0 || string.IsNullOrEmpty(line) == true) continue;
-                            var pair = line.Split(':');
-                            if (pair.Length == 0) continue;
-                            if (pair.Length == 1)
-                            {
-                                header.Add(pair[0], "");
-                            }
-                            else
-                            {
-                                header.Add(pair[0], pair[1]);
-                            }
-                        }
-                        catch(Exception err)
-                        {
-                            System.Diagnostics.Debug.WriteLine("●ヘッダ定義の読み込み中のエラー\n" + err.ToString());
-                        }
-                    }
-                }
-            }
-            DatProxy.WriteHeader = header;
-            if (header.Count == 0)
-            {
-                this.SystemLog = "書き込み時には内部定義ヘッダを使用します";
-            }
-            else
-            {
-                this.SystemLog = "書き込み時には外部定義ヘッダを使用します";
-            }
-            //板毎設定の読み込み
+            //書き込み板毎設定の読み込み
             if (File.Exists("./BoardSettings.yaml"))
             {
                 using (var stream = File.OpenText("./BoardSettings.yaml"))
@@ -198,6 +159,16 @@ namespace _2chAPIProxy
             }
             DatProxy.BoardSettings ??= new Dictionary<string, BoardSettings>();
             this.SystemLog = $"{DatProxy.BoardSettings.Count()}板分の設定を読み込みました。";
+            if (DatProxy.BoardSettings.ContainsKey("2chapiproxy_default") == false)
+            {
+                // ファイルが無いかデフォルト設定が無い時、JaneStyleの設定を使用
+                var def = new BoardSettings { UserAgent = "Monazilla/1.00 JaneStyle/4.00 Windows/10.0.19041", SetOekaki = false };
+                def.Headers.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+                def.Headers.Add("Accept-Encoding", "gzip, identity");
+                def.Headers.Add("ContentType", "application/x-www-form-urlencoded");
+                DatProxy.BoardSettings.Add("2chapiproxy_default", def);
+                this.SystemLog = "書き込みのデフォルト設定としてJaneStyleのものを使用します";
+            }
 
             //外部コードのコンパイル
             if (CEExternalRead) CEResultView = DatProxy.HtmlConverter.Compile(CESrcfilePath);

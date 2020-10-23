@@ -43,7 +43,6 @@ namespace _2chAPIProxy
 
         public IHtmlConverter HtmlConverter { get; set; }
 
-        public Dictionary<string, string> WriteHeader { get; set; }
         public Dictionary<string, BoardSettings> BoardSettings { get; set; }
         //public HTMLtoDat htmlconverter { get; set; }
         public String Proxy { get; set; }
@@ -639,11 +638,14 @@ namespace _2chAPIProxy
                 ReqBody = ReqBody.Replace("subject=&", "");
                 //主にギコナビ、submitに改行が入っている
                 ReqBody = ReqBody.Replace("\r\n", "");
+                //スレ立てと書き込みを識別する、同じbbs.cgiを使用しているため
                 bool IsResPost = !ReqBody.Contains("subject=");
                 if (oSession.fullUrl.Contains("subbbs.cgi"))
                 {
                     oSession.fullUrl = oSession.fullUrl.Replace("subbbs.cgi", "bbs.cgi");
                 }
+
+
                 String PostURI = (ViewModel.Setting.UseTLSWrite) ? (oSession.fullUrl.Replace("http://", "https://")) : (oSession.fullUrl);
                 HttpWebRequest Write = (HttpWebRequest)WebRequest.Create(PostURI);
                 Write.Method = "POST";
@@ -651,6 +653,8 @@ namespace _2chAPIProxy
                 Write.Headers.Clear();
                 //ここで指定しないとデコードされない
                 Write.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                //デフォルトがtrueなのでオフっとく
+                Write.KeepAlive = false;
 
                 //デバッグ出力
                 System.Diagnostics.Debug.WriteLine("オリジナルリクエストヘッダ");
@@ -659,100 +663,90 @@ namespace _2chAPIProxy
                     System.Diagnostics.Debug.WriteLine($"{header.Name}:{header.Value}");
                 }
 
-                if (this.WriteHeader.Count == 0)
-                {
-                    System.Diagnostics.Debug.WriteLine("Styleヘッダを設定");
+                // デフォルトUAを設定（優先度最低、空の時は知らない）
+                Write.UserAgent = BoardSettings["2chapiproxy_default"].UserAgent;
 
-                    Write.ProtocolVersion = HttpVersion.Version10;
-                    //Write.UserAgent = (String.IsNullOrEmpty(WriteUA)) ? ("Monazilla/1.00 JaneStyle/4.00 Windows/6.1.7601 Service Pack 1") : (WriteUA);
-                    Write.UserAgent = (String.IsNullOrEmpty(WriteUA)) ? ("Monazilla/1.00 JaneStyle/4.00 Windows/10.0.19041") : (WriteUA);
-                    Write.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
-                    Write.Headers.Add("Accept-Encoding", "gzip, identity");
-                    Write.ContentType = "application/x-www-form-urlencoded";
-                    Write.KeepAlive = false;
-                    //Write.ProtocolVersion = HttpVersion.Version10;
-                    //Write.UserAgent = "Monazilla/1.00 Live5ch/1.52 Windows/6.1.7601 (Service Pack 1)";
-                    //Write.Accept = "text/plain";
-                    //Write.Headers.Add("Accept-Encoding", "");
-                    //Write.ContentType = "application/x-www-form-urlencoded";
-                    //Write.Headers.Add("Accept-charset", "shift_jis");
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("外部定義ヘッダを使用して書き込み");
-
-                    if (WriteHeader.ContainsKey("Accept") == true)
-                    {
-                        Write.Accept = WriteHeader["Accept"];
-                    }
-                    if (WriteHeader.ContainsKey("User-Agent") == true)
-                    {
-                        Write.UserAgent = WriteHeader["User-Agent"];
-                    }
-                    else
-                    {
-                        Write.UserAgent = (String.IsNullOrEmpty(WriteUA) == true) ? (oSession.oRequest.headers["User-Agent"]) : (WriteUA);
-                    }
-                    if (WriteHeader.ContainsKey("Expect") == true)
-                    {
-                        Write.Expect = WriteHeader["Expect"];
-                    }
-                    if (WriteHeader.ContainsKey("Content-Type") == true)
-                    {
-                        Write.ContentType = WriteHeader["Content-Type"];
-                    }
-                    if (WriteHeader.ContainsKey("Connection ") == true)
-                    {
-                        Write.KeepAlive = true;
-                        Write.Connection = WriteHeader["Connection "];
-                    }
-
-                    foreach (var header in WriteHeader)
-                    {
-                        try
-                        {
-                            if (Regex.IsMatch(header.Key, @"(^HTTPVer$|^Accept$|^User-Agent$|^Expect$|^Content-Type$|^Connection$|^Cookie$)") == true) continue;
-                            Write.Headers.Add(header.Key, header.Value);
-                        }
-                        catch (Exception err)
-                        {
-                            System.Diagnostics.Debug.WriteLine("●ヘッダ定義の適用中のエラー\n" + err.ToString());
-                        }
-                    }
-
-                    if (WriteHeader.ContainsKey("HTTPVer") == true)
-                    {
-                        if (WriteHeader["HTTPVer"] == "1.0")
-                        {
-                            Write.ProtocolVersion = HttpVersion.Version10;
-                        }
-                        else
-                        {
-                            Write.ProtocolVersion = HttpVersion.Version11;
-                        }
-                    }
-                }
-                //板毎の設定（UA）を適用
-                if (0 < BoardSettings.Count())
+                // 板毎設定の引き当て
+                BoardSettings PostSetting = null;
+                if (1 < BoardSettings.Count())
                 {
                     // 板名を抽出
                     var bbs_match = Regex.Match(ReqBody, @"bbs=(\w+)");
                     if (bbs_match.Success)
                     {
                         var bbs = bbs_match.Groups[1].Value;
-                        // UA設定を引き当て
                         if (BoardSettings.ContainsKey(bbs))
                         {
-                            var setting = BoardSettings[bbs];
-                            Write.UserAgent = setting.UserAgent;
-                            System.Diagnostics.Debug.WriteLine($"{bbs}のUA設定を{setting.UserAgent}に変更");
+                            PostSetting = BoardSettings[bbs];
                         }
+                    }
+                }
+
+                // UAの設定
+                // デフォルト→板毎設定→書き込みUAの順に優先
+                if (String.IsNullOrEmpty(WriteUA))
+                {
+                    // 設定があるときだけ上書き
+                    if (string.IsNullOrEmpty(PostSetting?.UserAgent) == false)
+                    {
+                        Write.UserAgent = PostSetting.UserAgent;
+                        // お絵かき設定はどうしようね・・・
+                        if (PostSetting.Headers.Count() == 0) PostSetting = null;
+                    }
+                }
+                else
+                {
+                    // UIの書き込みUAを私用
+                    Write.UserAgent = WriteUA;
+                }
+
+                // デフォルト設定の引き当て
+                PostSetting ??= BoardSettings["2chapiproxy_default"];
+
+                // ヘッダの設定
+                if (PostSetting.Headers.ContainsKey("Accept") == true)
+                {
+                    Write.Accept = PostSetting.Headers["Accept"];
+                }
+                if (PostSetting.Headers.ContainsKey("Expect") == true)
+                {
+                    Write.Expect = PostSetting.Headers["Expect"];
+                }
+                if (PostSetting.Headers.ContainsKey("Content-Type") == true)
+                {
+                    Write.ContentType = PostSetting.Headers["Content-Type"];
+                }
+                if (PostSetting.Headers.ContainsKey("Connection") == true)
+                {
+                    Write.KeepAlive = true;
+                    Write.Connection = PostSetting.Headers["Connection"];
+                }
+
+                foreach (var header in PostSetting.Headers)
+                {
+                    try
+                    {
+                        if (Regex.IsMatch(header.Key, @"(^HTTPVer$|^Accept$|^User-Agent$|^Expect$|^Content-Type$|^Connection$|^Cookie$)") == true) continue;
+                        Write.Headers.Add(header.Key, header.Value);
+                    }
+                    catch (Exception err)
+                    {
+                        ViewModel.OnModelNotice($"{header.Key}ヘッダは設定できません。");
+                        System.Diagnostics.Debug.WriteLine("●ヘッダ定義の適用中のエラー\n" + err.ToString());
+                    }
+                }
+
+                if (PostSetting.Headers.ContainsKey("HTTPVer") == true)
+                {
+                    if (PostSetting.Headers["HTTPVer"] == "1.0")
+                    {
+                        Write.ProtocolVersion = HttpVersion.Version10;
                     }
                 }
 
                 // referer調整
                 String referer = oSession.oRequest.headers["Referer"];
-                if (SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
+                if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
                 {
                     var bbs = Regex.Match(ReqBody, @"bbs=(\w+)").Groups[1].Value;
                     var key = Regex.Match(ReqBody, @"key=(\w+)").Groups[1].Value;
@@ -799,7 +793,7 @@ namespace _2chAPIProxy
                     ReqBody = Regex.Replace(ReqBody, @"&$", "");
                 }
                 //お絵かき用のデータ追加
-                if (IsResPost && !ReqBody.Contains("&oekaki_thread") && !oSession.host.Contains("qb5.5ch.net"))
+                if (IsResPost && PostSetting.SetOekaki && !ReqBody.Contains("&oekaki_thread"))
                 {
                     ReqBody = ReqBody.Replace("\r\n", "");
                     ReqBody += "&oekaki_thread1=";
@@ -845,7 +839,7 @@ namespace _2chAPIProxy
                             //if (gZipRes) oSession.utilGZIPResponse();
                         }
 
-                        System.Diagnostics.Debug.WriteLine("レスポンスヘッダ");
+                        System.Diagnostics.Debug.WriteLine("リクエストヘッダ");
                         foreach (var header in Write.Headers.AllKeys)
                         {
                             System.Diagnostics.Debug.WriteLine($"{header}:{Write.Headers[header].ToString()}");

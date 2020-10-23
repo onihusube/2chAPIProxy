@@ -366,5 +366,9 @@ namespace _2chAPIProxy
     public class BoardSettings
     {
         public string UserAgent { get; set; }
+
+        public bool SetOekaki { get; set; } = false;
+
+        public Dictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
     }
 }
