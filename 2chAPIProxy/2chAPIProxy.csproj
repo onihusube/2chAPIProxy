@@ -57,7 +57,7 @@
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>icon3.ico</ApplicationIcon>
+    <ApplicationIcon>icon3xp.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FiddlerCore4, Version=4.6.2.0, Culture=neutral, PublicKeyToken=67cb91587178ac5a, processorArchitecture=MSIL">

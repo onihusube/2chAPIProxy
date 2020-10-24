@@ -17,7 +17,7 @@ using System.Runtime.Remoting.Channels.Ipc;
 using YamlDotNet;
 
 using _2chAPIProxy.ViewModels;
-
+using System.Net;
 
 namespace _2chAPIProxy
 {

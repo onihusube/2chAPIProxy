@@ -1,0 +1,30 @@
+﻿//2chAPIProxy書き込み時リクエストヘッダの定義ファイル
+//行頭が//で始まる行はコメントとみなしスルー
+//ヘッダ名:内容 のように記述
+//Content-Length Date Host If-Modified-Since Range Referer Transfer-Encoding ヘッダはここでは変更不可
+//Cookieヘッダも無視
+//User-Agentの設定はこちらの定義が優先される(ここのUA→書き込みUA→専ブラのUAの順の優先度）
+//ヘッダ名と内容には半角英数字のみを使用すること
+//HTTPVerはこのファイルのみの特殊定義、HTTPのバージョンを指定する（1.0 or 1.1のみ）。
+//変更したら2chAPIProxyを再起動して再読み込みさせること
+//この定義ファイルは2chAPIProxy.exe本体と同じフォルダに置くこと、無い場合は内部定義のヘッダを使用（Styleベースのもの）
+
+
+//以下はLive5chのヘッダ定義
+HTTPVer:1.0
+User-Agent:Monazilla/1.00 Live5ch/1.52 Windows/10.0.17134
+Accept:text/plain
+Accept-charset:shift_jis
+Accept-Encoding:
+Content-Type:application/x-www-form-urlencoded
+
+
+//サンプル、Edge定義
+//HTTPVer:1.1
+//Accept:text/html, application/xhtml+xml, application/xml; q=0.9, */*; q=0.8
+//Accept-Encoding:gzip, deflate, br
+//Accept-Language:ja
+//Cache-Control:max-age=0
+//Content-Type:application/x-www-form-urlencoded
+//Upgrade-Insecure-Requests:1
+//User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134

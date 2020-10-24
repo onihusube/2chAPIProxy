@@ -653,7 +653,7 @@ namespace _2chAPIProxy
                 Write.Headers.Clear();
                 //ここで指定しないとデコードされない
                 Write.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-                //デフォルトがtrueなのでオフっとく
+                //デフォルトがtrueなのでオフっとく（これやらない方が良い？
                 Write.KeepAlive = false;
 
                 //デバッグ出力
@@ -704,6 +704,8 @@ namespace _2chAPIProxy
                 PostSetting ??= BoardSettings["2chapiproxy_default"];
 
                 // ヘッダの設定
+
+                // 個別の設定項目があるやつ
                 if (PostSetting.Headers.ContainsKey("Accept") == true)
                 {
                     Write.Accept = PostSetting.Headers["Accept"];
@@ -722,6 +724,7 @@ namespace _2chAPIProxy
                     Write.Connection = PostSetting.Headers["Connection"];
                 }
 
+                // 直接設定できるのはまとめて
                 foreach (var header in PostSetting.Headers)
                 {
                     try
@@ -736,6 +739,7 @@ namespace _2chAPIProxy
                     }
                 }
 
+                // これ順番ここじゃなきゃだめ？
                 if (PostSetting.Headers.ContainsKey("HTTPVer") == true)
                 {
                     if (PostSetting.Headers["HTTPVer"] == "1.0")
@@ -942,6 +946,13 @@ namespace _2chAPIProxy
                 switch (dat.StatusCode)
                 {
                     case HttpStatusCode.PartialContent:
+                        // あぼーん検出のため、一部の専ブラは取得済datサイズ-1のサイズを指定して取得しようとする
+                        // API以前（初期も？）はその際304を返していたが、いつからか206を返してくるようになったらしい
+                        // サイズを調べて304で応答する（ギコナビはもしかしたら16とかかもしれない？
+                        if (dat.ContentLength == 1)
+                        {
+                            goto case HttpStatusCode.NotModified;
+                        }
                         oSession.oResponse.headers.HTTPResponseCode = 206;
                         oSession.oResponse.headers.HTTPResponseStatus = "206 Partial Content";
                         oSession.oResponse.headers["Content-Type"] = "text/plain";
