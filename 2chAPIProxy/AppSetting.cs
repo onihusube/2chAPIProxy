@@ -369,6 +369,8 @@ namespace _2chAPIProxy
 
         public bool SetOekaki { get; set; } = false;
 
+        public bool KeepAlive { get; set; } = false;
+
         public Dictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
     }
 }

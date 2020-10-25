@@ -653,8 +653,9 @@ namespace _2chAPIProxy
                 Write.Headers.Clear();
                 //ここで指定しないとデコードされない
                 Write.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-                //デフォルトがtrueなのでオフっとく（これやらない方が良い？
+                //デフォルトがtrueなのでオフっとく
                 Write.KeepAlive = false;
+                Write.Connection = null;    // こうしないとヘッダから消えない
 
                 //デバッグ出力
                 System.Diagnostics.Debug.WriteLine("オリジナルリクエストヘッダ");
@@ -718,10 +719,10 @@ namespace _2chAPIProxy
                 {
                     Write.ContentType = PostSetting.Headers["Content-Type"];
                 }
-                if (PostSetting.Headers.ContainsKey("Connection") == true)
+                if (PostSetting.KeepAlive)
                 {
                     Write.KeepAlive = true;
-                    Write.Connection = PostSetting.Headers["Connection"];
+                    //Write.Connection = PostSetting.Headers["Connection"];
                 }
 
                 // 直接設定できるのはまとめて
@@ -889,6 +890,7 @@ namespace _2chAPIProxy
 
         private void GetDat(ref Session oSession, bool is2ch)
         {
+            // API以前のふるまいについて http://age.s22.xrea.com/talk2ch/
             try
             {
                 int range;
