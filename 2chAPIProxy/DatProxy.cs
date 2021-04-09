@@ -1160,7 +1160,7 @@ namespace _2chAPIProxy
                         break;
                 }
                 oSession.oResponse.headers["Date"] = dat.Headers[HttpResponseHeader.Date];
-                oSession.oResponse.headers["Set-Cookie"] = (is2ch) ? (dat.Headers[HttpResponseHeader.SetCookie].Replace("5ch.net", "2ch.net")) : (dat.Headers[HttpResponseHeader.SetCookie]);
+                oSession.oResponse.headers["Set-Cookie"] = (is2ch) ? (dat.Headers[HttpResponseHeader.SetCookie]?.Replace("5ch.net", "2ch.net")) : (dat.Headers[HttpResponseHeader.SetCookie]);
                 oSession.oResponse.headers["Connection"] = "close";
                 dat.Close();
             }
