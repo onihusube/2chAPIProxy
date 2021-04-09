@@ -92,7 +92,6 @@
     </ApplicationDefinition>
     <None Include="Models\HTMLtoDat.cs" />
     <Compile Include="Models\ModelFuctory.cs" />
-    <None Include="Models\ProxyServer.cs" />
     <Compile Include="ViewModels\ViewModel.cs" />
     <Compile Include="ViewModels\VMBase.cs" />
     <Page Include="MainWindow.xaml">

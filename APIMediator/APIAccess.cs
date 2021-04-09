@@ -177,66 +177,6 @@ namespace _2chAPIProxy.APIMediator
             }, null, 3600000 * 8, -1);
         }
 
-        public void Init(string AppKey, string HMKey, string X2chUA, string SidUA, string DatUA, string Proxy)
-        {
-            //可能であればTLS1.1/1.2を使用するように
-            try
-            {
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | (SecurityProtocolType)768 | (SecurityProtocolType)3072;
-            }
-            catch
-            {
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
-            }
-
-            //必要なキー等を初期化
-            this.AppKey = AppKey;
-            this.HMKey  = HMKey;
-            this.X2chUA = X2chUA;
-            this.SidUA  = SidUA;
-            this.DatUA  = DatUA;
-            this.ProxyAddress  = Proxy;
-
-            //SID自動更新タイマー開始
-            this.m_HoboCheck = this.m_HoboCheck ?? new Timer((o) => {
-                //更新回数2回以下のデータを削除
-                var rmkey = from db in this.m_HoboCache.ToArray().AsParallel()
-                            where db.Value.Count < 2
-                            select db.Key;
-                foreach (var key in rmkey) this.m_HoboCache.TryRemove(key, out HoboData value);
-                //更新回数5回以下のデータをリセット
-                var rkey = from db in this.m_HoboCache.ToArray().AsParallel()
-                           where db.Value.Count <= 5
-                           select db.Key;
-                foreach (var key in rkey) this.m_HoboCache[key].Count = 0;
-                //更新回数6回以上のデータを5にセット
-                var skey = from db in this.m_HoboCache.ToArray().AsParallel()
-                           where db.Value.Count > 5
-                           select db.Key;
-                foreach (var key in skey) this.m_HoboCache[key].Count = 5;
-
-                this.m_ElapsedTime += 8;
-                if (this.m_ElapsedTime >= 24)
-                {
-                    try
-                    {
-                        this.UpdateSID();
-                    }
-                    catch (Exception err)
-                    {
-                        System.Diagnostics.Debug.WriteLine(err.ToString());
-                        CurrentError = $"SessionIDの更新に失敗しました。\n{err.ToString()}";
-                        //ViewModel.OnModelNotice("SessionIDの更新に失敗しました。\n" + err.ToString());
-                    }
-                    this.m_ElapsedTime = 0;
-                }
-                this.m_HoboCheck.Change(3600000 * 8, -1);
-            }, null, 3600000 * 8, -1);
-
-            //SID取得
-            this.UpdateSID();
-        }
-
         /// <summary>
         /// 保持するSessionIDを更新する
         /// </summary>
