@@ -11,6 +11,8 @@ using System.CodeDom.Compiler;
 using System.Reflection;
 using _2chAPIProxy.HtmlConverter;
 using _2chAPIProxy.APIMediator;
+using System.Security.Cryptography;
+using System.Threading;
 
 namespace _2chAPIProxy
 {
@@ -134,7 +136,15 @@ namespace _2chAPIProxy
                             {
                                 //書き込みをバイパスする
                                 oSession.utilCreateResponseAndBypassServer();
-                                ResPost(oSession, is2ch);
+
+                                if (oSession.fullUrl.Contains("bbspink.com"))
+                                {
+                                    // pinkはまだ新書き込み仕様になってないらしい？
+                                    ResPost(oSession, is2ch);
+                                } else
+                                {
+                                    ResPostv2(oSession, is2ch);
+                                }
                             }
                             return;
                         }
@@ -763,7 +773,7 @@ namespace _2chAPIProxy
                 }
                 Write.Referer = referer;
 
-                if (Proxy != "") Write.Proxy = new WebProxy(Proxy);
+                if (string.IsNullOrEmpty(Proxy) == false) Write.Proxy = new WebProxy(Proxy);
                 Write.CookieContainer = new CookieContainer();
                 //送信されてきたクッキーを抽出
                 foreach (Match mc in Regex.Matches(oSession.oRequest.headers["Cookie"], @"(?:\s+|^)((.+?)=(?:|.+?)(?:;|$))"))
@@ -828,12 +838,356 @@ namespace _2chAPIProxy
                                 oSession.oResponse.headers.Add("Set-Cookie", tc);
                             }
                         }
+
+                        if (wres.Headers.AllKeys.Contains("X-Chx-Error") == true)
+                        {
+                            ViewModel.OnModelNotice("X-Chx-Error : " + wres.Headers["X-Chx-Error"]);
+                        }
+
                         Cookie["DMDM"] = Cookie["MDMD"] = "";
                         using (System.IO.StreamReader Res = new System.IO.StreamReader(wres.GetResponseStream(), Encoding.GetEncoding("Shift_JIS")))
                         {
                             oSession.oResponse.headers.HTTPResponseCode = (int)wres.StatusCode;
                             oSession.oResponse.headers.HTTPResponseStatus = (int)wres.StatusCode + " " + wres.StatusDescription;
                             if(oSession.oRequest.headers["User-Agent"].Contains("Live2ch")) oSession.oResponse.headers["Connection"] = "Close";
+                            else oSession.oResponse.headers["Connection"] = "keep-alive";
+                            oSession.oResponse.headers["Content-Type"] = "text/html; charset=Shift_JIS";
+                            oSession.oResponse.headers["Date"] = wres.Headers[HttpResponseHeader.Date];
+                            oSession.oResponse.headers["Vary"] = "Accept-Encoding";
+                            String resdat = Res.ReadToEnd();
+                            oSession.utilSetResponseBody(resdat);
+                            //oSession.utilSetResponseBody(Res.ReadToEnd());
+                            //if (gZipRes) oSession.utilGZIPResponse();
+                        }
+
+                        System.Diagnostics.Debug.WriteLine("リクエストヘッダ");
+                        foreach (var header in Write.Headers.AllKeys)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"{header}:{Write.Headers[header].ToString()}");
+                        }
+
+                        System.Diagnostics.Debug.WriteLine("レスポンスヘッダ");
+                        foreach (var header in wres.Headers.AllKeys)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"{header}:{wres.Headers[header].ToString()}");
+                        }
+
+                        if (wres != null) wres.Close();
+                        return;
+                    }
+                }
+                catch (WebException err)
+                {
+                    Cookie["DMDM"] = Cookie["MDMD"] = "";
+                    ViewModel.OnModelNotice("書き込み中にエラーが発生しました。\n" + err.ToString());
+                    oSession.oResponse.headers.SetStatus(404, "404 NotFound");
+                    return;
+                }
+                catch (NullReferenceException err)
+                {
+                    Cookie["DMDM"] = Cookie["MDMD"] = "";
+                    ViewModel.OnModelNotice("書き込み中にエラーが発生しました。\n" + err.ToString());
+                    oSession.oResponse.headers.SetStatus(404, "404 NotFound");
+                    return;
+                }
+            }
+            catch (Exception err)
+            {
+                Cookie["DMDM"] = Cookie["MDMD"] = "";
+                oSession.oResponse.headers.SetStatus(404, "404 NotFound");
+                oSession.oResponse.headers["Content-Type"] = "text/html; charset=Shift_JIS";
+                oSession.oResponse.headers["Date"] = DateTime.Now.ToUniversalTime().ToString("R");
+                oSession.oResponse.headers["Connection"] = "Close";
+                oSession.utilSetResponseBody("2chAPIProxy書き込み処理中にエラーが発生しました。\n" + err.ToString());
+                ViewModel.OnModelNotice("書き込み部でエラーです。\n" + err.ToString());
+            }
+            return;
+        }
+
+        private String Monakey = "00000000-0000-0000-0000-000000000000";
+
+
+        // キー要素があればそれを、無ければ空文字
+        private string value_or(Dictionary<string, string> dict, string key)
+        {
+            return dict.TryGetValue(key, out string value) ? value : "";
+        }
+
+        private string CreatePostsignature(Dictionary<string, string> post_filed, string nonce, string UA)
+        {
+            // キー要素があればそれをsjis文字列としてデコードして返す、無ければ空文字
+            string dec_value_or(Dictionary<string, string> dict, string key)
+            {
+                return dict.TryGetValue(key, out string value) ? HttpUtility.UrlDecode(value, Encoding.GetEncoding("Shift_JIS")) : "";
+            };
+
+            // PostSig計算用文字列
+            string sigstr = $"{value_or(post_filed, "bbs")}<>{value_or(post_filed, "key")}<>{value_or(post_filed, "time")}<>{value_or(post_filed, "FROM")}<>{dec_value_or(post_filed, "mail")}<>{dec_value_or(post_filed, "MESSAGE")}<>{dec_value_or(post_filed, "subject")}<>{UA}<>{Monakey}<><>{nonce}";
+
+            using (HMACSHA256 hs256 = new HMACSHA256(Encoding.UTF8.GetBytes(this.APIMediator.HMKey)))
+            {
+                // UTF-8でポストするときはUTF-8で、Shift-JiSでポストするときはShift-Jisでハッシュを求める必要がある
+                //byte[] hash = hs256.ComputeHash(Encoding.UTF8.GetBytes(sigstr));
+                byte[] hash = hs256.ComputeHash(Encoding.GetEncoding("Shift_JIS").GetBytes(sigstr));
+                return BitConverter.ToString(hash).Replace("-", "").ToLower();
+            }
+        }
+
+        private string ReConstructPostField(Dictionary<string, string> post_filed)
+        {
+            return $"FROM={value_or(post_filed, "FROM")}&mail={value_or(post_filed, "mail")}&MESSAGE={value_or(post_filed, "MESSAGE")}&bbs={value_or(post_filed, "bbs")}&key={value_or(post_filed, "key")}&time={value_or(post_filed, "time")}&submit={value_or(post_filed, "submit")}";
+        }
+
+        private void ResPostv2(Session oSession, bool is2ch)
+        {
+            try
+            {
+                String ReqBody = oSession.GetRequestBodyAsString();
+                //ギコナビ、レス投稿時にもsubject=が付いてる対策
+                ReqBody = ReqBody.Replace("subject=&", "");
+                //主にギコナビ、submitに改行が入っている
+                ReqBody = ReqBody.Replace("\r\n", "");
+                //スレ立てと書き込みを識別する、同じbbs.cgiを使用しているため
+                bool IsResPost = !ReqBody.Contains("subject=");
+                if (oSession.fullUrl.Contains("subbbs.cgi"))
+                {
+                    oSession.fullUrl = oSession.fullUrl.Replace("subbbs.cgi", "bbs.cgi");
+                }
+
+
+                String PostURI = (ViewModel.Setting.UseTLSWrite) ? (oSession.fullUrl.Replace("http://", "https://")) : (oSession.fullUrl);
+                HttpWebRequest Write = (HttpWebRequest)WebRequest.Create(PostURI);
+                Write.Method = "POST";
+                Write.ServicePoint.Expect100Continue = false;
+                Write.Headers.Clear();
+                //ここで指定しないとデコードされない
+                Write.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                //デフォルトがtrueなのでオフっとく
+                Write.KeepAlive = false;
+                Write.Connection = null;    // こうしないとヘッダから消えない
+
+                //デバッグ出力
+                System.Diagnostics.Debug.WriteLine("オリジナルリクエストヘッダ");
+                foreach (var header in oSession.RequestHeaders)
+                {
+                    System.Diagnostics.Debug.WriteLine($"{header.Name}:{header.Value}");
+                }
+
+                // デフォルトUAを設定（優先度最低、空の時は知らない）
+                Write.UserAgent = BoardSettings["2chapiproxy_default"].UserAgent;
+
+                // 板毎設定の引き当て
+                BoardSettings PostSetting = null;
+                if (1 < BoardSettings.Count())
+                {
+                    // 板名を抽出
+                    var bbs_match = Regex.Match(ReqBody, @"bbs=(\w+)");
+                    if (bbs_match.Success)
+                    {
+                        var bbs = bbs_match.Groups[1].Value;
+                        if (BoardSettings.ContainsKey(bbs))
+                        {
+                            PostSetting = BoardSettings[bbs];
+                        }
+                    }
+                }
+
+                // UAの設定
+                // デフォルト→板毎設定→書き込みUAの順に優先
+                if (String.IsNullOrEmpty(WriteUA))
+                {
+                    // 設定があるときだけ上書き
+                    if (string.IsNullOrEmpty(PostSetting?.UserAgent) == false)
+                    {
+                        Write.UserAgent = PostSetting.UserAgent;
+                        // お絵かき設定はどうしようね・・・
+                        if (PostSetting.Headers.Count() == 0) PostSetting = null;
+                    }
+                }
+                else
+                {
+                    // UIの書き込みUAを私用
+                    Write.UserAgent = WriteUA;
+                }
+
+                // デフォルト設定の引き当て
+                PostSetting ??= BoardSettings["2chapiproxy_default"];
+
+                // ヘッダの設定
+
+                // 個別の設定項目があるやつ
+                if (PostSetting.Headers.ContainsKey("Accept") == true)
+                {
+                    Write.Accept = PostSetting.Headers["Accept"];
+                }
+                if (PostSetting.Headers.ContainsKey("Expect") == true)
+                {
+                    Write.Expect = PostSetting.Headers["Expect"];
+                }
+                if (PostSetting.Headers.ContainsKey("Content-Type") == true)
+                {
+                    Write.ContentType = PostSetting.Headers["Content-Type"];
+                }
+                if (PostSetting.KeepAlive)
+                {
+                    Write.KeepAlive = true;
+                    //Write.Connection = PostSetting.Headers["Connection"];
+                }
+
+                // 直接設定できるのはまとめて
+                foreach (var header in PostSetting.Headers)
+                {
+                    try
+                    {
+                        if (Regex.IsMatch(header.Key, @"(^HTTPVer$|^Accept$|^User-Agent$|^Expect$|^Content-Type$|^Connection$|^Cookie$)") == true) continue;
+                        Write.Headers.Add(header.Key, header.Value);
+                    }
+                    catch (Exception err)
+                    {
+                        ViewModel.OnModelNotice($"{header.Key}ヘッダは設定できません。");
+                        System.Diagnostics.Debug.WriteLine("●ヘッダ定義の適用中のエラー\n" + err.ToString());
+                    }
+                }
+
+                // これ順番ここじゃなきゃだめ？
+                if (PostSetting.Headers.ContainsKey("HTTPVer") == true)
+                {
+                    if (PostSetting.Headers["HTTPVer"] == "1.0")
+                    {
+                        Write.ProtocolVersion = HttpVersion.Version10;
+                    }
+                }
+
+
+                // 新しい書き込み仕様への対応
+                
+                // リクエストボディの分解
+                var post_field_map = ReqBody.Split('&')
+                                    .Select(kvpair => kvpair.Split('='))
+                                    .ToDictionary(pair => pair[0], pair => pair[1]);
+
+                // nonceの取得
+                //string nonce = string.Format("{0}.{1:000}", (ulong)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds, DateTime.UtcNow.Millisecond);
+                string nonce = string.Format("{0}.{1:000}", post_field_map["time"], DateTime.UtcNow.Millisecond);
+                //string nonce = string.Format("{0}.000", post_field_map["time"]);
+
+                // 各種値の計算とヘッダセット
+                Write.Headers.Add("X-PostSig", CreatePostsignature(post_field_map, nonce, Write.UserAgent));
+                Write.Headers.Add("X-APIKey", this.APIMediator.AppKey);
+                Write.Headers.Add("X-PostNonce", nonce);
+                Write.Headers.Add("X-MonaKey", Monakey);
+
+                // リクエストボディ再構成
+                ReqBody = ReConstructPostField(post_field_map);
+                
+                // スレ立ての時の順番が分からない・・・
+                if (post_field_map.ContainsKey("subject"))
+                {
+                    ReqBody += $"subject={post_field_map["subject"]}";
+                }
+
+                // referer調整
+                String referer = oSession.oRequest.headers["Referer"];
+                if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
+                {
+                    var bbs = post_field_map["bbs"];
+                    var key = post_field_map["key"];
+                    referer = @$"https://{Write.Host}/test/read.cgi/{bbs}/{key}/";
+                }
+                else
+                {
+                    referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net").Replace("http:", "https:");
+                }
+                Write.Referer = referer;
+
+                if (string.IsNullOrEmpty(Proxy) == false) Write.Proxy = new WebProxy(Proxy);
+                Write.CookieContainer = new CookieContainer();
+                //送信されてきたクッキーを抽出
+                foreach (Match mc in Regex.Matches(oSession.oRequest.headers["Cookie"], @"(?:\s+|^)((.+?)=(?:|.+?)(?:;|$))"))
+                {
+                    Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
+                }
+                Cookie.Remove("sid");
+                Cookie.Remove("SID");
+                //送信クッキーのセット
+                String domain = CheckWriteuri.Match(oSession.fullUrl).Groups[1].Value;
+                //String domain = ".5ch.net";
+                foreach (var cook in Cookie)
+                {
+                    if (cook.Value != "")
+                    {
+                        var m = Regex.Match(cook.Value, @"^(.+?)=(.*?)(;|$)");
+                        try
+                        {
+                            Write.CookieContainer.Add(new Cookie(m.Groups[1].Value, m.Groups[2].Value, "/", domain));
+                        }
+                        catch (CookieException)
+                        {
+                            continue;
+                        }
+                        //if (cook.Key == "PREN" || cook.Key == "yuki" || cook.Key == "MDMD" || cook.Key == "DMDM")
+                    }
+                }
+                // 浪人を再設定（無効化設定がfalseでsidフィールドが元々あった場合）
+                if (ViewModel.Setting.PostRoninInvalid == false && post_field_map.ContainsKey("sid"))
+                {
+                    ReqBody += $"&sid={post_field_map["sid"]}";
+                }
+                // お絵かき用のデータ追加（レス投稿時のみ）
+                if (IsResPost)
+                {
+                    // 投稿設定でお絵描きデータを付加する設定になっているか元々あった場合
+                    if (PostSetting.SetOekaki || post_field_map.ContainsKey("oekaki_thread1"))
+                    {
+                        ReqBody += "&oekaki_thread1=";
+                    }
+                }
+                Byte[] Body = Encoding.GetEncoding("Shift_JIS").GetBytes(ReqBody);
+                Write.ContentLength = Body.Length;
+                try
+                {
+                    using (System.IO.Stream PostStream = Write.GetRequestStream())
+                    {
+                        PostStream.Write(Body, 0, Body.Length);
+                        foreach (var header in Write.Headers.AllKeys)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"{header}:{Write.Headers[header].ToString()}");
+                        }
+
+                        HttpWebResponse wres = (HttpWebResponse)Write.GetResponse();
+                        if (wres.Cookies.Count > 0)
+                        {
+                            var cul = new System.Globalization.CultureInfo("en-US");
+                            foreach (System.Net.Cookie cookie in wres.Cookies)
+                            {
+                                String tc = Cookie[cookie.Name] = cookie.ToString();
+                                if (cookie.Expires != null) tc += "; expires=" + cookie.Expires.ToUniversalTime().ToString("ddd, dd-MMM-yyyy HH:mm:ss", cul) + " GMT";
+                                if (!String.IsNullOrEmpty(cookie.Path)) tc += "; path=" + cookie.Path;
+                                if (!String.IsNullOrEmpty(cookie.Domain)) tc += "; domain=" + ((is2ch) ? (cookie.Domain.Replace("5ch.net", "2ch.net")) : (cookie.Domain));
+                                oSession.oResponse.headers.Add("Set-Cookie", tc);
+                            }
+                        }
+
+                        // MonaKeyの更新
+                        if (wres.Headers.AllKeys.Contains("X-MonaKey") == true)
+                        {
+                            this.Monakey = wres.Headers["X-MonaKey"];
+                            ViewModel.OnModelNotice("MonaKeyを更新しました。");
+
+                            // 1秒待機する
+                            Thread.Sleep(5000);
+                        }
+                        if (wres.Headers.AllKeys.Contains("X-Chx-Error") == true)
+                        {
+                            ViewModel.OnModelNotice("X-Chx-Error : " + wres.Headers["X-Chx-Error"]);
+                        }
+
+                        Cookie["DMDM"] = Cookie["MDMD"] = "";
+                        using (System.IO.StreamReader Res = new System.IO.StreamReader(wres.GetResponseStream(), Encoding.GetEncoding("Shift_JIS")))
+                        {
+                            oSession.oResponse.headers.HTTPResponseCode = (int)wres.StatusCode;
+                            oSession.oResponse.headers.HTTPResponseStatus = (int)wres.StatusCode + " " + wres.StatusDescription;
+                            if (oSession.oRequest.headers["User-Agent"].Contains("Live2ch")) oSession.oResponse.headers["Connection"] = "Close";
                             else oSession.oResponse.headers["Connection"] = "keep-alive";
                             oSession.oResponse.headers["Content-Type"] = "text/html; charset=Shift_JIS";
                             oSession.oResponse.headers["Date"] = wres.Headers[HttpResponseHeader.Date];
