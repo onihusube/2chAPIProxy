@@ -904,7 +904,8 @@ namespace _2chAPIProxy
             return;
         }
 
-        private String Monakey = "00000000-0000-0000-0000-000000000000";
+        private string Monakey = "00000000-0000-0000-0000-000000000000";
+        //private string Monakey = "7b6799cc2bb1eef3acadffeecc180df6d1c7caab887326120056660f6ac05b45";
 
 
         // キー要素があればそれを、無ければ空文字
@@ -1149,10 +1150,6 @@ namespace _2chAPIProxy
                     using (System.IO.Stream PostStream = Write.GetRequestStream())
                     {
                         PostStream.Write(Body, 0, Body.Length);
-                        foreach (var header in Write.Headers.AllKeys)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"{header}:{Write.Headers[header].ToString()}");
-                        }
 
                         HttpWebResponse wres = (HttpWebResponse)Write.GetResponse();
                         if (wres.Cookies.Count > 0)
@@ -1174,12 +1171,19 @@ namespace _2chAPIProxy
                             this.Monakey = wres.Headers["X-MonaKey"];
                             ViewModel.OnModelNotice("MonaKeyを更新しました。");
 
-                            // 1秒待機する
+                            // 5秒待機する
                             Thread.Sleep(5000);
                         }
                         if (wres.Headers.AllKeys.Contains("X-Chx-Error") == true)
                         {
                             ViewModel.OnModelNotice("X-Chx-Error : " + wres.Headers["X-Chx-Error"]);
+
+                            // E3000番台のエラーが帰ってきたらMonaKeyを更新する（雑な暫定対応
+                            if (wres.Headers["X-Chx-Error"].Contains("E3331") == false && wres.Headers["X-Chx-Error"].Contains("E3"))
+                            {
+                                Monakey = "00000000-0000-0000-0000-000000000000";
+                            }
+
                         }
 
                         Cookie["DMDM"] = Cookie["MDMD"] = "";
