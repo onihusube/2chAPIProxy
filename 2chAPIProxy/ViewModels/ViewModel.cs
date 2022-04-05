@@ -114,6 +114,11 @@ namespace _2chAPIProxy
             _CEExternalRead = Setting.CEExternalRead;
             _CESrcfilePath = Setting.CESrcfilePath;
             _CEResultView = "ここにコンパイルとテストの結果が表示されます";
+            enablePostv2 = Setting.EnablePostv2;
+            enablePostv2onPink = Setting.EnablePostv2onPink;
+            enableUTF8Post = Setting.EnableUTF8Post;
+            postFieldOrder = Setting.PostFieldOrder;
+
             //スリープ/休止状態時の処理
             Microsoft.Win32.SystemEvents.PowerModeChanged += new Microsoft.Win32.PowerModeChangedEventHandler(PowermodeChanged);
         }
@@ -127,7 +132,7 @@ namespace _2chAPIProxy
             {
                 DatProxy = new DatProxy(Appkey, HMkey, UserAgent1, UserAgent0, UserAgent2, RouninID, RouninPW, ProxyAddress)
                 {
-                    APIMediator   = fuctory.CreateAPIMediator(),
+                    APIMediator = fuctory.CreateAPIMediator(),
                     HtmlConverter = fuctory.CreateHtmlConverter()
                 };
             }
@@ -151,7 +156,7 @@ namespace _2chAPIProxy
                         var deserializer = new YamlDotNet.Serialization.Deserializer();
                         DatProxy.BoardSettings = deserializer.Deserialize<Dictionary<string, BoardSettings>>(stream);
                     }
-                    catch(Exception err)
+                    catch (Exception err)
                     {
                         this.SystemLog = "YAMLファイルの書式が間違っているようです。\n" + err.ToString();
                     }
@@ -174,57 +179,61 @@ namespace _2chAPIProxy
             if (CEExternalRead) CEResultView = DatProxy.HtmlConverter.Compile(CESrcfilePath);
 
             //設定の適用、プロクシクラス
-            DatProxy.AllowWANAccese  = WANAccess;
-            DatProxy.user            = WANID;
-            DatProxy.pw              = WANPW;
-            DatProxy.WriteUA         = UserAgent3;
-            DatProxy.GetHTML         = KakotoHTML;
+            DatProxy.AllowWANAccese = WANAccess;
+            DatProxy.user = WANID;
+            DatProxy.pw = WANPW;
+            DatProxy.WriteUA = UserAgent3;
+            DatProxy.GetHTML = KakotoHTML;
             DatProxy.OfflawRokkaPerm = OfflawRokkaPermutation;
-            DatProxy.CangeUARetry    = ChangeUARetry;
-            DatProxy.SocksPoxy       = Socks4aProxy;
-            DatProxy.gZipRes         = gZipResponse;
-            DatProxy.ChunkRes        = ChunkedResponse;
-            DatProxy.OnlyORPerm      = OnlyORPerm;
-            DatProxy.CRReplace       = CRReplace;
-            DatProxy.KakolinkPerm    = KakolinkPermutation;
-            DatProxy.AllUAReplace    = (UserAgent3 == "") ? (false) : (AllUAReplace);
-            DatProxy.BeLogin         = BeLogin;
-            DatProxy.SetReferrer     = SetReferrer;
+            DatProxy.CangeUARetry = ChangeUARetry;
+            DatProxy.SocksPoxy = Socks4aProxy;
+            DatProxy.gZipRes = gZipResponse;
+            DatProxy.ChunkRes = ChunkedResponse;
+            DatProxy.OnlyORPerm = OnlyORPerm;
+            DatProxy.CRReplace = CRReplace;
+            DatProxy.KakolinkPerm = KakolinkPermutation;
+            DatProxy.AllUAReplace = (UserAgent3 == "") ? (false) : (AllUAReplace);
+            DatProxy.BeLogin = BeLogin;
+            DatProxy.SetReferrer = SetReferrer;
+            DatProxy.EnablePostv2 = EnablePostv2;
+            DatProxy.EnablePostv2onPink = EnablePostv2onPink;
+            DatProxy.EnableUTF8Post = EnableUTF8Post;
+            DatProxy.PostFieldOrder = PostFieldOrder;
 
             //設定の適用、APIアクセスクラス
-            DatProxy.APIMediator.AppKey       = this.Appkey;
-            DatProxy.APIMediator.HMKey        = this.HMkey;
-            DatProxy.APIMediator.SidUA        = this.UserAgent0;
-            DatProxy.APIMediator.X2chUA       = this.UserAgent1;
-            DatProxy.APIMediator.DatUA        = this.UserAgent2;
-            DatProxy.APIMediator.RouninID     = this.RouninID;
-            DatProxy.APIMediator.RouninPW     = this.RouninPW;
+            DatProxy.APIMediator.AppKey = this.Appkey;
+            DatProxy.APIMediator.HMKey = this.HMkey;
+            DatProxy.APIMediator.SidUA = this.UserAgent0;
+            DatProxy.APIMediator.X2chUA = this.UserAgent1;
+            DatProxy.APIMediator.DatUA = this.UserAgent2;
+            DatProxy.APIMediator.RouninID = this.RouninID;
+            DatProxy.APIMediator.RouninPW = this.RouninPW;
             DatProxy.APIMediator.ProxyAddress = this.ProxyAddress;
             DatProxy.UpdateAsync();
 
             //設定の適用、html変換クラス
-            DatProxy.HtmlConverter.UserAgent              = _UserAgent4;
-            DatProxy.HtmlConverter.ProxyAddress           = _ProxyAddress;
-            DatProxy.HtmlConverter.IsDifferenceDetect     = !_AllReturn;
-            DatProxy.HtmlConverter.IsAliveCheckSkip       = _SkipAliveCheck;
-            DatProxy.HtmlConverter.Is5chURIReplace        = _Replace5chURI;
-            DatProxy.HtmlConverter.IsHttpsReplace         = _ReplaceHttpsLink;
+            DatProxy.HtmlConverter.UserAgent = _UserAgent4;
+            DatProxy.HtmlConverter.ProxyAddress = _ProxyAddress;
+            DatProxy.HtmlConverter.IsDifferenceDetect = !_AllReturn;
+            DatProxy.HtmlConverter.IsAliveCheckSkip = _SkipAliveCheck;
+            DatProxy.HtmlConverter.Is5chURIReplace = _Replace5chURI;
+            DatProxy.HtmlConverter.IsHttpsReplace = _ReplaceHttpsLink;
             DatProxy.HtmlConverter.IsExternalConverterUse = _CEExternalRead;
 
             //エラー通知用コールバック登録
-            DatProxy.APIMediator.PropertyChanged   += (sender, e) =>
-            {
-                if (e.PropertyName == nameof(DatProxy.APIMediator.CurrentError))
-                {
-                    //ここで取得しておく
-                    string error = DatProxy.APIMediator.CurrentError;
+            DatProxy.APIMediator.PropertyChanged += (sender, e) =>
+          {
+              if (e.PropertyName == nameof(DatProxy.APIMediator.CurrentError))
+              {
+                  //ここで取得しておく
+                  string error = DatProxy.APIMediator.CurrentError;
 
-                    App.Current.Dispatcher.BeginInvoke((Action)(() =>
-                    {
-                        this.SystemLog = error;
-                    }));
-                }
-            };
+                  App.Current.Dispatcher.BeginInvoke((Action)(() =>
+                  {
+                      this.SystemLog = error;
+                  }));
+              }
+          };
 
             DatProxy.HtmlConverter.PropertyChanged += (sender, e) =>
             {
@@ -347,7 +356,7 @@ namespace _2chAPIProxy
                             SenburaName = SenburaName.Replace("kage.exe", "Katjusha.exe");
                             if (System.IO.Path.GetFileName(SenburaProcess.MainModule.FileName) == SenburaName) SenburaProcess.CloseMainWindow();
                         }
-                        catch (System.ComponentModel.Win32Exception) { }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+                        catch (System.ComponentModel.Win32Exception) { }
                     }
                     catch (ArgumentException) { }
                 }
@@ -555,7 +564,7 @@ namespace _2chAPIProxy
                 }
             }
         }
-        
+
         bool _WANAccess;
         public bool WANAccess
         {
@@ -809,10 +818,55 @@ namespace _2chAPIProxy
             }
         }
 
+        private bool enablePostv2;
+
+        public bool EnablePostv2
+        {
+            get => enablePostv2;
+            set
+            {
+                if (enablePostv2 != value)
+                {
+                    Setting.EnablePostv2 = DatProxy.EnablePostv2 = enablePostv2 = value;
+                    NoticePropertyChanged("EnablePostv2");
+                }
+            }
+        }
+
+        private bool enablePostv2onPink;
+
+        public bool EnablePostv2onPink
+        {
+            get => enablePostv2onPink;
+            set
+            {
+                if (enablePostv2onPink != value)
+                {
+                    Setting.EnablePostv2onPink = DatProxy.EnablePostv2onPink = enablePostv2onPink = value;
+                    NoticePropertyChanged("EnablePostv2onPink");
+                }
+            }
+        }
+
+        private bool enableUTF8Post;
+
+        public bool EnableUTF8Post
+        {
+            get => enableUTF8Post;
+            set
+            {
+                if (enableUTF8Post != value)
+                {
+                    Setting.EnableUTF8Post = DatProxy.EnableUTF8Post = enableUTF8Post = value;
+                    NoticePropertyChanged("EnableUTF8Post");
+                }
+            }
+        }
+
         int _PortNumber;
         public int PortNumber
         {
-            get { return _PortNumber;}
+            get { return _PortNumber; }
             set
             {
                 if (_PortNumber != value)
@@ -1091,6 +1145,21 @@ namespace _2chAPIProxy
             }
         }
 
+        private string postFieldOrder;
+
+        public string PostFieldOrder 
+        { 
+            get => postFieldOrder;
+            set
+            {
+                if (postFieldOrder != value)
+                {
+                    DatProxy.PostFieldOrder = DatProxy.PostFieldOrder = postFieldOrder = value;
+                    NoticePropertyChanged("PostFieldOrder");
+                }
+            }
+        }
+
 
         //ボタンを押した時のイベントハンドラ
         RelayCommand<String> _OnClick;
@@ -1285,6 +1354,7 @@ namespace _2chAPIProxy
         public static Action ActivateWindow;
         //同期オブジェクト
         private static object m_SyncObj = new object();
+
         /// <summary>
         /// モデルからの通知を受け取る、
         /// インスタンスがあればNullではないので呼び出し可能

@@ -19,7 +19,7 @@ namespace _2chAPIProxy
         bool _duplication = false;
         bool _ClosetoMin = true;
         bool _WANAccess = false;
-        bool _Socks4aProxy= false;
+        bool _Socks4aProxy = false;
         bool _OfflawRokkaPermutation = true;
         bool _gZipResponse = true;
         bool _ChunkedResponse = false;
@@ -39,6 +39,9 @@ namespace _2chAPIProxy
         bool _ReplaceHttpsLink = false;
         bool _PostNoReplace = false;
         bool _SetReferrer = false;
+        private bool enablePostv2 = false;
+        private bool enablePostv2onPink = false;
+        private bool enableUTF8Post = false;
         String _HMkey = "hO2QHdapzbqbTFOaJgZTKXgT2gWqYS";
         String _Appkey = "JYW2J6wh9z8p8xjGFxO3M2JppGCyjQ";
         String _UserAgent0 = "";
@@ -53,6 +56,7 @@ namespace _2chAPIProxy
         String _WANID = "test";
         String _WANPW = "testpw";
         String _CESrcfilePath = "";
+        private string postFieldOrder = "FROM&mail&MESSAGE&bbs&key&time&submit";
 
         public bool change = false;
 
@@ -62,7 +66,7 @@ namespace _2chAPIProxy
 
         public int PortNumber
         {
-            get {return _PortNumber;}
+            get { return _PortNumber; }
             set { _PortNumber = value; change = true; }
         }
 
@@ -152,7 +156,7 @@ namespace _2chAPIProxy
 
         public bool CEExternalRead
         {
-            get { return _CEExternalRead;}
+            get { return _CEExternalRead; }
             set { _CEExternalRead = value; change = true; }
         }
 
@@ -322,6 +326,31 @@ namespace _2chAPIProxy
             get { return _CESrcfilePath; }
             set { _CESrcfilePath = value; change = true; }
         }
+
+        public bool EnablePostv2
+        {
+            get => enablePostv2;
+            set { enablePostv2 = value; change = true; }
+        }
+
+        public bool EnablePostv2onPink 
+        { 
+            get => enablePostv2onPink; 
+            set { enablePostv2onPink = value; change = true; } 
+        }
+
+        public bool EnableUTF8Post 
+        {
+            get => enableUTF8Post; 
+            set { enableUTF8Post = value; change = true; } 
+        }
+
+        public string PostFieldOrder 
+        { 
+            get => postFieldOrder; 
+            set { postFieldOrder = value; change = true; } 
+        }
+
 
         public String CryptData(String data, bool encrypt = true)
         {

@@ -65,6 +65,10 @@ namespace _2chAPIProxy
         public bool AllUAReplace { get; set; }
         public bool BeLogin { get; set; }
         public bool SetReferrer { get; set; }
+        public bool EnablePostv2 { get; set; }
+        public bool EnablePostv2onPink { get; set; }
+        public bool EnableUTF8Post { get; set; }
+        public String PostFieldOrder { get; set; }
 
         public DatProxy(String Akey, String Hkey, String ua1, String sidUA, String ua2, String RID, String RPW, String ProxyAddrese)
         {
