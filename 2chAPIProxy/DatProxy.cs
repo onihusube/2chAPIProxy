@@ -68,7 +68,19 @@ namespace _2chAPIProxy
         public bool EnablePostv2 { get; set; }
         public bool EnablePostv2onPink { get; set; }
         public bool EnableUTF8Post { get; set; }
-        public String PostFieldOrder { get; set; }
+
+        private string[] PostFieldOrederArray;
+
+        private string postFieldOrder;
+        public String PostFieldOrder 
+        { 
+            get => postFieldOrder;
+            set 
+            {
+                postFieldOrder = value;
+                PostFieldOrederArray = value.Split('&');
+            } 
+        }
 
         public DatProxy(String Akey, String Hkey, String ua1, String sidUA, String ua2, String RID, String RPW, String ProxyAddrese)
         {
@@ -125,7 +137,7 @@ namespace _2chAPIProxy
                         }
                         else if (CheckWriteuri.IsMatch(oSession.fullUrl))
                         {
-                            if(ViewModel.Setting.PostNoReplace == true)
+                            if (ViewModel.Setting.PostNoReplace == true)
                             {
                                 System.Diagnostics.Debug.WriteLine("書き込み関与を最小限にして書き込み");
                                 if (oSession.oRequest.headers["User-Agent"].Contains("gikoNavi") == true)
@@ -141,13 +153,21 @@ namespace _2chAPIProxy
                                 //書き込みをバイパスする
                                 oSession.utilCreateResponseAndBypassServer();
 
-                                if (oSession.fullUrl.Contains("bbspink.com"))
+                                if (EnablePostv2)
                                 {
-                                    // pinkはまだ新書き込み仕様になってないらしい？
+                                    if (!EnablePostv2onPink && oSession.fullUrl.Contains("bbspink.com"))
+                                    {
+                                        // pinkはまだ新書き込み仕様になってないらしい？
+                                        ResPost(oSession, is2ch);
+                                    }
+                                    else
+                                    {
+                                        ResPostv2(oSession, is2ch);
+                                    }
+                                }
+                                else
+                                {
                                     ResPost(oSession, is2ch);
-                                } else
-                                {
-                                    ResPostv2(oSession, is2ch);
                                 }
                             }
                             return;
@@ -204,7 +224,7 @@ namespace _2chAPIProxy
                             oSession["x-OverrideSslProtocols"] = " tls1.0;tls1.1;tls1.2";
                             System.Diagnostics.Debug.WriteLine("HTTPS化：" + oSession.fullUrl);
                         }
-                        
+
                         if (CheckShitarabaPost.IsMatch(oSession.fullUrl))
                         {
                             //したらば書き込みと結果置換
@@ -226,7 +246,7 @@ namespace _2chAPIProxy
                     }
                     oSession.Ignore();
                 }
-                catch(Exception err)
+                catch (Exception err)
                 {
                     ViewModel.OnModelNotice($"プロクシ処理中にエラーが発生しました。URL:{oSession.fullUrl}\n{err.ToString()}");
                 }
@@ -274,7 +294,7 @@ namespace _2chAPIProxy
                 if (ooSession.responseCode == 301)
                 {
                     ooSession.oResponse.headers.SetStatus(302, "302 Found");
-                    if(ooSession.fullUrl.Contains("subject.txt")) ooSession.oResponse.headers["Location"] = "http://www2.2ch.net/live.html";
+                    if (ooSession.fullUrl.Contains("subject.txt")) ooSession.oResponse.headers["Location"] = "http://www2.2ch.net/live.html";
                 }
                 if (itenuri.Contains("Change your bookmark") || itenuri.Contains("The document has moved"))
                 {
@@ -824,7 +844,7 @@ namespace _2chAPIProxy
                     using (System.IO.Stream PostStream = Write.GetRequestStream())
                     {
                         PostStream.Write(Body, 0, Body.Length);
-                        foreach(var header in Write.Headers.AllKeys)
+                        foreach (var header in Write.Headers.AllKeys)
                         {
                             System.Diagnostics.Debug.WriteLine($"{header}:{Write.Headers[header].ToString()}");
                         }
@@ -853,7 +873,7 @@ namespace _2chAPIProxy
                         {
                             oSession.oResponse.headers.HTTPResponseCode = (int)wres.StatusCode;
                             oSession.oResponse.headers.HTTPResponseStatus = (int)wres.StatusCode + " " + wres.StatusDescription;
-                            if(oSession.oRequest.headers["User-Agent"].Contains("Live2ch")) oSession.oResponse.headers["Connection"] = "Close";
+                            if (oSession.oRequest.headers["User-Agent"].Contains("Live2ch")) oSession.oResponse.headers["Connection"] = "Close";
                             else oSession.oResponse.headers["Connection"] = "keep-alive";
                             oSession.oResponse.headers["Content-Type"] = "text/html; charset=Shift_JIS";
                             oSession.oResponse.headers["Date"] = wres.Headers[HttpResponseHeader.Date];
@@ -909,6 +929,7 @@ namespace _2chAPIProxy
         }
 
         private string Monakey = "00000000-0000-0000-0000-000000000000";
+
         //private string Monakey = "7b6799cc2bb1eef3acadffeecc180df6d1c7caab887326120056660f6ac05b45";
 
 
@@ -932,15 +953,46 @@ namespace _2chAPIProxy
             using (HMACSHA256 hs256 = new HMACSHA256(Encoding.UTF8.GetBytes(this.APIMediator.HMKey)))
             {
                 // UTF-8でポストするときはUTF-8で、Shift-JiSでポストするときはShift-Jisでハッシュを求める必要がある
-                //byte[] hash = hs256.ComputeHash(Encoding.UTF8.GetBytes(sigstr));
-                byte[] hash = hs256.ComputeHash(Encoding.GetEncoding("Shift_JIS").GetBytes(sigstr));
+                byte[] hash;
+                if (EnableUTF8Post)
+                {
+                    hash = hs256.ComputeHash(Encoding.UTF8.GetBytes(sigstr));
+                }
+                else
+                {
+                    hash = hs256.ComputeHash(Encoding.GetEncoding("Shift_JIS").GetBytes(sigstr));
+                }
                 return BitConverter.ToString(hash).Replace("-", "").ToLower();
             }
         }
 
-        private string ReConstructPostField(Dictionary<string, string> post_filed)
+        private string ReConstructPostField(Dictionary<string, string> post_filed_map)
         {
-            return $"FROM={value_or(post_filed, "FROM")}&mail={value_or(post_filed, "mail")}&MESSAGE={value_or(post_filed, "MESSAGE")}&bbs={value_or(post_filed, "bbs")}&key={value_or(post_filed, "key")}&time={value_or(post_filed, "time")}&submit={value_or(post_filed, "submit")}";
+            // 投稿時に浪人を無効化する
+            bool remove_sid = ViewModel.Setting.PostRoninInvalid;
+
+            string postfield = "";
+
+            // 順序指定があるものをその順序で指定する
+            foreach (var key in PostFieldOrederArray)
+            {
+                if (remove_sid && key == "sid") continue;
+                // データが送られてきてる場合のみ追加（無い場合に空文字を追加しない）
+                if (post_filed_map.ContainsKey(key))
+                {
+                    postfield += $"{key}={post_filed_map[key]}&";
+                }
+            }
+
+            // 順序指定が無いものは送られてきた順序で（ほんまか？Dictionalyの内部順序って何？？）
+            foreach (var kvpair in post_filed_map.Where(kv => !PostFieldOrederArray.Contains(kv.Key)))
+            {
+                if (remove_sid && kvpair.Key == "sid") continue;
+                postfield += $"{kvpair.Key}={kvpair.Value}&";
+            }
+
+            return postfield;
+            //return $"FROM={value_or(post_filed, "FROM")}&mail={value_or(post_filed, "mail")}&MESSAGE={value_or(post_filed, "MESSAGE")}&bbs={value_or(post_filed, "bbs")}&key={value_or(post_filed, "key")}&time={value_or(post_filed, "time")}&submit={value_or(post_filed, "submit")}";
         }
 
         private void ResPostv2(Session oSession, bool is2ch)
@@ -1065,7 +1117,7 @@ namespace _2chAPIProxy
 
 
                 // 新しい書き込み仕様への対応
-                
+
                 // リクエストボディの分解
                 var post_field_map = ReqBody.Split('&')
                                     .Select(kvpair => kvpair.Split('='))
@@ -1074,7 +1126,6 @@ namespace _2chAPIProxy
                 // nonceの取得
                 //string nonce = string.Format("{0}.{1:000}", (ulong)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds, DateTime.UtcNow.Millisecond);
                 string nonce = string.Format("{0}.{1:000}", post_field_map["time"], DateTime.UtcNow.Millisecond);
-                //string nonce = string.Format("{0}.000", post_field_map["time"]);
 
                 // 各種値の計算とヘッダセット
                 Write.Headers.Add("X-PostSig", CreatePostsignature(post_field_map, nonce, Write.UserAgent));
@@ -1082,14 +1133,24 @@ namespace _2chAPIProxy
                 Write.Headers.Add("X-PostNonce", nonce);
                 Write.Headers.Add("X-MonaKey", Monakey);
 
+                if (EnableUTF8Post)
+                {
+                    // ShiftJIS文字列としてURLデコード -> URLエンコード（UTF-8文字列として）
+                    post_field_map = post_field_map
+                                        .Select(kv => new KeyValuePair<string, string>(kv.Key, HttpUtility.UrlEncode(HttpUtility.UrlDecode(kv.Value, Encoding.GetEncoding("Shift_JIS")))))
+                                        .ToDictionary(kv => kv.Key, kv => kv.Value);
+                }
+                if (IsResPost)
+                {
+                    // 投稿設定でお絵描きデータを付加する設定になっていて、フィールドに含まれていない場合
+                    if (PostSetting.SetOekaki && post_field_map.ContainsKey("oekaki_thread1") == false)
+                    {
+                        post_field_map.Add("oekaki_thread1", "");
+                    }
+                }
+
                 // リクエストボディ再構成
                 ReqBody = ReConstructPostField(post_field_map);
-                
-                // スレ立ての時の順番が分からない・・・
-                if (post_field_map.ContainsKey("subject"))
-                {
-                    ReqBody += $"subject={post_field_map["subject"]}";
-                }
 
                 // referer調整
                 String referer = oSession.oRequest.headers["Referer"];
@@ -1134,20 +1195,31 @@ namespace _2chAPIProxy
                     }
                 }
                 // 浪人を再設定（無効化設定がfalseでsidフィールドが元々あった場合）
-                if (ViewModel.Setting.PostRoninInvalid == false && post_field_map.ContainsKey("sid"))
-                {
-                    ReqBody += $"&sid={post_field_map["sid"]}";
-                }
+                //if (ViewModel.Setting.PostRoninInvalid == false && post_field_map.ContainsKey("sid"))
+                //{
+                //    ReqBody += $"&sid={post_field_map["sid"]}";
+                //}
                 // お絵かき用のデータ追加（レス投稿時のみ）
-                if (IsResPost)
+                //if (IsResPost)
+                //{
+                //    // 投稿設定でお絵描きデータを付加する設定になっているか元々あった場合
+                //    if (PostSetting.SetOekaki || post_field_map.ContainsKey("oekaki_thread1"))
+                //    {
+                //        ReqBody += "&oekaki_thread1=";
+                //    }
+                //}
+                Byte[] Body;
+                if (EnableUTF8Post)
                 {
-                    // 投稿設定でお絵描きデータを付加する設定になっているか元々あった場合
-                    if (PostSetting.SetOekaki || post_field_map.ContainsKey("oekaki_thread1"))
-                    {
-                        ReqBody += "&oekaki_thread1=";
-                    }
+                    // UTF-8変換
+                    Body = Encoding.UTF8.GetBytes(ReqBody);
+                    Write.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
                 }
-                Byte[] Body = Encoding.GetEncoding("Shift_JIS").GetBytes(ReqBody);
+                else
+                {
+                    Body = Encoding.GetEncoding("Shift_JIS").GetBytes(ReqBody);
+                }
+
                 Write.ContentLength = Body.Length;
                 try
                 {

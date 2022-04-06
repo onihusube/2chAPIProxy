@@ -39,7 +39,7 @@ namespace _2chAPIProxy
         bool _ReplaceHttpsLink = false;
         bool _PostNoReplace = false;
         bool _SetReferrer = false;
-        private bool enablePostv2 = false;
+        private bool enablePostv2 = true;
         private bool enablePostv2onPink = false;
         private bool enableUTF8Post = false;
         String _HMkey = "hO2QHdapzbqbTFOaJgZTKXgT2gWqYS";
