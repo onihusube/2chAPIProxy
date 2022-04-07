@@ -934,64 +934,52 @@ namespace _2chAPIProxy
 
 
         // キー要素があればそれを、無ければ空文字
-        private string value_or(Dictionary<string, string> dict, string key)
+        private string ValueOr(Dictionary<string, string> dict, string key)
         {
             return dict.TryGetValue(key, out string value) ? value : "";
         }
 
-        private string CreatePostsignature(Dictionary<string, string> post_filed, string nonce, string UA)
+        private string CreatePostsignature(Dictionary<string, string> post_filed, string nonce, string UA, Encoding dst_encoding)
         {
             // キー要素があればそれをsjis文字列としてデコードして返す、無ければ空文字
-            string dec_value_or(Dictionary<string, string> dict, string key)
-            {
-                return dict.TryGetValue(key, out string value) ? HttpUtility.UrlDecode(value, Encoding.GetEncoding("Shift_JIS")) : "";
-            };
+            //string dec_value_or(Dictionary<string, string> dict, string key)
+            //{
+            //    return dict.TryGetValue(key, out string value) ? HttpUtility.UrlDecode(value, Encoding.GetEncoding("Shift_JIS")) : "";
+            //};
 
             // PostSig計算用文字列
-            string sigstr = $"{value_or(post_filed, "bbs")}<>{value_or(post_filed, "key")}<>{value_or(post_filed, "time")}<>{dec_value_or(post_filed, "FROM")}<>{dec_value_or(post_filed, "mail")}<>{dec_value_or(post_filed, "MESSAGE")}<>{dec_value_or(post_filed, "subject")}<>{UA}<>{Monakey}<><>{nonce}";
+            string sigstr = $"{ValueOr(post_filed, "bbs")}<>{ValueOr(post_filed, "key")}<>{ValueOr(post_filed, "time")}<>{ValueOr(post_filed, "FROM")}<>{ValueOr(post_filed, "mail")}<>{ValueOr(post_filed, "MESSAGE")}<>{ValueOr(post_filed, "subject")}<>{UA}<>{Monakey}<><>{nonce}";
 
             using (HMACSHA256 hs256 = new HMACSHA256(Encoding.UTF8.GetBytes(this.APIMediator.HMKey)))
             {
                 // UTF-8でポストするときはUTF-8で、Shift-JiSでポストするときはShift-Jisでハッシュを求める必要がある
-                byte[] hash;
-                if (EnableUTF8Post)
-                {
-                    hash = hs256.ComputeHash(Encoding.UTF8.GetBytes(sigstr));
-                }
-                else
-                {
-                    hash = hs256.ComputeHash(Encoding.GetEncoding("Shift_JIS").GetBytes(sigstr));
-                }
+                byte[] hash = hs256.ComputeHash(dst_encoding.GetBytes(sigstr));
                 return BitConverter.ToString(hash).Replace("-", "").ToLower();
             }
         }
 
-        private string ReConstructPostField(Dictionary<string, string> post_filed_map)
+        private string ReConstructPostField(Dictionary<string, string> post_filed_map, Encoding dst_encoding)
         {
-            // 投稿時に浪人を無効化する
-            bool remove_sid = ViewModel.Setting.PostRoninInvalid;
-
             string postfield = "";
 
             // 順序指定があるものをその順序で指定する
-            foreach (var key in PostFieldOrederArray)
+            foreach (string key in PostFieldOrederArray)
             {
-                if (remove_sid && key == "sid") continue;
                 // データが送られてきてる場合のみ追加（無い場合に空文字を追加しない）
                 if (post_filed_map.ContainsKey(key))
                 {
-                    postfield += $"{key}={post_filed_map[key]}&";
+                    postfield += $"{key}={HttpUtility.UrlEncode(post_filed_map[key], dst_encoding)}&";
                 }
             }
 
             // 順序指定が無いものは送られてきた順序で（ほんまか？Dictionalyの内部順序って何？？）
             foreach (var kvpair in post_filed_map.Where(kv => !PostFieldOrederArray.Contains(kv.Key)))
             {
-                if (remove_sid && kvpair.Key == "sid") continue;
-                postfield += $"{kvpair.Key}={kvpair.Value}&";
+                postfield += $"{kvpair.Key}={HttpUtility.UrlEncode(kvpair.Value, dst_encoding)}&";
             }
 
-            return postfield;
+            // 余分にくっついてるのを削除
+            return postfield.TrimEnd('&');
             //return $"FROM={value_or(post_filed, "FROM")}&mail={value_or(post_filed, "mail")}&MESSAGE={value_or(post_filed, "MESSAGE")}&bbs={value_or(post_filed, "bbs")}&key={value_or(post_filed, "key")}&time={value_or(post_filed, "time")}&submit={value_or(post_filed, "submit")}";
         }
 
@@ -1118,27 +1106,38 @@ namespace _2chAPIProxy
 
                 // 新しい書き込み仕様への対応
 
-                // リクエストボディの分解
+                // 送信されてきたエンコーディング取得
+                var src_encoding = oSession.RequestHeaders["Content-Type"].Contains("UTF-8") switch
+                {
+                    true => Encoding.UTF8,
+                    false => Encoding.GetEncoding("Shift_JIS")
+                };
+                // 送信するエンコーディング取得
+                var dst_encoding = EnableUTF8Post switch
+                {
+                    true => Encoding.UTF8,
+                    false => Encoding.GetEncoding("Shift_JIS")
+                };
+
+                // リクエストボディの分解（URLデコードもしておく）
                 var post_field_map = ReqBody.Split('&')
                                     .Select(kvpair => kvpair.Split('='))
-                                    .ToDictionary(pair => pair[0], pair => pair[1]);
+                                    .ToDictionary(pair => pair[0], pair => HttpUtility.UrlDecode(pair[1], src_encoding));
 
                 // nonceの取得
                 //string nonce = string.Format("{0}.{1:000}", (ulong)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds, DateTime.UtcNow.Millisecond);
                 string nonce = string.Format("{0}.{1:000}", post_field_map["time"], DateTime.UtcNow.Millisecond);
 
                 // 各種値の計算とヘッダセット
-                Write.Headers.Add("X-PostSig", CreatePostsignature(post_field_map, nonce, Write.UserAgent));
+                Write.Headers.Add("X-PostSig", CreatePostsignature(post_field_map, nonce, Write.UserAgent, dst_encoding));
                 Write.Headers.Add("X-APIKey", this.APIMediator.AppKey);
                 Write.Headers.Add("X-PostNonce", nonce);
                 Write.Headers.Add("X-MonaKey", Monakey);
 
-                if (EnableUTF8Post)
+                // 浪人無効化が設定されていたら、sidフィールドを削除
+                if (ViewModel.Setting.PostRoninInvalid)
                 {
-                    // ShiftJIS文字列としてURLデコード -> URLエンコード（UTF-8文字列として）
-                    post_field_map = post_field_map
-                                        .Select(kv => new KeyValuePair<string, string>(kv.Key, HttpUtility.UrlEncode(HttpUtility.UrlDecode(kv.Value, Encoding.GetEncoding("Shift_JIS")))))
-                                        .ToDictionary(kv => kv.Key, kv => kv.Value);
+                    post_field_map.Remove("sid");
                 }
                 if (IsResPost)
                 {
@@ -1150,7 +1149,7 @@ namespace _2chAPIProxy
                 }
 
                 // リクエストボディ再構成
-                ReqBody = ReConstructPostField(post_field_map);
+                ReqBody = ReConstructPostField(post_field_map, dst_encoding);
 
                 // referer調整
                 String referer = oSession.oRequest.headers["Referer"];
@@ -1208,16 +1207,11 @@ namespace _2chAPIProxy
                 //        ReqBody += "&oekaki_thread1=";
                 //    }
                 //}
-                Byte[] Body;
+                byte[] Body = dst_encoding.GetBytes(ReqBody);
                 if (EnableUTF8Post)
                 {
-                    // UTF-8変換
-                    Body = Encoding.UTF8.GetBytes(ReqBody);
+                    // UTF-8でポスト（BordSettingの設定を強制上書きしている・・・
                     Write.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
-                }
-                else
-                {
-                    Body = Encoding.GetEncoding("Shift_JIS").GetBytes(ReqBody);
                 }
 
                 Write.ContentLength = Body.Length;
