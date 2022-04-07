@@ -167,7 +167,7 @@ namespace _2chAPIProxy
             if (DatProxy.BoardSettings.ContainsKey("2chapiproxy_default") == false)
             {
                 // ファイルが無いかデフォルト設定が無い時、JaneStyleの設定を使用
-                var def = new BoardSettings { UserAgent = "Monazilla/1.00 JaneStyle/4.00 Windows/10.0.19041", SetOekaki = false, KeepAlive = false };
+                var def = new BoardSettings { UserAgent = "Monazilla/1.00 JaneStyle/4.22 Windows/10.0.22000", SetOekaki = false, KeepAlive = false };
                 def.Headers.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
                 def.Headers.Add("Accept-Encoding", "gzip, identity");
                 def.Headers.Add("ContentType", "application/x-www-form-urlencoded");

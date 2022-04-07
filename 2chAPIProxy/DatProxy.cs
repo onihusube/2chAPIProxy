@@ -701,12 +701,23 @@ namespace _2chAPIProxy
                 // デフォルトUAを設定（優先度最低、空の時は知らない）
                 Write.UserAgent = BoardSettings["2chapiproxy_default"].UserAgent;
 
+                // pinkへの書き込みを識別
+                bool is_pink = oSession.fullUrl.Contains("bbspink.com") && BoardSettings.ContainsKey("2chapiproxy_pink_common");
+
                 // 板毎設定の引き当て
                 BoardSettings PostSetting = null;
                 if (1 < BoardSettings.Count())
                 {
+                    // Pink共通設定があれば引き当てておく
+                    if (is_pink)
+                    {
+                        PostSetting = BoardSettings["2chapiproxy_pink_common"];
+                    }
+
                     // 板名を抽出
                     var bbs_match = Regex.Match(ReqBody, @"bbs=(\w+)");
+
+                    // 板事設定があればそれが最優先
                     if (bbs_match.Success)
                     {
                         var bbs = bbs_match.Groups[1].Value;
@@ -719,7 +730,12 @@ namespace _2chAPIProxy
 
                 // UAの設定
                 // デフォルト→板毎設定→書き込みUAの順に優先
-                if (String.IsNullOrEmpty(WriteUA))
+                if (is_pink)
+                {
+                    // pink共通設定は最優先
+                    Write.UserAgent = PostSetting.UserAgent;
+                }
+                else if (String.IsNullOrEmpty(WriteUA))
                 {
                     // 設定があるときだけ上書き
                     if (string.IsNullOrEmpty(PostSetting?.UserAgent) == false)
@@ -735,8 +751,11 @@ namespace _2chAPIProxy
                     Write.UserAgent = WriteUA;
                 }
 
-                // デフォルト設定の引き当て
-                PostSetting ??= BoardSettings["2chapiproxy_default"];
+                if (is_pink == false)
+                {
+                    // デフォルト設定の引き当て（Pink投稿時は共通設定がないときのみ
+                    PostSetting ??= BoardSettings["2chapiproxy_default"];
+                }
 
                 // ヘッダの設定
 
@@ -832,11 +851,19 @@ namespace _2chAPIProxy
                     ReqBody = Regex.Replace(ReqBody, @"&$", "");
                 }
                 //お絵かき用のデータ追加
-                if (IsResPost && PostSetting.SetOekaki && !ReqBody.Contains("&oekaki_thread"))
+                if (IsResPost)
                 {
-                    ReqBody = ReqBody.Replace("\r\n", "");
-                    ReqBody += "&oekaki_thread1=";
+                    if (PostSetting.SetOekaki && !ReqBody.Contains("&oekaki_thread"))
+                    {
+                        ReqBody = ReqBody.Replace("\r\n", "");
+                        ReqBody += "&oekaki_thread1=";
+                    }
+                    else if (PostSetting.SetOekaki == false && ReqBody.Contains("&oekaki_thread"))
+                    {
+                        ReqBody = ReqBody.Replace("&oekaki_thread1=", "");
+                    }
                 }
+                
                 Byte[] Body = Encoding.GetEncoding("Shift_JIS").GetBytes(ReqBody);
                 Write.ContentLength = Body.Length;
                 try
@@ -941,12 +968,6 @@ namespace _2chAPIProxy
 
         private string CreatePostsignature(Dictionary<string, string> post_filed, string nonce, string UA, Encoding dst_encoding)
         {
-            // キー要素があればそれをsjis文字列としてデコードして返す、無ければ空文字
-            //string dec_value_or(Dictionary<string, string> dict, string key)
-            //{
-            //    return dict.TryGetValue(key, out string value) ? HttpUtility.UrlDecode(value, Encoding.GetEncoding("Shift_JIS")) : "";
-            //};
-
             // PostSig計算用文字列
             string sigstr = $"{ValueOr(post_filed, "bbs")}<>{ValueOr(post_filed, "key")}<>{ValueOr(post_filed, "time")}<>{ValueOr(post_filed, "FROM")}<>{ValueOr(post_filed, "mail")}<>{ValueOr(post_filed, "MESSAGE")}<>{ValueOr(post_filed, "subject")}<>{UA}<>{Monakey}<><>{nonce}";
 
@@ -1146,6 +1167,11 @@ namespace _2chAPIProxy
                     {
                         post_field_map.Add("oekaki_thread1", "");
                     }
+                    else if (PostSetting.SetOekaki == false && post_field_map.ContainsKey("oekaki_thread1"))
+                    {
+                        // 逆にお絵描きデータ追加が無効になっている場合
+                        post_field_map.Remove("oekaki_thread1");
+                    }
                 }
 
                 // リクエストボディ再構成
@@ -1193,20 +1219,6 @@ namespace _2chAPIProxy
                         //if (cook.Key == "PREN" || cook.Key == "yuki" || cook.Key == "MDMD" || cook.Key == "DMDM")
                     }
                 }
-                // 浪人を再設定（無効化設定がfalseでsidフィールドが元々あった場合）
-                //if (ViewModel.Setting.PostRoninInvalid == false && post_field_map.ContainsKey("sid"))
-                //{
-                //    ReqBody += $"&sid={post_field_map["sid"]}";
-                //}
-                // お絵かき用のデータ追加（レス投稿時のみ）
-                //if (IsResPost)
-                //{
-                //    // 投稿設定でお絵描きデータを付加する設定になっているか元々あった場合
-                //    if (PostSetting.SetOekaki || post_field_map.ContainsKey("oekaki_thread1"))
-                //    {
-                //        ReqBody += "&oekaki_thread1=";
-                //    }
-                //}
                 byte[] Body = dst_encoding.GetBytes(ReqBody);
                 if (EnableUTF8Post)
                 {
