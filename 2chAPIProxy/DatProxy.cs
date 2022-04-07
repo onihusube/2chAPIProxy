@@ -948,7 +948,7 @@ namespace _2chAPIProxy
             };
 
             // PostSig計算用文字列
-            string sigstr = $"{value_or(post_filed, "bbs")}<>{value_or(post_filed, "key")}<>{value_or(post_filed, "time")}<>{value_or(post_filed, "FROM")}<>{dec_value_or(post_filed, "mail")}<>{dec_value_or(post_filed, "MESSAGE")}<>{dec_value_or(post_filed, "subject")}<>{UA}<>{Monakey}<><>{nonce}";
+            string sigstr = $"{value_or(post_filed, "bbs")}<>{value_or(post_filed, "key")}<>{value_or(post_filed, "time")}<>{dec_value_or(post_filed, "FROM")}<>{dec_value_or(post_filed, "mail")}<>{dec_value_or(post_filed, "MESSAGE")}<>{dec_value_or(post_filed, "subject")}<>{UA}<>{Monakey}<><>{nonce}";
 
             using (HMACSHA256 hs256 = new HMACSHA256(Encoding.UTF8.GetBytes(this.APIMediator.HMKey)))
             {
@@ -1258,6 +1258,7 @@ namespace _2chAPIProxy
                             if (wres.Headers["X-Chx-Error"].Contains("E3331") == false && wres.Headers["X-Chx-Error"].Contains("E3"))
                             {
                                 Monakey = "00000000-0000-0000-0000-000000000000";
+                                ViewModel.OnModelNotice("MonaKeyをリセットしました。");
                             }
 
                         }
