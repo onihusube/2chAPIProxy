@@ -1154,7 +1154,7 @@ namespace _2chAPIProxy
             {
                 if (postFieldOrder != value)
                 {
-                    DatProxy.PostFieldOrder = DatProxy.PostFieldOrder = postFieldOrder = value;
+                    Setting.PostFieldOrder = DatProxy.PostFieldOrder = postFieldOrder = value;
                     NoticePropertyChanged("PostFieldOrder");
                 }
             }
