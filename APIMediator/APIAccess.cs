@@ -212,13 +212,23 @@ namespace _2chAPIProxy.APIMediator
                     using (StreamReader Res = new StreamReader(wres.GetResponseStream()))
                     {
                         String ResData = Res.ReadToEnd();
-                        //
-                        this.SessionID = ResData.Split(':')[1];
-                        if (ResData.Contains("ERROR:") == true || this.SessionID == "")
+
+                        System.Diagnostics.Debug.WriteLine(ResData);
+
+                        if (ResData.StartsWith("ng"))
                         {
                             CurrentError = $"SessionIDの取得に失敗しました。\n{ResData}";
-                            //ViewModel.OnModelNotice("SessionIDの取得に失敗しました。\n" + ResData, true);
                             this.SessionID = DefaultSID;
+                        }
+                        else
+                        {
+                            this.SessionID = ResData.Split(':')[1];
+                            if (ResData.Contains("ERROR:") == true || this.SessionID == "")
+                            {
+                                CurrentError = $"SessionIDの取得に失敗しました。\n{ResData}";
+                                //ViewModel.OnModelNotice("SessionIDの取得に失敗しました。\n" + ResData, true);
+                                this.SessionID = DefaultSID;
+                            }
                         }
                     }
                     wres?.Close();
