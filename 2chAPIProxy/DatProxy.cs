@@ -1223,13 +1223,40 @@ namespace _2chAPIProxy
                 ReqBody = ReConstructPostField(post_field_map, dst_encoding);
 
                 if (string.IsNullOrEmpty(Proxy) == false) Write.Proxy = new WebProxy(Proxy);
-                
+
+
+                // 送信されてきたクッキーを抽出
+                foreach (Match mc in Regex.Matches(oSession.oRequest.headers["Cookie"], @"(?:\s+|^)((.+?)=(?:|.+?)(?:;|$))"))
+                {
+                    Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
+                }
+
+                // Beログイン用クッキーのセット
+                if (Cookie.ContainsKey("DMDM") || Cookie.ContainsKey("MDMD"))
+                {
+                    String domain = CheckWriteuri.Match(oSession.fullUrl).Groups[1].Value;
+                    foreach (var cook in Cookie.Where(kv => (kv.Key == "DMDM") || (kv.Key == "MDMD")))
+                    {
+                        if (cook.Value != "")
+                        {
+                            // クッキーが確実にあるときだけクッキーコンテナを初期化
+                            Write.CookieContainer ??= new CookieContainer();
+
+                            var m = Regex.Match(cook.Value, @"^(.+?)=(.*?)(;|$)");
+                            try
+                            {
+                                Write.CookieContainer.Add(new Cookie(m.Groups[1].Value, m.Groups[2].Value, "/", domain));
+                            }
+                            catch (CookieException)
+                            {
+                                continue;
+                            }
+                        }
+
+                    }
+                }
+
                 //Write.CookieContainer = new CookieContainer();
-                ////送信されてきたクッキーを抽出
-                //foreach (Match mc in Regex.Matches(oSession.oRequest.headers["Cookie"], @"(?:\s+|^)((.+?)=(?:|.+?)(?:;|$))"))
-                //{
-                //    Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
-                //}
                 //Cookie.Remove("sid");
                 //Cookie.Remove("SID");
                 ////送信クッキーのセット

@@ -1222,6 +1222,8 @@ namespace _2chAPIProxy
                                 SystemLog = "現在の設定を保存しました。";
                                 this.PopupVisible = true;
                             }
+                            // Monakeyをリセット
+                            DatProxy.ResetMonakey();
                             break;
                         case "KeyReset":
                             var defaultSetting = new AppSetting();
