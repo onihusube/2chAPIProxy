@@ -955,7 +955,27 @@ namespace _2chAPIProxy
             return;
         }
 
-        private string Monakey = "00000000-0000-0000-0000-000000000000";
+        private string monakey = "00000000-0000-0000-0000-000000000000";
+        private string Monakey
+        {
+            get => monakey;
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    monakey = "00000000-0000-0000-0000-000000000000";
+                }
+                else
+                {
+                    monakey = value;
+                }
+            }
+        }
+
+        public void ResetMonakey()
+        {
+            Monakey = "";
+        }
 
         //private string Monakey = "7b6799cc2bb1eef3acadffeecc180df6d1c7caab887326120056660f6ac05b45";
 
@@ -1020,17 +1040,19 @@ namespace _2chAPIProxy
                     oSession.fullUrl = oSession.fullUrl.Replace("subbbs.cgi", "bbs.cgi");
                 }
 
-
                 String PostURI = (ViewModel.Setting.UseTLSWrite) ? (oSession.fullUrl.Replace("http://", "https://")) : (oSession.fullUrl);
                 HttpWebRequest Write = (HttpWebRequest)WebRequest.Create(PostURI);
                 Write.Method = "POST";
                 Write.ServicePoint.Expect100Continue = false;
                 Write.Headers.Clear();
                 //ここで指定しないとデコードされない
-                Write.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                Write.AutomaticDecompression = DecompressionMethods.GZip;
+                //Write.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                 //デフォルトがtrueなのでオフっとく
                 Write.KeepAlive = false;
                 Write.Connection = null;    // こうしないとヘッダから消えない
+                // デフォルト1.0にしておく
+                Write.ProtocolVersion = HttpVersion.Version10;
 
                 //デバッグ出力
                 System.Diagnostics.Debug.WriteLine("オリジナルリクエストヘッダ");
@@ -1039,8 +1061,6 @@ namespace _2chAPIProxy
                     System.Diagnostics.Debug.WriteLine($"{header.Name}:{header.Value}");
                 }
 
-                // デフォルトUAを設定（優先度最低、空の時は知らない）
-                Write.UserAgent = BoardSettings["2chapiproxy_default"].UserAgent;
 
                 // 板毎設定の引き当て
                 BoardSettings PostSetting = null;
@@ -1058,14 +1078,17 @@ namespace _2chAPIProxy
                     }
                 }
 
+                // デフォルトUAを設定（優先度最低、空の時は知らない）
+                string UA = BoardSettings["2chapiproxy_default"].UserAgent;
+
                 // UAの設定
-                // デフォルト→板毎設定→書き込みUAの順に優先
+                // 書き込みUAがあればそれを使用、無ければ板毎設定、それもなければデフォルト設定
                 if (String.IsNullOrEmpty(WriteUA))
                 {
                     // 設定があるときだけ上書き
                     if (string.IsNullOrEmpty(PostSetting?.UserAgent) == false)
                     {
-                        Write.UserAgent = PostSetting.UserAgent;
+                        UA = PostSetting.UserAgent;
                         // お絵かき設定はどうしようね・・・
                         if (PostSetting.Headers.Count() == 0) PostSetting = null;
                     }
@@ -1073,10 +1096,56 @@ namespace _2chAPIProxy
                 else
                 {
                     // UIの書き込みUAを私用
-                    Write.UserAgent = WriteUA;
+                    UA = WriteUA;
                 }
 
-                // デフォルト設定の引き当て
+                // 新しい書き込み仕様への対応
+
+                // 送信されてきたエンコーディング取得
+                var src_encoding = oSession.RequestHeaders["Content-Type"].Contains("UTF-8") switch
+                {
+                    true => Encoding.UTF8,
+                    false => Encoding.GetEncoding("Shift_JIS")
+                };
+                // 送信するエンコーディング取得
+                var dst_encoding = EnableUTF8Post switch
+                {
+                    true => Encoding.UTF8,
+                    false => Encoding.GetEncoding("Shift_JIS")
+                };
+
+                // リクエストボディの分解（URLデコードもしておく）
+                var post_field_map = ReqBody.Split('&')
+                                    .Select(kvpair => kvpair.Split('='))
+                                    .ToDictionary(pair => pair[0], pair => HttpUtility.UrlDecode(pair[1], src_encoding));
+
+                // referer調整
+                String referer = oSession.oRequest.headers["Referer"];
+                if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
+                {
+                    var bbs = post_field_map["bbs"];
+                    var key = post_field_map["key"];
+                    referer = @$"https://{Write.Host}/test/read.cgi/{bbs}/{key}/";
+                }
+                else
+                {
+                    referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net").Replace("http:", "https:");
+                }
+                Write.Referer = referer;
+
+                // nonceの取得
+                //string nonce = string.Format("{0}.{1:000}", (ulong)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds, DateTime.UtcNow.Millisecond);
+                string nonce = string.Format("{0}.{1:000}", post_field_map["time"], DateTime.UtcNow.Millisecond);
+
+                // 各種値の計算とヘッダセット
+                Write.Headers.Add("X-PostSig", CreatePostsignature(post_field_map, nonce, UA, dst_encoding));
+                Write.Headers.Add("X-APIKey", this.APIMediator.AppKey);
+                Write.Headers.Add("X-PostNonce", nonce);
+                Write.Headers.Add("X-MonaKey", Monakey);
+                Write.Headers.Add("X-2ch-UA", APIMediator.X2chUA);
+                Write.UserAgent = UA;
+
+                // 板毎設定がなければ、デフォルト設定を引き当て
                 PostSetting ??= BoardSettings["2chapiproxy_default"];
 
                 // ヘッダの設定
@@ -1125,36 +1194,6 @@ namespace _2chAPIProxy
                 }
 
 
-                // 新しい書き込み仕様への対応
-
-                // 送信されてきたエンコーディング取得
-                var src_encoding = oSession.RequestHeaders["Content-Type"].Contains("UTF-8") switch
-                {
-                    true => Encoding.UTF8,
-                    false => Encoding.GetEncoding("Shift_JIS")
-                };
-                // 送信するエンコーディング取得
-                var dst_encoding = EnableUTF8Post switch
-                {
-                    true => Encoding.UTF8,
-                    false => Encoding.GetEncoding("Shift_JIS")
-                };
-
-                // リクエストボディの分解（URLデコードもしておく）
-                var post_field_map = ReqBody.Split('&')
-                                    .Select(kvpair => kvpair.Split('='))
-                                    .ToDictionary(pair => pair[0], pair => HttpUtility.UrlDecode(pair[1], src_encoding));
-
-                // nonceの取得
-                //string nonce = string.Format("{0}.{1:000}", (ulong)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds, DateTime.UtcNow.Millisecond);
-                string nonce = string.Format("{0}.{1:000}", post_field_map["time"], DateTime.UtcNow.Millisecond);
-
-                // 各種値の計算とヘッダセット
-                Write.Headers.Add("X-PostSig", CreatePostsignature(post_field_map, nonce, Write.UserAgent, dst_encoding));
-                Write.Headers.Add("X-APIKey", this.APIMediator.AppKey);
-                Write.Headers.Add("X-PostNonce", nonce);
-                Write.Headers.Add("X-MonaKey", Monakey);
-
                 // 浪人無効化が設定されていたら、sidフィールドを削除
                 if (ViewModel.Setting.PostRoninInvalid)
                 {
@@ -1177,48 +1216,35 @@ namespace _2chAPIProxy
                 // リクエストボディ再構成
                 ReqBody = ReConstructPostField(post_field_map, dst_encoding);
 
-                // referer調整
-                String referer = oSession.oRequest.headers["Referer"];
-                if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
-                {
-                    var bbs = post_field_map["bbs"];
-                    var key = post_field_map["key"];
-                    referer = @$"https://{Write.Host}/test/read.cgi/{bbs}/{key}/";
-                }
-                else
-                {
-                    referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net").Replace("http:", "https:");
-                }
-                Write.Referer = referer;
-
                 if (string.IsNullOrEmpty(Proxy) == false) Write.Proxy = new WebProxy(Proxy);
-                Write.CookieContainer = new CookieContainer();
-                //送信されてきたクッキーを抽出
-                foreach (Match mc in Regex.Matches(oSession.oRequest.headers["Cookie"], @"(?:\s+|^)((.+?)=(?:|.+?)(?:;|$))"))
-                {
-                    Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
-                }
-                Cookie.Remove("sid");
-                Cookie.Remove("SID");
-                //送信クッキーのセット
-                String domain = CheckWriteuri.Match(oSession.fullUrl).Groups[1].Value;
-                //String domain = ".5ch.net";
-                foreach (var cook in Cookie)
-                {
-                    if (cook.Value != "")
-                    {
-                        var m = Regex.Match(cook.Value, @"^(.+?)=(.*?)(;|$)");
-                        try
-                        {
-                            Write.CookieContainer.Add(new Cookie(m.Groups[1].Value, m.Groups[2].Value, "/", domain));
-                        }
-                        catch (CookieException)
-                        {
-                            continue;
-                        }
-                        //if (cook.Key == "PREN" || cook.Key == "yuki" || cook.Key == "MDMD" || cook.Key == "DMDM")
-                    }
-                }
+                
+                //Write.CookieContainer = new CookieContainer();
+                ////送信されてきたクッキーを抽出
+                //foreach (Match mc in Regex.Matches(oSession.oRequest.headers["Cookie"], @"(?:\s+|^)((.+?)=(?:|.+?)(?:;|$))"))
+                //{
+                //    Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
+                //}
+                //Cookie.Remove("sid");
+                //Cookie.Remove("SID");
+                ////送信クッキーのセット
+                //String domain = CheckWriteuri.Match(oSession.fullUrl).Groups[1].Value;
+                ////String domain = ".5ch.net";
+                //foreach (var cook in Cookie)
+                //{
+                //    if (cook.Value != "")
+                //    {
+                //        var m = Regex.Match(cook.Value, @"^(.+?)=(.*?)(;|$)");
+                //        try
+                //        {
+                //            Write.CookieContainer.Add(new Cookie(m.Groups[1].Value, m.Groups[2].Value, "/", domain));
+                //        }
+                //        catch (CookieException)
+                //        {
+                //            continue;
+                //        }
+                //        //if (cook.Key == "PREN" || cook.Key == "yuki" || cook.Key == "MDMD" || cook.Key == "DMDM")
+                //    }
+                //}
                 byte[] Body = dst_encoding.GetBytes(ReqBody);
                 if (EnableUTF8Post)
                 {
@@ -1227,6 +1253,7 @@ namespace _2chAPIProxy
                 }
 
                 Write.ContentLength = Body.Length;
+
                 try
                 {
                     using (System.IO.Stream PostStream = Write.GetRequestStream())
@@ -1263,7 +1290,7 @@ namespace _2chAPIProxy
                             // E3000番台のエラーが帰ってきたらMonaKeyを更新する（雑な暫定対応
                             if (wres.Headers["X-Chx-Error"].Contains("E3331") == false && wres.Headers["X-Chx-Error"].Contains("E3"))
                             {
-                                Monakey = "00000000-0000-0000-0000-000000000000";
+                                Monakey = "";
                                 ViewModel.OnModelNotice("MonaKeyをリセットしました。");
                             }
 

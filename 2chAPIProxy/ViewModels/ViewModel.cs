@@ -886,7 +886,7 @@ namespace _2chAPIProxy
             {
                 if (_Appkey != value)
                 {
-                    DatProxy.APIMediator.AppKey = Setting.Appkey = _Appkey = value;
+                    DatProxy.APIMediator.AppKey = Setting.Appkey = _Appkey = value.TrimEnd(' ');
                     NoticePropertyChanged("Appkey");
                 }
             }
@@ -900,7 +900,7 @@ namespace _2chAPIProxy
             {
                 if (_HMkey != value)
                 {
-                    DatProxy.APIMediator.HMKey = Setting.HMkey = _HMkey = value;
+                    DatProxy.APIMediator.HMKey = Setting.HMkey = _HMkey = value.TrimEnd(' ');
                     NoticePropertyChanged("HMkey");
                 }
             }
@@ -915,7 +915,7 @@ namespace _2chAPIProxy
             {
                 if (_UserAgent0 != value)
                 {
-                    DatProxy.APIMediator.SidUA = Setting.UserAgent0 = _UserAgent0 = value;
+                    DatProxy.APIMediator.SidUA = Setting.UserAgent0 = _UserAgent0 = value.TrimEnd(' ');
                     NoticePropertyChanged("UserAgent0");
                 }
             }
@@ -930,7 +930,7 @@ namespace _2chAPIProxy
             {
                 if (_UserAgent1 != value)
                 {
-                    DatProxy.APIMediator.X2chUA = Setting.UserAgent1 = _UserAgent1 = value;
+                    DatProxy.APIMediator.X2chUA = Setting.UserAgent1 = _UserAgent1 = value.TrimEnd(' ');
                     NoticePropertyChanged("UserAgent1");
                 }
             }
@@ -945,7 +945,7 @@ namespace _2chAPIProxy
             {
                 if (_UserAgent2 != value)
                 {
-                    DatProxy.APIMediator.DatUA = Setting.UserAgent2 = _UserAgent2 = value;
+                    DatProxy.APIMediator.DatUA = Setting.UserAgent2 = _UserAgent2 = value.TrimEnd(' ');
                     NoticePropertyChanged("UserAgent2");
                 }
             }
@@ -960,7 +960,7 @@ namespace _2chAPIProxy
             {
                 if (_UserAgent3 != value)
                 {
-                    DatProxy.WriteUA = Setting.UserAgent3 = _UserAgent3 = value;
+                    DatProxy.WriteUA = Setting.UserAgent3 = _UserAgent3 = value.TrimEnd(' ');
                     NoticePropertyChanged("UserAgent3");
                     if (value == "") DatProxy.AllUAReplace = false;
                     else DatProxy.AllUAReplace = AllUAReplace;
@@ -1342,6 +1342,9 @@ namespace _2chAPIProxy
                         Setting.change = false;
                         SystemLog = "現在の設定を保存しました。";
                     }
+
+                    // Monakeyをリセット
+                    DatProxy.ResetMonakey();
                 });
                 return _SaveSetting;
             }
