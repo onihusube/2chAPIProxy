@@ -113,6 +113,12 @@ namespace _2chAPIProxy
                         //WANアクセス有効時の認証と識別
                         if (!WANAcceseAuth(ref oSession)) return;
                     }
+                    if (oSession.HTTPMethodIs("CONNECT"))
+                    {
+                        // HTTPSのConnect要求はスルーする
+                        oSession.Ignore();
+                        return;
+                    }
                     if (Check2churi.IsMatch(oSession.hostname))
                     {
                         //元のURLが2chか5chか
