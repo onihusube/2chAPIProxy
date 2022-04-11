@@ -42,6 +42,7 @@ namespace _2chAPIProxy
         private bool enablePostv2 = true;
         private bool enablePostv2onPink = false;
         private bool enableUTF8Post = false;
+        private bool addX2chUAHeader = false;
         String _HMkey = "hO2QHdapzbqbTFOaJgZTKXgT2gWqYS";
         String _Appkey = "JYW2J6wh9z8p8xjGFxO3M2JppGCyjQ";
         String _UserAgent0 = "";
@@ -349,6 +350,12 @@ namespace _2chAPIProxy
         { 
             get => postFieldOrder; 
             set { postFieldOrder = value; change = true; } 
+        }
+
+        public bool AddX2chUAHeader
+        {
+            get => addX2chUAHeader;
+            set { addX2chUAHeader = value; change = true; }
         }
 
 

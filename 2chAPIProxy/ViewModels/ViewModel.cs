@@ -863,6 +863,21 @@ namespace _2chAPIProxy
             }
         }
 
+        private bool addX2chUAHeader;
+
+        public bool AddX2chUAHeader
+        {
+            get => addX2chUAHeader;
+            set
+            {
+                if (addX2chUAHeader != value)
+                {
+                    Setting.AddX2chUAHeader = DatProxy.AddX2chUAHeader = addX2chUAHeader = value;
+                    NoticePropertyChanged("AddX2chUAHeader");
+                }
+            }
+        }
+
         int _PortNumber;
         public int PortNumber
         {

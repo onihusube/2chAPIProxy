@@ -68,6 +68,7 @@ namespace _2chAPIProxy
         public bool EnablePostv2 { get; set; }
         public bool EnablePostv2onPink { get; set; }
         public bool EnableUTF8Post { get; set; }
+        public bool AddX2chUAHeader { get; set; }
 
         private string[] PostFieldOrederArray;
 
@@ -1148,7 +1149,7 @@ namespace _2chAPIProxy
                 Write.Headers.Add("X-APIKey", this.APIMediator.AppKey);
                 Write.Headers.Add("X-PostNonce", nonce);
                 Write.Headers.Add("X-MonaKey", Monakey);
-                Write.Headers.Add("X-2ch-UA", APIMediator.X2chUA);
+                if (AddX2chUAHeader) Write.Headers.Add("X-2ch-UA", APIMediator.X2chUA);
                 Write.UserAgent = UA;
 
                 // 板毎設定がなければ、デフォルト設定を引き当て
