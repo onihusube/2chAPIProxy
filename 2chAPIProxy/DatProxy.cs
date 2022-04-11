@@ -69,6 +69,8 @@ namespace _2chAPIProxy
         public bool EnablePostv2onPink { get; set; }
         public bool EnableUTF8Post { get; set; }
         public bool AddX2chUAHeader { get; set; }
+        public bool AddMsToNonce { get; set; }
+
 
         private string[] PostFieldOrederArray;
 
@@ -982,6 +984,7 @@ namespace _2chAPIProxy
         public void ResetMonakey()
         {
             Monakey = "";
+            ViewModel.OnModelNotice("MonaKeyをリセットしました。");
         }
 
         //private string Monakey = "7b6799cc2bb1eef3acadffeecc180df6d1c7caab887326120056660f6ac05b45";
@@ -1142,7 +1145,11 @@ namespace _2chAPIProxy
 
                 // nonceの取得
                 //string nonce = string.Format("{0}.{1:000}", (ulong)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds, DateTime.UtcNow.Millisecond);
-                string nonce = string.Format("{0}.{1:000}", post_field_map["time"], DateTime.UtcNow.Millisecond);
+                string nonce = AddMsToNonce switch
+                {
+                    true => string.Format("{0}.{1:000}", post_field_map["time"], DateTime.UtcNow.Millisecond),
+                    false => post_field_map["time"].ToString()
+                };
 
                 // 各種値の計算とヘッダセット
                 Write.Headers.Add("X-PostSig", CreatePostsignature(post_field_map, nonce, UA, dst_encoding));
@@ -1324,8 +1331,7 @@ namespace _2chAPIProxy
                             // E3000番台のエラーが帰ってきたらMonaKeyを更新する（雑な暫定対応
                             if (wres.Headers["X-Chx-Error"].Contains("E3331") == false && wres.Headers["X-Chx-Error"].Contains("E3"))
                             {
-                                Monakey = "";
-                                ViewModel.OnModelNotice("MonaKeyをリセットしました。");
+                                ResetMonakey();
                             }
 
                         }

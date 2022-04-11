@@ -118,6 +118,8 @@ namespace _2chAPIProxy
             enablePostv2onPink = Setting.EnablePostv2onPink;
             enableUTF8Post = Setting.EnableUTF8Post;
             postFieldOrder = Setting.PostFieldOrder;
+            addX2chUAHeader = Setting.AddX2chUAHeader;
+            addMsToNonce = Setting.AddMsToNonce;
 
             //スリープ/休止状態時の処理
             Microsoft.Win32.SystemEvents.PowerModeChanged += new Microsoft.Win32.PowerModeChangedEventHandler(PowermodeChanged);
@@ -199,6 +201,8 @@ namespace _2chAPIProxy
             DatProxy.EnablePostv2onPink = EnablePostv2onPink;
             DatProxy.EnableUTF8Post = EnableUTF8Post;
             DatProxy.PostFieldOrder = PostFieldOrder;
+            DatProxy.AddX2chUAHeader = AddX2chUAHeader;
+            DatProxy.AddMsToNonce = AddMsToNonce;
 
             //設定の適用、APIアクセスクラス
             DatProxy.APIMediator.AppKey = this.Appkey;
@@ -873,6 +877,21 @@ namespace _2chAPIProxy
                 if (addX2chUAHeader != value)
                 {
                     Setting.AddX2chUAHeader = DatProxy.AddX2chUAHeader = addX2chUAHeader = value;
+                    NoticePropertyChanged("AddX2chUAHeader");
+                }
+            }
+        }
+
+        private bool addMsToNonce;
+
+        public bool AddMsToNonce
+        {
+            get => addMsToNonce;
+            set
+            {
+                if (addMsToNonce != value)
+                {
+                    Setting.AddMsToNonce = DatProxy.AddMsToNonce = addMsToNonce = value;
                     NoticePropertyChanged("AddX2chUAHeader");
                 }
             }
