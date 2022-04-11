@@ -945,7 +945,14 @@ namespace _2chAPIProxy
             {
                 if (_UserAgent1 != value)
                 {
-                    DatProxy.APIMediator.X2chUA = Setting.UserAgent1 = _UserAgent1 = value.TrimEnd(' ');
+                    // "X-2ch-UA: JaneStyle/4.0.0"のように入力されている時、最初の"X-2ch-UA"を取り除く
+                    string x2chua = "";
+                    foreach (var str in value.TrimEnd(' ').Split(':').SkipWhile(s => s.ToLower().Contains("x-2ch-ua")))
+                    {
+                        x2chua += str;
+                    }
+
+                    DatProxy.APIMediator.X2chUA = Setting.UserAgent1 = _UserAgent1 = x2chua;
                     NoticePropertyChanged("UserAgent1");
                 }
             }

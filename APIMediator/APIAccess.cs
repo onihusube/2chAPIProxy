@@ -193,8 +193,8 @@ namespace _2chAPIProxy.APIMediator
             }
             APIRequest.Method = "POST";
             APIRequest.UserAgent = this.SidUA;
-            var res = this.X2chUA.Split(':');
-            APIRequest.Headers.Add("X-2ch-UA", (res.Length == 1) ? (this.X2chUA) : (res[1]));
+            // VM（UIからの入力直後）に"X-2ch-UA : "を取り除くのでここでは考慮しない
+            APIRequest.Headers.Add("X-2ch-UA", this.X2chUA);
             APIRequest.Timeout = GetSIDTimeout;
             APIRequest.ContentType = "application/x-www-form-urlencoded";
             APIRequest.ServicePoint.Expect100Continue = false;
