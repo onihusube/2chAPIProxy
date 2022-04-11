@@ -946,8 +946,15 @@ namespace _2chAPIProxy
                 if (_UserAgent1 != value)
                 {
                     // "X-2ch-UA: JaneStyle/4.0.0"のように入力されている時、最初の"X-2ch-UA"を取り除く
+                    var tmp = value.TrimEnd(' ').Split(':');
+                    int skip = tmp[0].ToLower().Contains("x-2ch-ua") switch
+                    {
+                        true => 1,
+                        false => 0
+                    };
+
                     string x2chua = "";
-                    foreach (var str in value.TrimEnd(' ').Split(':').SkipWhile(s => s.ToLower().Contains("x-2ch-ua")))
+                    foreach (var str in tmp.Skip(skip))
                     {
                         x2chua += str;
                     }
