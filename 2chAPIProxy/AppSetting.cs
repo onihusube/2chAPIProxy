@@ -44,6 +44,7 @@ namespace _2chAPIProxy
         private bool enableUTF8Post = false;
         private bool addX2chUAHeader = true;
         private bool addMsToNonce = true;
+        private bool assumeReqBodyIsUTF8 = false;
         String _HMkey = "hO2QHdapzbqbTFOaJgZTKXgT2gWqYS";
         String _Appkey = "JYW2J6wh9z8p8xjGFxO3M2JppGCyjQ";
         String _UserAgent0 = "";
@@ -363,6 +364,12 @@ namespace _2chAPIProxy
         {
             get => addMsToNonce;
             set { addMsToNonce = value; change = true; }
+        }
+
+        public bool AssumeReqBodyIsUTF8
+        {
+            get => assumeReqBodyIsUTF8;
+            set { assumeReqBodyIsUTF8 = value; change = true; }
         }
 
 

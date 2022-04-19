@@ -390,6 +390,19 @@
                             </Style>
                         </CheckBox.Style>
                     </CheckBox>
+                    <CheckBox x:Name="PostUTF8_Copy" Content="UTF-8エンコーディングを仮定する" VerticalAlignment="Top" Margin="410,267,30,0" Height="20" ToolTip="書き込み時、送られてきたデータがUTF-8エンコーディングであると仮定して処理します。どうしても文字化けする場合に試してみてください" TabIndex="3" IsChecked="{Binding AssumeReqBodyIsUTF8, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <CheckBox.Style>
+                            <Style TargetType="{x:Type CheckBox}">
+                                <Setter Property="FontSize" Value="12px"/>
+                                <Setter Property="IsEnabled" Value="True"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding EnablePostv2}" Value="False">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </CheckBox.Style>
+                    </CheckBox>
                 </Grid>
             </TabItem>
         </TabControl>

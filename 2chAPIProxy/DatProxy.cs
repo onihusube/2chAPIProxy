@@ -70,6 +70,7 @@ namespace _2chAPIProxy
         public bool EnableUTF8Post { get; set; }
         public bool AddX2chUAHeader { get; set; }
         public bool AddMsToNonce { get; set; }
+        public bool AssumeReqBodyIsUTF8 { get; set; }
 
 
         private string[] PostFieldOrederArray;
@@ -1112,7 +1113,7 @@ namespace _2chAPIProxy
                 // 新しい書き込み仕様への対応
 
                 // 送信されてきたエンコーディング取得
-                var src_encoding = oSession.RequestHeaders["Content-Type"].Contains("UTF-8") switch
+                var src_encoding = (AssumeReqBodyIsUTF8 || oSession.RequestHeaders["Content-Type"].Contains("UTF-8")) switch
                 {
                     true => Encoding.UTF8,
                     false => Encoding.GetEncoding("Shift_JIS")
