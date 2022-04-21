@@ -835,6 +835,10 @@ namespace _2chAPIProxy
                 }
                 Cookie.Remove("sid");
                 Cookie.Remove("SID");
+
+                // TAKO=ODORIを消す
+                Cookie.Remove("TAKO");
+
                 //送信クッキーのセット
                 String domain = CheckWriteuri.Match(oSession.fullUrl).Groups[1].Value;
                 //String domain = ".5ch.net";
