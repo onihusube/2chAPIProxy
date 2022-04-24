@@ -970,7 +970,7 @@ namespace _2chAPIProxy
         }
 
         private string monakey = "00000000-0000-0000-0000-000000000000";
-        private string Monakey
+        public string Monakey
         {
             get => monakey;
             set

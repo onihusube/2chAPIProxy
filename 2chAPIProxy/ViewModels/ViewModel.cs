@@ -205,6 +205,7 @@ namespace _2chAPIProxy
             DatProxy.AddX2chUAHeader = AddX2chUAHeader;
             DatProxy.AddMsToNonce = AddMsToNonce;
             DatProxy.AssumeReqBodyIsUTF8 = AssumeReqBodyIsUTF8;
+            DatProxy.Monakey = Setting.Monakey;
 
             //設定の適用、APIアクセスクラス
             DatProxy.APIMediator.AppKey = this.Appkey;
@@ -366,6 +367,10 @@ namespace _2chAPIProxy
                     }
                     catch (ArgumentException) { }
                 }
+                
+                // Monakeyが更新されてたら保存
+                if (Setting.Monakey != DatProxy.Monakey) Setting.Monakey = DatProxy.Monakey;
+
                 if (Setting.change)
                 {
                     XmlSerializer xser = new XmlSerializer(typeof(AppSetting));
@@ -1313,6 +1318,8 @@ namespace _2chAPIProxy
                                     }
                                 }));
                             });
+                            // Monakeyをリセット
+                            DatProxy.ResetMonakey();
                             break;
                         case "UpdateSID":
                             DatProxy.UpdateAsync()
