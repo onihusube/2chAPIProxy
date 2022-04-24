@@ -1134,6 +1134,12 @@ namespace _2chAPIProxy
                                     .Select(kvpair => kvpair.Split('='))
                                     .ToDictionary(pair => pair[0], pair => HttpUtility.UrlDecode(pair[1], src_encoding));
 
+                // 送信されてきたクッキーを抽出
+                foreach (Match mc in Regex.Matches(oSession.oRequest.headers["Cookie"], @"(?:\s+|^)((.+?)=(?:|.+?)(?:;|$))"))
+                {
+                    Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
+                }
+
                 // referer調整
                 String referer = oSession.oRequest.headers["Referer"];
                 if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
@@ -1162,6 +1168,24 @@ namespace _2chAPIProxy
                 Write.Headers.Add("X-PostNonce", nonce);
                 Write.Headers.Add("X-MonaKey", Monakey);
                 if (AddX2chUAHeader) Write.Headers.Add("X-2ch-UA", APIMediator.X2chUA);
+
+                // 浪人sidを適切に再配置
+                if (ViewModel.Setting.PostRoninInvalid == false)
+                {
+                    if (post_field_map.ContainsKey("sid"))
+                    {
+                        // sidフィールドにある場合（専ブラ）
+                        Write.Headers.Add("X-Ronin-Sid", post_field_map["sid"]);
+                    }
+                    else if (Cookie.TryGetValue("sid", out string sid_value) && Regex.IsMatch(sid_value, @"Monazilla/\d.\d\d:\w+"))
+                    {
+                        // クッキーにある場合（一般ブラウザ、sikiなど？）
+                        Write.Headers.Add("X-Ronin-Sid", sid_value);
+                    }
+                }
+                // 新仕様ではこのフィールドはなさそうなので削除
+                post_field_map.Remove("sid");
+
                 Write.UserAgent = UA;
 
                 // 板毎設定がなければ、デフォルト設定を引き当て
@@ -1212,12 +1236,6 @@ namespace _2chAPIProxy
                     }
                 }
 
-
-                // 浪人無効化が設定されていたら、sidフィールドを削除
-                if (ViewModel.Setting.PostRoninInvalid)
-                {
-                    post_field_map.Remove("sid");
-                }
                 if (IsResPost)
                 {
                     // 投稿設定でお絵描きデータを付加する設定になっていて、フィールドに含まれていない場合
@@ -1236,13 +1254,6 @@ namespace _2chAPIProxy
                 ReqBody = ReConstructPostField(post_field_map, dst_encoding);
 
                 if (string.IsNullOrEmpty(Proxy) == false) Write.Proxy = new WebProxy(Proxy);
-
-
-                // 送信されてきたクッキーを抽出
-                foreach (Match mc in Regex.Matches(oSession.oRequest.headers["Cookie"], @"(?:\s+|^)((.+?)=(?:|.+?)(?:;|$))"))
-                {
-                    Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
-                }
 
                 // Beログイン用クッキーのセット
                 if (Cookie.ContainsKey("DMDM") || Cookie.ContainsKey("MDMD"))
