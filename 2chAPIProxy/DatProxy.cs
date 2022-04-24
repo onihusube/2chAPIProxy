@@ -1177,10 +1177,16 @@ namespace _2chAPIProxy
                         // sidフィールドにある場合（専ブラ）
                         Write.Headers.Add("X-Ronin-Sid", post_field_map["sid"]);
                     }
-                    else if (Cookie.TryGetValue("sid", out string sid_value) && Regex.IsMatch(sid_value, @"Monazilla/\d.\d\d:\w+"))
+                    else if (Cookie.TryGetValue("sid", out string sid_cookie))
                     {
-                        // クッキーにある場合（一般ブラウザ、sikiなど？）
-                        Write.Headers.Add("X-Ronin-Sid", sid_value);
+                        var m = Regex.Match(sid_cookie, @"Monazilla/\d.\d\d:\w+");
+
+                        if (m.Success)
+                        {
+                            // クッキーにある場合（一般ブラウザ、sikiなど？）
+                            // クッキーはsid=xxxxの形で保存されてる
+                            Write.Headers.Add("X-Ronin-Sid", m.Value);
+                        }
                     }
                 }
                 // 新仕様ではこのフィールドはなさそうなので削除
