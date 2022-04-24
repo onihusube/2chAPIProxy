@@ -206,6 +206,7 @@ namespace _2chAPIProxy
             DatProxy.AddMsToNonce = AddMsToNonce;
             DatProxy.AssumeReqBodyIsUTF8 = AssumeReqBodyIsUTF8;
             DatProxy.Monakey = Setting.Monakey;
+            if (string.IsNullOrEmpty(Setting.Monakey)) DatProxy.ResetMonakey();
 
             //設定の適用、APIアクセスクラス
             DatProxy.APIMediator.AppKey = this.Appkey;

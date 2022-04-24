@@ -1129,6 +1129,8 @@ namespace _2chAPIProxy
                     false => Encoding.GetEncoding("Shift_JIS")
                 };
 
+                //ReqBody += "&sid=Monazilla/2.00:08urgq8vn478951437vn89574389v7843y584vht";
+
                 // リクエストボディの分解（URLデコードもしておく）
                 var post_field_map = ReqBody.Split('&')
                                     .Select(kvpair => kvpair.Split('='))
@@ -1184,7 +1186,7 @@ namespace _2chAPIProxy
                         if (m.Success)
                         {
                             // クッキーにある場合（一般ブラウザ、sikiなど？）
-                            // クッキーはsid=xxxxの形で保存されてる
+                            // クッキーはsid=xxxxの形で保存されてる（はず
                             Write.Headers.Add("X-Ronin-Sid", m.Value);
                         }
                     }
