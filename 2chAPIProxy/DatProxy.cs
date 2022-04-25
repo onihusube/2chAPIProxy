@@ -1181,7 +1181,9 @@ namespace _2chAPIProxy
                     }
                     else if (Cookie.TryGetValue("sid", out string sid_cookie))
                     {
-                        var m = Regex.Match(sid_cookie, @"Monazilla/\d.\d\d:\w+");
+                        // エンコーディングは何が正しい？全角文字は入らないから気にしなくていい・・・？
+                        // sid=Monazilla/2.00:xxxxx.... の形式なので、: = /の3つがエンコードされるだけ？
+                        var m = Regex.Match(HttpUtility.UrlDecode(sid_cookie, src_encoding), @"Monazilla/\d.\d\d:\w+");
 
                         if (m.Success)
                         {
