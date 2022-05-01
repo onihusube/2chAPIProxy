@@ -1494,7 +1494,7 @@ namespace _2chAPIProxy
                 }
 
 
-                System.Diagnostics.Debug.WriteLine("datレスポンスヘッダ");
+                System.Diagnostics.Debug.WriteLine($"datレスポンスヘッダ(status={dat.StatusCode})");
                 foreach (var header in dat.Headers.AllKeys)
                 {
                     System.Diagnostics.Debug.WriteLine($"{header}:{dat.Headers[header].ToString()}");
