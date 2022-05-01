@@ -292,7 +292,11 @@ namespace _2chAPIProxy.APIMediator
 
             if (-1 < range)
             {
-                if (DateTime.TryParse(lastmod, out DateTime ifModifiedSince) == false)
+                if (DateTime.TryParse(lastmod, out DateTime ifModifiedSince))
+                {
+                    datRequest.IfModifiedSince = ifModifiedSince;
+                }
+                else
                 {
                     datRequest.IfModifiedSince = DateTime.Parse("1970/12/1");
                 }
@@ -312,6 +316,14 @@ namespace _2chAPIProxy.APIMediator
                 using (Stream PostStream = datRequest.GetRequestStream())
                 {
                     PostStream.Write(m_HoboCache[hkey].Hobo, 0, m_HoboCache[hkey].Hobo.Length);
+
+                    // デバッグ出力、送信ヘッダを出力
+                    System.Diagnostics.Debug.WriteLine("datリクエストヘッダ");
+                    foreach (var header in datRequest.Headers.AllKeys)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"{header}:{datRequest.Headers[header]}");
+                    }
+
                     return (HttpWebResponse)datRequest.GetResponse();
                 }
             }

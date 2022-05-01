@@ -1427,16 +1427,30 @@ namespace _2chAPIProxy
             // API以前のふるまいについて http://age.s22.xrea.com/talk2ch/
             try
             {
-                int range;
-                bool retry = true, retrydat = true;
-                HttpWebResponse dat;
                 String last = oSession.oRequest.headers["If-Modified-Since"], hrange = oSession.oRequest.headers["Range"];
-                range = (!String.IsNullOrEmpty(hrange)) ? (int.Parse(Regex.Match(hrange, @"\d+").Value)) : (-1);
                 if (String.IsNullOrEmpty(last)) last = "1970/12/1";
+
+                //int range = (!String.IsNullOrEmpty(hrange)) ? (int.Parse(Regex.Match(hrange, @"\d+").Value)) : (-1);
+                int range = String.IsNullOrEmpty(hrange) switch
+                {
+                    true => -1,
+                    false => int.Parse(Regex.Match(hrange, @"\d+").Value)
+                };
+
                 //スレッドステータス
                 int Status = 0;
 
+                //デバッグ出力
+                System.Diagnostics.Debug.WriteLine($"オリジナルdatリクエストヘッダ(range:{range}, last:{last})");
+                foreach (var header in oSession.RequestHeaders)
+                {
+                    System.Diagnostics.Debug.WriteLine($"{header.Name}:{header.Value}");
+                }
+
+                bool retry = true, retrydat = true;
                 Match ch2uri = CheckDaturi.Match(oSession.fullUrl);
+                HttpWebResponse dat;
+
                 datget:
                 try
                 {
@@ -1477,6 +1491,13 @@ namespace _2chAPIProxy
                     oSession.oResponse.headers["Connection"] = "close";
 
                     return;
+                }
+
+
+                System.Diagnostics.Debug.WriteLine("datレスポンスヘッダ");
+                foreach (var header in dat.Headers.AllKeys)
+                {
+                    System.Diagnostics.Debug.WriteLine($"{header}:{dat.Headers[header].ToString()}");
                 }
 
                 switch (dat.StatusCode)
