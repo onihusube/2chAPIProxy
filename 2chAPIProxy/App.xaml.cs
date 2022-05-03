@@ -27,6 +27,10 @@ namespace _2chAPIProxy
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             RemoteObject = null;
+
+            // カレントディレクトリの設定（ショートカット経由起動などで場所が変わるため）
+            Directory.SetCurrentDirectory(System.AppDomain.CurrentDomain.BaseDirectory);
+            
             if (File.Exists("./settings.xml"))
             {
                 XmlSerializer xser = new XmlSerializer(typeof(AppSetting));
