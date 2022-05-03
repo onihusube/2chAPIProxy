@@ -111,7 +111,7 @@ namespace _2chAPIProxy
             {
                 try
                 {
-                    if (Proxy != "") oSession["X-OverrideGateway"] = (SocksPoxy) ? ("socks=" + Proxy) : (Proxy);
+                    if (string.IsNullOrEmpty(Proxy) == false) oSession["X-OverrideGateway"] = (SocksPoxy) ? ("socks=" + Proxy) : (Proxy);
                     if (AllowWANAccese && !oSession.clientIP.Contains("127.0.0.1"))
                     {
                         //WANアクセス有効時の認証と識別
@@ -1137,9 +1137,10 @@ namespace _2chAPIProxy
                                     .ToDictionary(pair => pair[0], pair => HttpUtility.UrlDecode(pair[1], src_encoding));
 
                 // 送信されてきたクッキーを抽出
+                var recv_cookie = new Dictionary<string, string>();
                 foreach (Match mc in Regex.Matches(oSession.oRequest.headers["Cookie"], @"(?:\s+|^)((.+?)=(?:|.+?)(?:;|$))"))
                 {
-                    Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
+                    recv_cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
                 }
 
                 // referer調整
@@ -1179,7 +1180,7 @@ namespace _2chAPIProxy
                         // sidフィールドにある場合（専ブラ）
                         Write.Headers.Add("X-Ronin-Sid", post_field_map["sid"]);
                     }
-                    else if (Cookie.TryGetValue("sid", out string sid_cookie))
+                    else if (recv_cookie.TryGetValue("sid", out string sid_cookie))
                     {
                         // エンコーディングは何が正しい？全角文字は入らないから気にしなくていい・・・？
                         // sid=Monazilla/2.00:xxxxx.... の形式なので、: = /の3つがエンコードされるだけ？
@@ -1196,6 +1197,7 @@ namespace _2chAPIProxy
                 // 新仕様ではこのフィールドはなさそうなので削除
                 post_field_map.Remove("sid");
 
+                // UA設定
                 Write.UserAgent = UA;
 
                 // 板毎設定がなければ、デフォルト設定を引き当て
@@ -1266,10 +1268,11 @@ namespace _2chAPIProxy
                 if (string.IsNullOrEmpty(Proxy) == false) Write.Proxy = new WebProxy(Proxy);
 
                 // Beログイン用クッキーのセット
-                if (Cookie.ContainsKey("DMDM") || Cookie.ContainsKey("MDMD"))
+                if (recv_cookie.ContainsKey("DMDM") || recv_cookie.ContainsKey("MDMD"))
                 {
                     String domain = CheckWriteuri.Match(oSession.fullUrl).Groups[1].Value;
-                    foreach (var cook in Cookie.Where(kv => (kv.Key == "DMDM") || (kv.Key == "MDMD")))
+
+                    foreach (var cook in recv_cookie.Where(kv => (kv.Key == "DMDM") || (kv.Key == "MDMD")))
                     {
                         if (cook.Value != "")
                         {
@@ -1290,28 +1293,6 @@ namespace _2chAPIProxy
                     }
                 }
 
-                //Write.CookieContainer = new CookieContainer();
-                //Cookie.Remove("sid");
-                //Cookie.Remove("SID");
-                ////送信クッキーのセット
-                //String domain = CheckWriteuri.Match(oSession.fullUrl).Groups[1].Value;
-                ////String domain = ".5ch.net";
-                //foreach (var cook in Cookie)
-                //{
-                //    if (cook.Value != "")
-                //    {
-                //        var m = Regex.Match(cook.Value, @"^(.+?)=(.*?)(;|$)");
-                //        try
-                //        {
-                //            Write.CookieContainer.Add(new Cookie(m.Groups[1].Value, m.Groups[2].Value, "/", domain));
-                //        }
-                //        catch (CookieException)
-                //        {
-                //            continue;
-                //        }
-                //        //if (cook.Key == "PREN" || cook.Key == "yuki" || cook.Key == "MDMD" || cook.Key == "DMDM")
-                //    }
-                //}
                 byte[] Body = dst_encoding.GetBytes(ReqBody);
                 if (EnableUTF8Post)
                 {
@@ -1328,12 +1309,14 @@ namespace _2chAPIProxy
                         PostStream.Write(Body, 0, Body.Length);
 
                         HttpWebResponse wres = (HttpWebResponse)Write.GetResponse();
+
+                        // クッキー抽出と設定
                         if (wres.Cookies.Count > 0)
                         {
                             var cul = new System.Globalization.CultureInfo("en-US");
                             foreach (System.Net.Cookie cookie in wres.Cookies)
                             {
-                                String tc = Cookie[cookie.Name] = cookie.ToString();
+                                String tc = cookie.ToString();
                                 if (cookie.Expires != null) tc += "; expires=" + cookie.Expires.ToUniversalTime().ToString("ddd, dd-MMM-yyyy HH:mm:ss", cul) + " GMT";
                                 if (!String.IsNullOrEmpty(cookie.Path)) tc += "; path=" + cookie.Path;
                                 if (!String.IsNullOrEmpty(cookie.Domain)) tc += "; domain=" + ((is2ch) ? (cookie.Domain.Replace("5ch.net", "2ch.net")) : (cookie.Domain));
@@ -1362,7 +1345,6 @@ namespace _2chAPIProxy
 
                         }
 
-                        Cookie["DMDM"] = Cookie["MDMD"] = "";
                         using (System.IO.StreamReader Res = new System.IO.StreamReader(wres.GetResponseStream(), Encoding.GetEncoding("Shift_JIS")))
                         {
                             oSession.oResponse.headers.HTTPResponseCode = (int)wres.StatusCode;
@@ -1396,14 +1378,12 @@ namespace _2chAPIProxy
                 }
                 catch (WebException err)
                 {
-                    Cookie["DMDM"] = Cookie["MDMD"] = "";
                     ViewModel.OnModelNotice("書き込み中にエラーが発生しました。\n" + err.ToString());
                     oSession.oResponse.headers.SetStatus(404, "404 NotFound");
                     return;
                 }
                 catch (NullReferenceException err)
                 {
-                    Cookie["DMDM"] = Cookie["MDMD"] = "";
                     ViewModel.OnModelNotice("書き込み中にエラーが発生しました。\n" + err.ToString());
                     oSession.oResponse.headers.SetStatus(404, "404 NotFound");
                     return;
@@ -1411,7 +1391,6 @@ namespace _2chAPIProxy
             }
             catch (Exception err)
             {
-                Cookie["DMDM"] = Cookie["MDMD"] = "";
                 oSession.oResponse.headers.SetStatus(404, "404 NotFound");
                 oSession.oResponse.headers["Content-Type"] = "text/html; charset=Shift_JIS";
                 oSession.oResponse.headers["Date"] = DateTime.Now.ToUniversalTime().ToString("R");
