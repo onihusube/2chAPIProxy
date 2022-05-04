@@ -1440,8 +1440,7 @@ namespace _2chAPIProxy
                 {
                     System.Diagnostics.Debug.WriteLine($"{header.Name}:{header.Value}");
                 }
-
-                bool retry = true, retrydat = true;
+                
                 Match ch2uri = CheckDaturi.Match(oSession.fullUrl);
                 HttpWebResponse dat;
 
@@ -1452,20 +1451,12 @@ namespace _2chAPIProxy
                 }
                 catch (Exception err)
                 {
-                    if (retrydat)
-                    {
-                        retrydat = false;
-                        goto datget;
-                    }
-                    else
-                    {
-                        ViewModel.OnModelNotice("datアクセス中にエラーが発生しました。\n" + err.ToString());
-                        oSession.oResponse.headers.HTTPResponseCode = 304;
-                        oSession.oResponse.headers.HTTPResponseStatus = "304 Not Modified";
-                        oSession.oResponse.headers["Content-Type"] = "text/html; charset=iso-8859-1";
-                        oSession.oResponse.headers["Connection"] = "close";
-                        return;
-                    }
+                    ViewModel.OnModelNotice("datアクセス中にエラーが発生しました。\n" + err.ToString());
+                    oSession.oResponse.headers.HTTPResponseCode = 304;
+                    oSession.oResponse.headers.HTTPResponseStatus = "304 Not Modified";
+                    oSession.oResponse.headers["Content-Type"] = "text/html; charset=iso-8859-1";
+                    oSession.oResponse.headers["Connection"] = "close";
+                    return;
                 }
                 //bool bat = CheckAlive(@"http://itest.2ch.net/public/newapi/client.php?subdomain=" + ch2uri.Groups[1].Value + "&board=" + ch2uri.Groups[3].Value + "&dat=" + ch2uri.Groups[4].Value);
                 //ViewModel.OnModelNotice("生存判定：" + bat);
@@ -1493,6 +1484,11 @@ namespace _2chAPIProxy
                 {
                     System.Diagnostics.Debug.WriteLine($"{header}:{dat.Headers[header].ToString()}");
                 }
+
+                // SID期限切れ（無効）時にSID更新後リトライするとき、それを検出し制御する
+                bool retry_on_sidupdate = true;
+
+                bool? is_alive = null;
 
                 switch (dat.StatusCode)
                 {
@@ -1596,29 +1592,36 @@ namespace _2chAPIProxy
                         }
                         goto case HttpStatusCode.InternalServerError;
                     case HttpStatusCode.Unauthorized:
-                        lock (new object())
+                        // 例えば連続で更新をかけた場合など、複数スレッドから呼ばれうる？
+                        // retryはローカル変数なので問題ない
+                        // SIDNowUpdateはグローバル（クラススコープ）だけど、volatile boolなので読み書きはatomicになる（はず
+                        if (!retry_on_sidupdate || SIDNowUpdate)
                         {
-                            if (!retry || SIDNowUpdate)
+                            // SIDアプデ中は何もせず終わる
+                            // retry == falseのとき、更新（エラー）後2回目のdat取得。ここにきているということはSID更新に失敗している。
+
+                            if (SIDNowUpdate)
                             {
-                                if (SIDNowUpdate) ViewModel.OnModelNotice("403応答によるSessionID更新を10秒間停止中です、しばらくお待ちください。");
-                                goto case HttpStatusCode.NotModified;
+                                ViewModel.OnModelNotice("403応答によるSessionID更新を10秒間停止中です、しばらくお待ちください。");
                             }
-                            SIDNowUpdate = true;
+
+                            goto case HttpStatusCode.NotModified;
                         }
+                        SIDNowUpdate = true;
+
                         try
                         {
                             APIMediator.UpdateSID();
                             ViewModel.OnModelNotice("SessionIDを更新しました。（期限切れ）");
-                            //if (!APIMediator.GetSIDFailed) ViewModel.OnModelNotice("SessionIDを更新しました。（期限切れ）");
-                            //APIMediator.GetSIDFailed = false;
                         }
                         catch (Exception err)
                         {
                             ViewModel.OnModelNotice("SessionIDの更新に失敗しました\n" + err.ToString());
                         }
                         dat.Close();
-                        retry = false;
-                        //403応答によるSID更新を10秒間ブロックする
+
+                        // 403応答によるSID更新を10秒間ブロックする
+                        // 更新直後はもちろん、更新失敗した時も、連打するのは無意味
                         System.Threading.Timer ReleaseSIDUpdate = null;
                         ReleaseSIDUpdate = new System.Threading.Timer((e) =>
                         {
@@ -1627,6 +1630,9 @@ namespace _2chAPIProxy
                                 SIDNowUpdate = false;
                             }
                         }, null, 10000, System.Threading.Timeout.Infinite);
+
+                        // 更新されたSIDを用いてdatを再取得
+                        retry_on_sidupdate = false;
                         goto datget;
                     case HttpStatusCode.InternalServerError:
                         Byte[] Htmldat = null;
@@ -1661,9 +1667,18 @@ namespace _2chAPIProxy
                         }
                         else
                         {
-                            if (CheckAlive(@"http://itest.2ch.net/public/newapi/client.php?subdomain=" + ch2uri.Groups[1].Value + "&board=" + ch2uri.Groups[3].Value + "&dat=" + ch2uri.Groups[4].Value)) Htmldat = new byte[] { 0, 0 };
-                            else Htmldat = new byte[] { 0 };
+                            is_alive ??= CheckAlive(@"http://itest.2ch.net/public/newapi/client.php?subdomain=" + ch2uri.Groups[1].Value + "&board=" + ch2uri.Groups[3].Value + "&dat=" + ch2uri.Groups[4].Value);
+
+                            Htmldat = is_alive switch
+                            {
+                                true => new byte[] { 0, 0 },
+                                false => new byte[] { 0 },
+                                null => new byte[] { 0, 0 } // 起こりえない
+                            };
                         }
+
+                        // Htmldat.Length == 2 : スレッドは生存している
+                        // Htmldat.Length == 1 : スレッドは生存していない
                         if (Htmldat.Length == 2 && Status < 2) goto case HttpStatusCode.NotModified;
                         if (Htmldat.Length == 1 || (Htmldat.Length == 2 && Status >= 2))
                         {
@@ -1671,6 +1686,8 @@ namespace _2chAPIProxy
                             oSession.oResponse.headers["Content-Type"] = "text/html; charset=iso-8859-1";
                             break;
                         }
+
+                        // Htmldat.Lengthが3以上ならば変換成功のはず
                         ViewModel.OnModelNotice(uri + " をhtmlから変換");
                         if (!ViewModel.Setting.AllReturn && range > 0)
                         {
@@ -1693,7 +1710,7 @@ namespace _2chAPIProxy
                     case HttpStatusCode.Found:
                         goto case HttpStatusCode.NotImplemented;
                     case HttpStatusCode.NotFound:
-                        //if (CheckAlive(@"http://" + ch2uri.Groups[1].Value + "." + ch2uri.Groups[2].Value + "/test/read.cgi/" + ch2uri.Groups[3].Value + @"/" + ch2uri.Groups[4].Value + @"/"))
+                        // is_aliveはここに来るときはnullであるはず
                         if (CheckAlive(@"http://itest.2ch.net/public/newapi/client.php?subdomain=" + ch2uri.Groups[1].Value + "&board=" + ch2uri.Groups[3].Value + "&dat=" + ch2uri.Groups[4].Value))
                         {
                             oSession.oResponse.headers.HTTPResponseCode = 416;
@@ -1701,7 +1718,11 @@ namespace _2chAPIProxy
                             oSession.oResponse.headers["Content-Type"] = "text/html; charset=iso-8859-1";
                             break;
                         }
-                        else goto case HttpStatusCode.NotImplemented;
+                        else
+                        {
+                            is_alive = false;
+                            goto case HttpStatusCode.NotImplemented;
+                        }
                     default:
                         oSession.oResponse.headers.HTTPResponseCode = (int)dat.StatusCode;
                         oSession.oResponse.headers.HTTPResponseStatus = (int)dat.StatusCode + " " + dat.StatusDescription;
