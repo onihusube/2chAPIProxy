@@ -1014,6 +1014,21 @@ namespace _2chAPIProxy
             }
         }
 
+        /// <summary>
+        /// 結果が正しく大文字となるように、パーセントエンコーディングを行う
+        /// 例えば、%a0 -> %A0 となるようにする
+        /// </summary>
+        /// <param name="input">入力文字列</param>
+        /// <param name="encoding">元の文字列のエンコーディング指定</param>
+        /// <returns>パーセントエンコーディング済み文字列</returns>
+        private string URLEncode(string input, Encoding encoding)
+        {
+            // HttpUtility.UrlEncodeの結果は%xxのxxが小文字になる
+            // RFC的には大文字が正しいらしい
+            string lowerstr = HttpUtility.UrlEncode(input, encoding);
+            return Regex.Replace(lowerstr, @"%[\x00-\xFF]{2}", m => m.Value.ToUpperInvariant());
+        }
+
         private string ReConstructPostField(Dictionary<string, string> post_filed_map, Encoding dst_encoding)
         {
             string postfield = "";
@@ -1024,14 +1039,14 @@ namespace _2chAPIProxy
                 // データが送られてきてる場合のみ追加（無い場合に空文字を追加しない）
                 if (post_filed_map.ContainsKey(key))
                 {
-                    postfield += $"{key}={HttpUtility.UrlEncode(post_filed_map[key], dst_encoding)}&";
+                    postfield += $"{key}={URLEncode(post_filed_map[key], dst_encoding)}&";
                 }
             }
 
             // 順序指定が無いものは送られてきた順序で（ほんまか？Dictionalyの内部順序って何？？）
             foreach (var kvpair in post_filed_map.Where(kv => !PostFieldOrederArray.Contains(kv.Key)))
             {
-                postfield += $"{kvpair.Key}={HttpUtility.UrlEncode(kvpair.Value, dst_encoding)}&";
+                postfield += $"{kvpair.Key}={URLEncode(kvpair.Value, dst_encoding)}&";
             }
 
             // 余分にくっついてるのを削除
