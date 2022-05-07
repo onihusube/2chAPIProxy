@@ -198,6 +198,7 @@ namespace _2chAPIProxy
             DatProxy.AllUAReplace = (UserAgent3 == "") ? (false) : (AllUAReplace);
             DatProxy.BeLogin = BeLogin;
             DatProxy.SetReferrer = SetReferrer;
+            DatProxy.Proxy = ProxyAddress;
             DatProxy.EnablePostv2 = EnablePostv2;
             DatProxy.EnablePostv2onPink = EnablePostv2onPink;
             DatProxy.EnableUTF8Post = EnableUTF8Post;
@@ -221,7 +222,7 @@ namespace _2chAPIProxy
 
             //設定の適用、html変換クラス
             DatProxy.HtmlConverter.UserAgent = _UserAgent4;
-            DatProxy.HtmlConverter.ProxyAddress = _ProxyAddress;
+            DatProxy.HtmlConverter.ProxyAddress = ProxyAddress;
             DatProxy.HtmlConverter.IsDifferenceDetect = !_AllReturn;
             DatProxy.HtmlConverter.IsAliveCheckSkip = _SkipAliveCheck;
             DatProxy.HtmlConverter.Is5chURIReplace = _Replace5chURI;
@@ -230,18 +231,18 @@ namespace _2chAPIProxy
 
             //エラー通知用コールバック登録
             DatProxy.APIMediator.PropertyChanged += (sender, e) =>
-          {
-              if (e.PropertyName == nameof(DatProxy.APIMediator.CurrentError))
-              {
-                  //ここで取得しておく
-                  string error = DatProxy.APIMediator.CurrentError;
+            {
+                if (e.PropertyName == nameof(DatProxy.APIMediator.CurrentError))
+                {
+                    //ここで取得しておく
+                    string error = DatProxy.APIMediator.CurrentError;
 
-                  App.Current.Dispatcher.BeginInvoke((Action)(() =>
-                  {
-                      this.SystemLog = error;
-                  }));
-              }
-          };
+                    App.Current.Dispatcher.BeginInvoke((Action)(() =>
+                    {
+                       this.SystemLog = error;
+                    }));
+                }
+            };
 
             DatProxy.HtmlConverter.PropertyChanged += (sender, e) =>
             {
