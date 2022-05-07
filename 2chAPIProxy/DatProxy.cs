@@ -1348,8 +1348,10 @@ namespace _2chAPIProxy
                             // 5秒待機する
                             Thread.Sleep(5000);
                         }
-                        if (wres.Headers.AllKeys.Contains("X-Chx-Error") == true)
+                        else if (wres.Headers.AllKeys.Contains("X-Chx-Error") == true)
                         {
+                            // Monakeyが送られてきておらず、X-Chx-Errorヘッダがセットされている場合、なんかエラー
+
                             ViewModel.OnModelNotice("X-Chx-Error : " + wres.Headers["X-Chx-Error"]);
 
                             // E3000番台のエラーが帰ってきたらMonaKeyを更新する（雑な暫定対応
@@ -1358,6 +1360,18 @@ namespace _2chAPIProxy
                                 ResetMonakey();
                             }
 
+                            string header_log = "リクエストヘッダ\n";
+                            foreach (var header in Write.Headers.AllKeys)
+                            {
+                                header_log += $"{header}:{Write.Headers[header].ToString()}";
+                            }
+
+                            header_log += "\nレスポンスヘッダ\n";
+                            foreach (var header in wres.Headers.AllKeys)
+                            {
+                                header_log += $"{header}:{wres.Headers[header].ToString()}";
+                            }
+                            ViewModel.OnModelNotice(header_log);
                         }
 
                         using (System.IO.StreamReader Res = new System.IO.StreamReader(wres.GetResponseStream(), Encoding.GetEncoding("Shift_JIS")))
