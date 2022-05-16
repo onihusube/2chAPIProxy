@@ -139,6 +139,7 @@ namespace _2chAPIProxy.APIMediator
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
                 CurrentError = "APIへのアクセスにSSL3.0/TLS1.0を使用";
             }
+            // ServicePointManagerの設定はプログラム？で共通。ここで設定すれば本体および他のdllでも設定されている
 
             //SID自動更新タイマー開始
             this.m_HoboCheck = new Timer((o) => {

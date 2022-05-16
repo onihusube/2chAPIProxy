@@ -60,6 +60,7 @@ namespace _2chAPIProxy
         String _WANPW = "testpw";
         String _CESrcfilePath = "";
         private string postFieldOrder = "FROM&mail&MESSAGE&bbs&key&time&submit";
+        private string threadPostFieldOrder = "subject&FROM&mail&MESSAGE&bbs&submit&time";
         private string monaKey = "00000000-0000-0000-0000-000000000000";
 
         public bool change = false;
@@ -377,6 +378,12 @@ namespace _2chAPIProxy
         {
             get => monaKey;
             set { monaKey = value; change = true; }
+        }
+
+        public string ThreadPostFieldOrder
+        {
+            get => threadPostFieldOrder;
+            set { threadPostFieldOrder = value; change = true; }
         }
 
         public String CryptData(String data, bool encrypt = true)

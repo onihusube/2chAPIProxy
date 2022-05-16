@@ -102,6 +102,8 @@ namespace _2chAPIProxy
             //Fiddler設定変更
             Fiddler.CONFIG.bReuseClientSockets = true;
             Fiddler.CONFIG.bReuseServerSockets = true;
+            // TLS1.2までを使用可能なように設定（XPとかVistaとかだとここ何が起こるだろう・・・？
+            Fiddler.CONFIG.oAcceptedServerHTTPSProtocols = System.Security.Authentication.SslProtocols.Tls | (System.Security.Authentication.SslProtocols)768 | (System.Security.Authentication.SslProtocols)3072;
             //正規表現キャッシュサイズ
             Regex.CacheSize = 75;
             GetHTML = true;

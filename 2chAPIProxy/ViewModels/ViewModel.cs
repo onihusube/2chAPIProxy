@@ -118,6 +118,7 @@ namespace _2chAPIProxy
             enablePostv2onPink = Setting.EnablePostv2onPink;
             enableUTF8Post = Setting.EnableUTF8Post;
             postFieldOrder = Setting.PostFieldOrder;
+            threadPostFieldOrder = Setting.ThreadPostFieldOrder;
             addX2chUAHeader = Setting.AddX2chUAHeader;
             addMsToNonce = Setting.AddMsToNonce;
             assumeReqBodyIsUTF8 = Setting.AssumeReqBodyIsUTF8;
@@ -203,6 +204,7 @@ namespace _2chAPIProxy
             DatProxy.EnablePostv2onPink = EnablePostv2onPink;
             DatProxy.EnableUTF8Post = EnableUTF8Post;
             DatProxy.PostFieldOrder = PostFieldOrder;
+            DatProxy.ThreadPostFieldOrder = ThreadPostFieldOrder;
             DatProxy.AddX2chUAHeader = AddX2chUAHeader;
             DatProxy.AddMsToNonce = AddMsToNonce;
             DatProxy.AssumeReqBodyIsUTF8 = AssumeReqBodyIsUTF8;
@@ -1228,6 +1230,21 @@ namespace _2chAPIProxy
                 {
                     Setting.PostFieldOrder = DatProxy.PostFieldOrder = postFieldOrder = value;
                     NoticePropertyChanged("PostFieldOrder");
+                }
+            }
+        }
+
+        private string threadPostFieldOrder;
+
+        public string ThreadPostFieldOrder
+        {
+            get => threadPostFieldOrder;
+            set
+            {
+                if (threadPostFieldOrder != value)
+                {
+                    Setting.ThreadPostFieldOrder = DatProxy.ThreadPostFieldOrder = threadPostFieldOrder = value;
+                    NoticePropertyChanged("ThreadPostFieldOrder");
                 }
             }
         }
