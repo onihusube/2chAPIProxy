@@ -86,6 +86,19 @@ namespace _2chAPIProxy
             } 
         }
 
+        private string[] threadPostFieldOrederArray;
+
+        private string threadPostFieldOrder;
+        public String ThreadPostFieldOrder
+        {
+            get => threadPostFieldOrder;
+            set
+            {
+                threadPostFieldOrder = value;
+                threadPostFieldOrederArray = value.Split('&');
+            }
+        }
+
         public DatProxy(String Akey, String Hkey, String ua1, String sidUA, String ua2, String RID, String RPW, String ProxyAddrese)
         {
             //System.Threading.Timer GetSid = null;
