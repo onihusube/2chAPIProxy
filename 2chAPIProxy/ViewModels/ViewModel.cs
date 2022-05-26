@@ -231,6 +231,17 @@ namespace _2chAPIProxy
             DatProxy.HtmlConverter.IsHttpsReplace = _ReplaceHttpsLink;
             DatProxy.HtmlConverter.IsExternalConverterUse = _CEExternalRead;
 
+            // Monakeyの即時保存処理
+            DatProxy.PropertyChanged += (sender, e) =>
+            {
+                if (e.PropertyName == nameof(DatProxy.Monakey))
+                {
+                    // Monakeyを保存
+                    Setting.Monakey = DatProxy.Monakey;
+                    SaveSettings();
+                }
+            };
+
             //エラー通知用コールバック登録
             DatProxy.APIMediator.PropertyChanged += (sender, e) =>
             {
@@ -348,6 +359,16 @@ namespace _2chAPIProxy
             throw new NotImplementedException();
         }
 
+        private void SaveSettings()
+        {
+            XmlSerializer xser = new XmlSerializer(typeof(AppSetting));
+            using (StreamWriter sw = new StreamWriter("./settings.xml", false, Encoding.UTF8))
+            {
+                xser.Serialize(sw, Setting);
+            }
+            Setting.change = false;
+        }
+
         public void BeforeShutdown()
         {
             using (TaskTrayIcon)
@@ -371,17 +392,10 @@ namespace _2chAPIProxy
                     }
                     catch (ArgumentException) { }
                 }
-                
-                // Monakeyが更新されてたら保存
-                if (Setting.Monakey != DatProxy.Monakey) Setting.Monakey = DatProxy.Monakey;
 
                 if (Setting.change)
                 {
-                    XmlSerializer xser = new XmlSerializer(typeof(AppSetting));
-                    using (StreamWriter sw = new StreamWriter("./settings.xml", false, Encoding.UTF8))
-                    {
-                        xser.Serialize(sw, Setting);
-                    }
+                    SaveSettings();
                 }
                 System.Windows.Application.Current.Shutdown();
             }
@@ -1303,14 +1317,12 @@ namespace _2chAPIProxy
                                     }
                                 }));
                             });
-                            XmlSerializer xser = new XmlSerializer(typeof(AppSetting));
-                            using (StreamWriter sw = new StreamWriter("./settings.xml", false, Encoding.UTF8))
-                            {
-                                xser.Serialize(sw, Setting);
-                                Setting.change = false;
-                                SystemLog = "現在の設定を保存しました。";
-                                this.PopupVisible = true;
-                            }
+
+                            // 無条件設定保存と通知
+                            SaveSettings();
+                            SystemLog = "現在の設定を保存しました。";
+                            this.PopupVisible = true;
+
                             // Monakeyをリセット
                             DatProxy.ResetMonakey();
                             break;
@@ -1428,13 +1440,9 @@ namespace _2chAPIProxy
             {
                 if (_SaveSetting == null) _SaveSetting = new RelayCommand(() =>
                 {
-                    XmlSerializer xser = new XmlSerializer(typeof(AppSetting));
-                    using (StreamWriter sw = new StreamWriter("./settings.xml", false, Encoding.UTF8))
-                    {
-                        xser.Serialize(sw, Setting);
-                        Setting.change = false;
-                        SystemLog = "現在の設定を保存しました。";
-                    }
+                    // 無条件設定保存と通知
+                    SaveSettings();
+                    SystemLog = "現在の設定を保存しました。";
 
                     // Monakeyをリセット
                     DatProxy.ResetMonakey();

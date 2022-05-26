@@ -13,6 +13,7 @@ using _2chAPIProxy.HtmlConverter;
 using _2chAPIProxy.APIMediator;
 using System.Security.Cryptography;
 using System.Threading;
+using System.ComponentModel;
 
 namespace _2chAPIProxy
 {
@@ -22,7 +23,7 @@ namespace _2chAPIProxy
         public String nonce = "";
     }
 
-    public class DatProxy
+    public class DatProxy : ViewModels.VMBase
     {
         Dictionary<String, String> Cookie = new Dictionary<string, string>();
         Dictionary<String, IPAuthData> AuthIPList = new Dictionary<string, IPAuthData>();
@@ -996,7 +997,7 @@ namespace _2chAPIProxy
                 }
                 else
                 {
-                    monakey = value;
+                    _ = SetProperty(ref monakey, value, nameof(Monakey));
                 }
             }
         }
