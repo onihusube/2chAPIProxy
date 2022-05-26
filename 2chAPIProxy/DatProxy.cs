@@ -86,7 +86,7 @@ namespace _2chAPIProxy
             } 
         }
 
-        private string[] threadPostFieldOrederArray;
+        private string[] ThreadPostFieldOrederArray;
 
         private string threadPostFieldOrder;
         public String ThreadPostFieldOrder
@@ -95,7 +95,7 @@ namespace _2chAPIProxy
             set
             {
                 threadPostFieldOrder = value;
-                threadPostFieldOrederArray = value.Split('&');
+                ThreadPostFieldOrederArray = value.Split('&');
             }
         }
 
@@ -1044,12 +1044,12 @@ namespace _2chAPIProxy
             return Regex.Replace(lowerstr, @"%[\x00-\xFF]{2}", m => m.Value.ToUpperInvariant());
         }
 
-        private string ReConstructPostField(Dictionary<string, string> post_filed_map, Encoding dst_encoding)
+        private string ReConstructPostField(string[] field_order, Dictionary<string, string> post_filed_map, Encoding dst_encoding)
         {
             string postfield = "";
 
             // 順序指定があるものをその順序で指定する
-            foreach (string key in PostFieldOrederArray)
+            foreach (string key in field_order)
             {
                 // データが送られてきてる場合のみ追加（無い場合に空文字を追加しない）
                 if (post_filed_map.ContainsKey(key))
@@ -1059,7 +1059,7 @@ namespace _2chAPIProxy
             }
 
             // 順序指定が無いものは送られてきた順序で（ほんまか？Dictionalyの内部順序って何？？）
-            foreach (var kvpair in post_filed_map.Where(kv => !PostFieldOrederArray.Contains(kv.Key)))
+            foreach (var kvpair in post_filed_map.Where(kv => !field_order.Contains(kv.Key)))
             {
                 postfield += $"{kvpair.Key}={URLEncode(kvpair.Value, dst_encoding)}&";
             }
@@ -1074,12 +1074,14 @@ namespace _2chAPIProxy
             try
             {
                 String ReqBody = oSession.GetRequestBodyAsString();
-                //ギコナビ、レス投稿時にもsubject=が付いてる対策
+                // ギコナビ、レス投稿時にもsubject=が付いてる対策
                 ReqBody = ReqBody.Replace("subject=&", "");
-                //主にギコナビ、submitに改行が入っている
+                // 主にギコナビ、submitに改行が入っている
                 ReqBody = ReqBody.Replace("\r\n", "");
-                //スレ立てと書き込みを識別する、同じbbs.cgiを使用しているため
-                bool IsResPost = !ReqBody.Contains("subject=");
+                // スレ立てと書き込みを識別する、同じbbs.cgiを使用しているため
+                bool IsResPost = !ReqBody.Contains("subject="); // trueの時レス投稿
+
+                // 昔はスレ立ては別だったらしい
                 if (oSession.fullUrl.Contains("subbbs.cgi"))
                 {
                     oSession.fullUrl = oSession.fullUrl.Replace("subbbs.cgi", "bbs.cgi");
@@ -1293,7 +1295,12 @@ namespace _2chAPIProxy
                 }
 
                 // リクエストボディ再構成
-                ReqBody = ReConstructPostField(post_field_map, dst_encoding);
+                // レス投稿時とスレ立て時でどのブラウザもフィールド順序は異なっているらしい
+                ReqBody = IsResPost switch
+                {
+                    true => ReConstructPostField(PostFieldOrederArray, post_field_map, dst_encoding),
+                    false => ReConstructPostField(ThreadPostFieldOrederArray, post_field_map, dst_encoding)
+                };
 
                 if (string.IsNullOrEmpty(Proxy) == false) Write.Proxy = new WebProxy(Proxy);
 
@@ -1370,25 +1377,29 @@ namespace _2chAPIProxy
 
                             ViewModel.OnModelNotice("X-Chx-Error : " + wres.Headers["X-Chx-Error"]);
 
-                            // E3000番台のエラーが帰ってきたらMonaKeyを更新する（雑な暫定対応
-                            // E3331 Invalid signature.はリセットの必要がない
-                            if (wres.Headers["X-Chx-Error"].Contains("E3331") == false && wres.Headers["X-Chx-Error"].Contains("E3"))
+                            // E3300番台のエラーが帰ってきたらMonaKeyを更新する（雑な暫定対応
+                            // E3331 Invalid signature.はリセットの必要がない（Postsigの計算が間違ってる）
+                            if (wres.Headers["X-Chx-Error"].Contains("E3331") == false && wres.Headers["X-Chx-Error"].Contains("E33"))
                             {
                                 ResetMonakey();
                             }
 
-                            string header_log = "リクエストヘッダ\n";
-                            foreach (var header in Write.Headers.AllKeys)
+                            // 鍵の有効期限切れ（と思われる）場合は出力しない
+                            if (wres.Headers["X-Chx-Error"].Contains("E3324") == false)
                             {
-                                header_log += $"{header}:{Write.Headers[header]}\n";
-                            }
+                                string header_log = "リクエストヘッダ\n";
+                                foreach (var header in Write.Headers.AllKeys)
+                                {
+                                    header_log += $"{header} : {Write.Headers[header]}\n";
+                                }
 
-                            header_log += "\nレスポンスヘッダ\n";
-                            foreach (var header in wres.Headers.AllKeys)
-                            {
-                                header_log += $"{header}:{wres.Headers[header]}\n";
+                                header_log += "\nレスポンスヘッダ\n";
+                                foreach (var header in wres.Headers.AllKeys)
+                                {
+                                    header_log += $"{header} : {wres.Headers[header]}\n";
+                                }
+                                ViewModel.OnModelNotice(header_log);
                             }
-                            ViewModel.OnModelNotice(header_log);
                         }
 
                         using (System.IO.StreamReader Res = new System.IO.StreamReader(wres.GetResponseStream(), Encoding.GetEncoding("Shift_JIS")))
