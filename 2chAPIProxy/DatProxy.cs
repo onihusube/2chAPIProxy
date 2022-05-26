@@ -1363,6 +1363,7 @@ namespace _2chAPIProxy
                             // 5秒待機する
                             Thread.Sleep(5000);
                         }
+                        // ここでelseとしていることで 0001 Confirmation phase の場合にログを出さない
                         else if (wres.Headers.AllKeys.Contains("X-Chx-Error") == true)
                         {
                             // Monakeyが送られてきておらず、X-Chx-Errorヘッダがセットされている場合、なんかエラー
@@ -1370,6 +1371,7 @@ namespace _2chAPIProxy
                             ViewModel.OnModelNotice("X-Chx-Error : " + wres.Headers["X-Chx-Error"]);
 
                             // E3000番台のエラーが帰ってきたらMonaKeyを更新する（雑な暫定対応
+                            // E3331 Invalid signature.はリセットの必要がない
                             if (wres.Headers["X-Chx-Error"].Contains("E3331") == false && wres.Headers["X-Chx-Error"].Contains("E3"))
                             {
                                 ResetMonakey();
@@ -1378,13 +1380,13 @@ namespace _2chAPIProxy
                             string header_log = "リクエストヘッダ\n";
                             foreach (var header in Write.Headers.AllKeys)
                             {
-                                header_log += $"{header}:{Write.Headers[header].ToString()}";
+                                header_log += $"{header}:{Write.Headers[header]}\n";
                             }
 
                             header_log += "\nレスポンスヘッダ\n";
                             foreach (var header in wres.Headers.AllKeys)
                             {
-                                header_log += $"{header}:{wres.Headers[header].ToString()}";
+                                header_log += $"{header}:{wres.Headers[header]}\n";
                             }
                             ViewModel.OnModelNotice(header_log);
                         }
