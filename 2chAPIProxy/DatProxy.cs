@@ -1295,6 +1295,10 @@ namespace _2chAPIProxy
                     }
                 }
 
+                // feature=confirmedを消すようにする
+                // Xenoは送ってくることがあるらしい
+                post_field_map.Remove("feature");
+
                 // リクエストボディ再構成
                 // レス投稿時とスレ立て時でどのブラウザもフィールド順序は異なっているらしい
                 ReqBody = IsResPost switch
