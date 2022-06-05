@@ -1443,9 +1443,6 @@ namespace _2chAPIProxy
                     // 無条件設定保存と通知
                     SaveSettings();
                     SystemLog = "現在の設定を保存しました。";
-
-                    // Monakeyをリセット
-                    DatProxy.ResetMonakey();
                 });
                 return _SaveSetting;
             }
