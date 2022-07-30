@@ -288,51 +288,76 @@ namespace _2chAPIProxy
                     DatProxy.End();
                 }
             }
-            //同時起動と終了を設定
-            if (!String.IsNullOrEmpty(Setting.SenburaPath))
+
+            // 同時起動と終了を設定
+            if (!string.IsNullOrEmpty(Setting.SenburaPath))
             {
-                bool kage = true;
                 System.Diagnostics.Process p = new System.Diagnostics.Process();
                 p.StartInfo.FileName = Setting.SenburaPath;
-                if (System.IO.Path.GetFileName(Setting.SenburaPath) != "kage.exe")
+
+                do
                 {
-                    kage = false;
-                    p.EnableRaisingEvents = true;
-                    p.Exited += (sender, e) =>
+                    // かちゅ～しゃにたいするkageは、実際に起動しているプロセス名が異なる
+                    // 終了を同期するときに特別扱いする必要がある
+                    bool kage = true;
+
+                    try
                     {
-                        App.Current.Dispatcher.BeginInvoke((Action)(() => { if (Setting.SyncEnd) BeforeShutdown(); }), null);
-                    };
-                }
-                try
-                {
-                    p.Start();
-                    m_SenburaPID = p.Id;
-                    SystemLog = Setting.SenburaPath + " を起動";
-                    m_SyncStart = true;
-                    //かちゅ～しゃの場合の終了同期処理の追加
-                    if (kage)
-                    {
-                        System.Diagnostics.Process[] plist = null;
-                        for (int i = 0; i < 50; ++i)
+                        // 同時起動したい専ブラのパスが""で囲われているなどすると、ここで例外
+                        if (System.IO.Path.GetFileName(Setting.SenburaPath) != "kage.exe")
                         {
-                            plist = System.Diagnostics.Process.GetProcessesByName("Katjusha");
-                            if (plist.Length != 0) break;
-                            System.Threading.Thread.Sleep(100);
+                            kage = false;
+
+                            p.EnableRaisingEvents = true;
+                            p.Exited += (sender, e) =>
+                            {
+                                App.Current.Dispatcher.BeginInvoke((Action)(() => { if (Setting.SyncEnd) BeforeShutdown(); }), null);
+                            };
                         }
-                        plist[0].EnableRaisingEvents = true;
-                        plist[0].Exited += (sender, e) =>
-                        {
-                            App.Current.Dispatcher.BeginInvoke((Action)(() => { if (Setting.SyncEnd) BeforeShutdown(); }), null);
-                        };
-                        m_SenburaPID = plist[0].Id;
                     }
-                }
-                catch (Exception err)
-                {
-                    SystemLog = Setting.SenburaPath + " の起動に失敗\n" + err.ToString();
-                }
+                    catch (ArgumentException)
+                    {
+                        SystemLog = "同時起動する専ブラのパス文字列に無効な文字が含まれています（\" < > など）\n同時起動は無効化されます";
+
+                        // パス文字列が使用できないので同時起動はしない
+                        break;
+                    }
+                    try
+                    {
+                        // 対象を起動
+                        _ = p.Start();
+
+                        m_SenburaPID = p.Id;
+                        SystemLog = Setting.SenburaPath + " を起動";
+                        m_SyncStart = true;
+
+                        // かちゅ～しゃの場合の終了同期処理の追加
+                        if (kage)
+                        {
+                            System.Diagnostics.Process[] plist = null;
+                            for (int i = 0; i < 50; ++i)
+                            {
+                                plist = System.Diagnostics.Process.GetProcessesByName("Katjusha");
+                                if (plist.Length != 0) break;
+                                System.Threading.Thread.Sleep(100);
+                            }
+                            plist[0].EnableRaisingEvents = true;
+                            plist[0].Exited += (sender, e) =>
+                            {
+                                App.Current.Dispatcher.BeginInvoke((Action)(() => { if (Setting.SyncEnd) BeforeShutdown(); }), null);
+                            };
+                            m_SenburaPID = plist[0].Id;
+                        }
+                    }
+                    catch (Exception err)
+                    {
+                        SystemLog = Setting.SenburaPath + " の起動に失敗\n" + err.ToString();
+                    }
+                } while (false);
             }
+
             Setting.change = false;
+
             //プロセス間通信のサーバ登録
             try
             {
