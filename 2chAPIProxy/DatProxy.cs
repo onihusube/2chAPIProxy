@@ -1683,7 +1683,7 @@ namespace _2chAPIProxy
                         goto datget;
                     case HttpStatusCode.InternalServerError:
                         Byte[] Htmldat = null;
-                        String uri = @"http://" + ch2uri.Groups[1].Value + "." + ch2uri.Groups[2].Value + "/test/read.cgi/" + ch2uri.Groups[3].Value + @"/" + ch2uri.Groups[4].Value + @"/";
+                        String uri = @"https://" + ch2uri.Groups[1].Value + "." + ch2uri.Groups[2].Value + "/test/read.cgi/" + ch2uri.Groups[3].Value + @"/" + ch2uri.Groups[4].Value + @"/";
                         if (GetHTML && !OnlyORPerm)
                         {
                             String UA = oSession.oRequest.headers["User-Agent"];

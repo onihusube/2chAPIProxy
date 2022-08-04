@@ -73,16 +73,25 @@ namespace _2chAPIProxy.HtmlConverter
         /// </summary>
         public bool IsHttpsReplace { get; set; }
 
+        /// <summary>
+        /// 指定されたスレのHTMLをdatへ変換する
+        /// </summary>
+        /// <param name="URI"></param>
+        /// <param name="range"></param>
+        /// <param name="UA">使用しない。UAを受け取っていたが適切ではなかった</param>
+        /// <param name="CRReplace"></param>
+        /// <param name="LastMod">datを途中まで取得していた場合の最終更新日付時刻。差分検出に使用する</param>
+        /// <returns></returns>
         public Byte[] Gethtml(String URI, int range, String UA, bool CRReplace, String LastMod = null)
         {
-            System.Diagnostics.Debug.WriteLine($"{URI}をHTML変換開始");
-            System.Diagnostics.Debug.WriteLine($"Range:{range}, UA:{UA}, CRReplace:{CRReplace}, LastMod:{LastMod}");
+            System.Diagnostics.Debug.WriteLine($"{URI} をHTML変換開始");
+            System.Diagnostics.Debug.WriteLine($"Range:{range}, UA:{this.UserAgent}, CRReplace:{CRReplace}, LastMod:{LastMod}");
 
             URI = URI.Replace("2ch.net", "5ch.net");
 
             if (this.IsExternalConverterUse)
             {
-                return HTMLTranceOutRegex(URI, range, UA, LastMod);
+                return HTMLTranceOutRegex(URI, range, this.UserAgent, LastMod);
             }
             using (WebClient get = new WebClient())
             {
@@ -96,23 +105,36 @@ namespace _2chAPIProxy.HtmlConverter
                         String title = "もうずっと人大杉";
 
                         bool NewCGI = false;
+                        // krsw鯖のHTML形式の検出
+                        bool is_krsw = false;
 
+                        string line = html.ReadLine();
 
-                        //タイトルの検索
-                        for (String line = html.ReadLine(); !html.EndOfStream; line = html.ReadLine())
+                        // krsw鯖のhtmlは1行に詰まってるので、1行読むと終端に達する
+                        if (html.EndOfStream == false)
                         {
-                            if (Regex.IsMatch(line, @"<title>(.+?)<\/title>"))
+                            //タイトルの検索
+                            for (; !html.EndOfStream; line = html.ReadLine())
                             {
-                                title = Regex.Match(line, @"<title>(.+?)<\/title>").Groups[1].Value;
-                                break;
-                            }
-                            else if (Regex.IsMatch(line, @"<title>(.+?)$"))
-                            {
-                                title = Regex.Match(line, @"<title>(.+?)$").Groups[1].Value;
-                                NewCGI = true;
-                                break;
+                                if (Regex.IsMatch(line, @"<title>(.+?)<\/title>"))
+                                {
+                                    title = Regex.Match(line, @"<title>(.+?)<\/title>").Groups[1].Value;
+                                    break;
+                                }
+                                else if (Regex.IsMatch(line, @"<title>(.+?)$"))
+                                {
+                                    title = Regex.Match(line, @"<title>(.+?)$").Groups[1].Value;
+                                    NewCGI = true;
+                                    break;
+                                }
                             }
                         }
+                        else
+                        {
+                            is_krsw = true;
+                            title = Regex.Match(line, @"<title>(.+?)<\/title>").Groups[1].Value;
+                        }
+
                         if (Regex.IsMatch(title, @"(５ちゃんねる error \d+|もうずっと人大杉|datが存在しません.削除されたかURL間違ってますよ)")) return new byte[] { 0 };
                         if (Regex.IsMatch(title, @"(2|5)ch\.net\s(\[\d+\])"))
                         {
@@ -126,14 +148,23 @@ namespace _2chAPIProxy.HtmlConverter
                         StringBuilder Builddat = null;
                         string ketu;
                         //新CGI形式と古いCGI形式で処理を分ける
-                        if (NewCGI)
+                        if (is_krsw)
                         {
+                            // 2022/08/05頃に観測された、krsw鯖の形式（1行に詰まってる）
+                            System.Diagnostics.Debug.WriteLine("krsw鯖形式");
+
+                            Builddat = this.krswCGIFormat(title, URI, line, out ketu);
+                        }
+                        else if (NewCGI)
+                        {
+                            // 2022年8月時点で主流のHTML形式（全5行くらいのやつ）
                             System.Diagnostics.Debug.WriteLine("新CGI形式");
 
                             Builddat = this.PresentCGIFormat(title, URI, html, out ketu);
                         }
                         else
                         {
+                            // API導入前の古い形式（1レス1行）
                             System.Diagnostics.Debug.WriteLine("旧CGI形式");
 
                             Builddat = this.OldCGIFormat(title, html, out ketu);
@@ -183,6 +214,32 @@ namespace _2chAPIProxy.HtmlConverter
             }
         }
 
+        /// <summary>
+        /// 2022/8/5頃にkrsw鯖の板のスレで見られた形式のHTMLをdat変換する
+        /// HTMLファイルが1行に詰まってる形式
+        /// </summary>
+        /// <param name="URI">スレのURL</param>
+        /// <param name="html">htmlの全体</param>
+        /// <param name="title">スレタイ</param>
+        /// <param name="datSize"></param>
+        /// <returns></returns>
+        private StringBuilder krswCGIFormat(string title, string URI, string html, out string datSize)
+        {
+            // レス部分の始まりを見つけて、それ以前を消しておく
+            int begin = Regex.Match(html, @"<d(?:iv|l) class=.(?:thread|post).+?>").Index;
+            string allres = html.Substring(begin);
+
+            return CommonConvertProcess(title, URI, allres, out datSize);
+        }
+
+        /// <summary>
+        /// 現在の（2022/8くらい）形式のHTMLをdatへ変換する
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="URI"></param>
+        /// <param name="htmlStream"></param>
+        /// <param name="datSize"></param>
+        /// <returns></returns>
         private StringBuilder PresentCGIFormat(string title, string URI, StreamReader htmlStream, out string datSize)
         {
             var Builddat = new StringBuilder(510 * 1024);
@@ -196,16 +253,15 @@ namespace _2chAPIProxy.HtmlConverter
             } while (!htmlStream.EndOfStream);
             
             String allres = line + htmlStream.ReadToEnd();
-            //スレ生存チェック
-            //if (this.IsAliveCheckSkip == false)
-            //{
-            //    if (Regex.IsMatch(allres, @"<div class=" + '"' + @"[a-zA-Z\s]+?" + '"' + @">(.+?過去ログ倉庫.+?|レス数が\d{3,}を超えています.+?(書き込み.*?|表.?示)でき.+?)</div>") == false)
-            //    {
-            //        datSize = "";
-            //        return null;
-            //    }
-            //}
 
+            return CommonConvertProcess(title, URI, allres, out datSize);
+        }
+
+        private StringBuilder CommonConvertProcess(string title, string URI, string allres, out string datSize)
+        {
+            // datの全体保持用
+            var Builddat = new StringBuilder(510 * 1024);
+            // 1レス分のhtml保持用
             var Bres = new StringBuilder(5 * 1024);
             //pinkレスずれ処理用
             bool pink = URI.Contains("bbspink.com");
@@ -213,6 +269,7 @@ namespace _2chAPIProxy.HtmlConverter
             long ThreadTime = long.Parse(Regex.Match(URI, @"/(\d{9,})").Groups[1].Value);
             var ResMatches = Regex.Matches(allres, @"<(?:div|dl) class=.post. id=.\d.+?>(.+?(?:</div></div>|</dd></dl>))");
 
+            // 旧型式の処理を再利用するために、レス部分のhtmlを1レスづつ旧型式に変換する
             foreach (Match Res in ResMatches)
             {
                 Match date = Regex.Match(Res.Groups[1].Value, @"<(?:div|span) class=.date.+?>(.+?(?:</span><span class=" + '"' + @"\w+?" + '"' + @">.*?)?)</(?:div|span)>(?:<(?:div|span) class=.be\s.+?.>(.+?)</(?:div|span)>)?");
@@ -292,6 +349,7 @@ namespace _2chAPIProxy.HtmlConverter
                 Bres.Insert(0, "：" + dateid + be + "<dd>");
                 Bres.Insert(0, "<dt>" + number + " ：" + name);
                 Bres.Append("<br><br>");
+                // レス1つ分をdat形式へ変換
                 Builddat.Append(html2dat(Bres.ToString()));
                 if (!String.IsNullOrEmpty(title))
                 {
@@ -307,6 +365,13 @@ namespace _2chAPIProxy.HtmlConverter
             return Builddat;
         }
 
+        /// <summary>
+        /// 古い（API導入前の）形式のHTMLをdatへ変換する
+        /// </summary>
+        /// <param name="title">スレタイ</param>
+        /// <param name="htmlStream">レス本文を含むHTMLの残りの部分</param>
+        /// <param name="datSize">末尾についてるdatサイズ情報を返す</param>
+        /// <returns></returns>
         private StringBuilder OldCGIFormat(string title, StreamReader htmlStream, out string datSize)
         {
             var Builddat = new StringBuilder(510 * 1024);
