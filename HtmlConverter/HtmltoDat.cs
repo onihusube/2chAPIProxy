@@ -76,7 +76,7 @@ namespace _2chAPIProxy.HtmlConverter
         /// <summary>
         /// 指定されたスレのHTMLをdatへ変換する
         /// </summary>
-        /// <param name="URI"></param>
+        /// <param name="URI">終端を/で終わらせること</param>
         /// <param name="range"></param>
         /// <param name="UA">使用しない。UAを受け取っていたが適切ではなかった</param>
         /// <param name="CRReplace"></param>
@@ -88,6 +88,7 @@ namespace _2chAPIProxy.HtmlConverter
             System.Diagnostics.Debug.WriteLine($"Range:{range}, UA:{this.UserAgent}, CRReplace:{CRReplace}, LastMod:{LastMod}");
 
             URI = URI.Replace("2ch.net", "5ch.net");
+            URI += "1-";
 
             if (this.IsExternalConverterUse)
             {
