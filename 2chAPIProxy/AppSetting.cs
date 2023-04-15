@@ -428,11 +428,52 @@ namespace _2chAPIProxy
 
     public class BoardSettings
     {
+        public string Preset { get; set; }
+
         public string UserAgent { get; set; }
 
         public bool SetOekaki { get; set; } = false;
 
         public bool KeepAlive { get; set; } = false;
+
+        public Dictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
+    }
+
+
+    public enum NonceTypeEnum
+    {
+        Sec = 0,
+        Milisec,
+        MilisecZero,
+        MilisecRandom
+    }
+
+    public enum RefererTypeEnum
+    {
+        BoardURL,
+        ThreadURL,
+        ThreadURLl50
+    }
+
+    public class PostSettings
+    {
+        public string UserAgent { get; set; }
+
+        public string AppKey { get; set; }
+
+        public string HMkey { get; set; }
+
+        public string PostFiledOrder { get; set; }
+
+        public string ThreadPostFieldOrder { get; set; }
+
+        public NonceTypeEnum NonceType { get; set; } = NonceTypeEnum.Milisec;
+
+        public RefererTypeEnum RefererType { get; set; } = RefererTypeEnum.ThreadURL;
+
+        public bool KeepAlive { get; set; } = false;
+
+        //public string ContentType { get; set; }
 
         public Dictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
     }
