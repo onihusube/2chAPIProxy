@@ -348,6 +348,5 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
-2chAPIProxy/FiddlerCore4.dll
 2chAPIProxy/FiddlerCore4.XML
 2chAPIProxy/b2ricon.zip
