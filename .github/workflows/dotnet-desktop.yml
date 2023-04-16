@@ -82,6 +82,6 @@ jobs:
       with:
           name: exe
           path: |
-            2chAPIProxy\2chAPIProxy\2chAPIProxy\bin\Release\2chAPIProxy.exe
-            2chAPIProxy\2chAPIProxy\2chAPIProxy\bin\Release\*.dll
+            ${{ github.workspace }}\2chAPIProxy\bin\Release\2chAPIProxy.exe
+            ${{ github.workspace }}\2chAPIProxy\bin\Release\*.dll
       
