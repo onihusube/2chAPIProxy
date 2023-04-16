@@ -66,6 +66,9 @@ jobs:
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1.0.5
       
+    - name: Restore Packages
+      run: nuget restore 2chAPIProxy.sln
+      
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
       run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
