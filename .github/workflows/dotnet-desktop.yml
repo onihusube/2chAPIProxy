@@ -52,7 +52,7 @@ jobs:
 
     runs-on: windows-2019
     env:
-      Solution_Name: your-solution-name                         # Replace with your solution name, i.e. MyWpfApp.sln.
+      Solution_Name: 2chAPIProxy.sln                         # Replace with your solution name, i.e. MyWpfApp.sln.
 
     steps:
     - name: Checkout
