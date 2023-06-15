@@ -80,7 +80,7 @@ jobs:
       
     - uses: actions/upload-artifact@v3
       with:
-          name: exe
+          name: provisional_binary
           path: |
             ${{ github.workspace }}\2chAPIProxy\bin\Release\2chAPIProxy.exe
             ${{ github.workspace }}\2chAPIProxy\bin\Release\*.dll
