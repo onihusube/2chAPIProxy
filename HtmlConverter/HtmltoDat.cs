@@ -216,6 +216,83 @@ namespace _2chAPIProxy.HtmlConverter
             }
         }
 
+        private StringBuilder CGI202306_ConvertProcess(string title, string URI, string allres)
+        {
+            // datの全体保持用
+            var Builddat = new StringBuilder(510 * 1024);
+            // 1レス分のhtml保持用
+            var Bres = new StringBuilder(5 * 1024);
+            // pinkレスずれ処理用
+            bool pink = URI.Contains("bbspink.com");
+            int datResnumber = 1, htmlResnumber = 0;
+            long ThreadTime = long.Parse(Regex.Match(URI, @"/(\d{9,})").Groups[1].Value);
+
+            // レスの連続抽出はざっくりとやる
+            var ResMatches = Regex.Matches(allres, @"<article id=.+?</section></article>");
+            // ↑で抽出した1つのレス内で各要素を抽出
+            Regex ResContent = new Regex(@"<article id=.(?<num>\d+?).+?<summary>.+?<span class=.postusername.>(?<name><b>.+?</b>)</span></summary><span class=.date.>(?<date>.+?)</span>(?:<span class=.uid.>(?<id>ID:\w+?)</span>)?</details><section class=.post-content.>(?<massage> .+? )</section></article>");
+
+            // 旧型式（API移行直後のhtml形式）の処理を再利用するために、レス部分のhtmlを1レスづつ旧型式に変換する
+            // 細部のハンドリングを継承するための措置
+            foreach (Match resmatch in ResMatches)
+            {
+                Match res_content = ResContent.Match(resmatch.Value);
+                string resnumber = res_content.Groups["num"].Value;
+                string name = res_content.Groups["name"].Value;
+                string date = res_content.Groups["date"].Value;
+                string id = res_content.Groups["id"].Value; // キャプチャ無し（IDなし）の場合は空文字になる（らしい
+                string message = res_content.Groups["massage"].Value;
+
+                // いくつかのコーナーケースのハンドル処理
+                // ただし、これらがこの形式でも出現するのかは未確認
+
+                // 0,NGの検出
+                if (resnumber == "0" && date == "NG")
+                {
+                    // 飛ばす
+                    continue;
+                }
+                // htmlでレスが飛んでいるときを検出（pinkのみ）
+                if (pink && int.TryParse(resnumber, out htmlResnumber) && datResnumber < htmlResnumber)
+                {
+                    for (int j = htmlResnumber - datResnumber; j > 0; --j)
+                    {
+                        Builddat.Append("うふ～ん<>うふ～ん<>うふ～ん ID:DELETED<>うふ～ん<>うふ～ん<>\n");
+                    }
+                    datResnumber = htmlResnumber;
+                }
+
+                // p53など、レス前後にスペースが無いときに補う。
+                if (!Regex.IsMatch(message, @"^\s.+\s$"))
+                {
+                    Bres.Insert(0, " ");
+                    Bres.Append(" ");
+                }
+                
+                //Bres.Insert(0, "：" + dateid + be + "<dd>");
+                //Bres.Insert(0, "<dt>" + number + " ：" + name);
+                //Bres.Append("<br><br>");
+                // レス1つ分をdat形式へ変換
+                //Builddat.Append(html2dat(Bres.ToString()));
+                
+                // 1レス目の末尾にはタイトルを付加する
+                if (!String.IsNullOrEmpty(title))
+                {
+                    Builddat.Append(title + "\n");
+                    title = "";
+                }
+                else
+                {
+                    Builddat.Append("\n");
+                }
+
+                Bres.Clear();
+                datResnumber++;
+            }
+
+            return Builddat;
+        }
+
         /// <summary>
         /// 2022/8/5頃にkrsw鯖の板のスレで見られた形式のHTMLをdat変換する
         /// HTMLファイルが1行に詰まってる形式
