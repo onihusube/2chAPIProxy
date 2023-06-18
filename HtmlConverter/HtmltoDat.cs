@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -84,7 +84,12 @@ namespace _2chAPIProxy.HtmlConverter
         /// <returns></returns>
         public Byte[] Gethtml(String URI, int range, String UA, bool CRReplace, String LastMod = null)
         {
-            URI = URI.Replace("test/read.cgi/", "test/read.cgi/c/");
+            // 現在（23/06/18）pinkはまだ新形式ではない
+            if (URI.Contains(".5ch.net/"))
+            {
+                URI = URI.Replace("test/read.cgi/", "test/read.cgi/c/");
+            }
+
             System.Diagnostics.Debug.WriteLine($"{URI} をHTML変換開始");
             System.Diagnostics.Debug.WriteLine($"Range:{range}, UA:{this.UserAgent}, CRReplace:{CRReplace}, LastMod:{LastMod}");
 
