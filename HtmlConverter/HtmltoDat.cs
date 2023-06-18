@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -235,21 +235,22 @@ namespace _2chAPIProxy.HtmlConverter
             // レスの連続抽出はざっくりとやる
             var ResMatches = Regex.Matches(allres, @"<article id=.+?</section></article>");
             // ↑で抽出した1つのレス内で各要素を抽出
-            Regex ResContent = new Regex(@"<article id=.(?<num>\d+?).+?<summary>.+?<span class=.postusername.>(?<name><b>.+?</b>)</span></summary><span class=.date.>(?<date>.+?)</span>(?:<span class=.uid.>(?<id>ID:\w+?)</span>)?</details><section class=.post-content.>(?<massage> .+? )</section></article>");
+            Regex ResContent = new Regex(@"<article id=.(?<num>\d+?).+?<summary>.+?<span class=.postusername.>(?<name><b>.+?</b>)</span></summary><span class=.date.>(?<date>.+?)</span><span class=.uid.>(?<id>.+?)</span>(?<be><span class=.be.+?</span>)?</details><section class=.post-content.>(?<massage>.+?)</section></article>");
 
             // 旧型式（API移行直後のhtml形式）の処理を再利用するために、レス部分のhtmlを1レスづつ旧型式に変換する
             // 細部のハンドリングを継承するための措置
             foreach (Match resmatch in ResMatches)
             {
                 Match res_content = ResContent.Match(resmatch.Value);
+
                 string resnumber = res_content.Groups["num"].Value;
                 string name = res_content.Groups["name"].Value;
                 string date = res_content.Groups["date"].Value;
-                string id = res_content.Groups["id"].Value; // キャプチャ無し（IDなし）の場合は空文字になる（らしい
+                string id = res_content.Groups["id"].Value; // キャプチャ無し（IDなし）の場合は空文字列になる（らしい
+                string be = res_content.Groups["be"].Value; // 無ければ空文字列
                 string message = res_content.Groups["massage"].Value;
 
                 // いくつかのコーナーケースのハンドル処理
-                // ただし、これらがこの形式でも出現するのかは未確認
 
                 // 0,NGの検出
                 if (resnumber == "0" && date == "NG")
@@ -262,10 +263,46 @@ namespace _2chAPIProxy.HtmlConverter
                 {
                     for (int j = htmlResnumber - datResnumber; j > 0; --j)
                     {
-                        Builddat.Append("うふ～ん<>うふ～ん<>うふ～ん ID:DELETED<>うふ～ん<>うふ～ん<>\n");
+                        Builddat.Append("うふ～ん<>うふ～ん<>うふ～ん<>うふ～ん<>うふ～ん\n");
                     }
                     datResnumber = htmlResnumber;
                 }
+                // あぼーんの検出（pinkはたぶんうふ～んになる）
+                if (date == "NG" && message == "あぼーん")
+                {
+                    // 昔はID:DELETEDになっていたらしいが今は違う
+                    // datでは "あぼーん<>あぼーん<>あぼーん<>あぼーん<>あぼーん"のようになる
+                    // ここで直でdat構築したほうが早そう
+                    date = "あぼーん";
+                    id = "";
+                }
+                if (string.IsNullOrEmpty(be))
+                {
+                    // beリンクの変換
+                    // <span class="be r2BP"><a href="http://be.5ch.net/user/823355746" target="_blank">?2BP(0)</a></span> これを
+                    // <a href="javascript:be(823355746);">?2BP(0)</a> みたいにする
+
+                    var mb = Regex.Match(be, @"<a href.+?(\d{2,}).+?>(.+)</span>");
+                    be = $" <a href={'"'}javascript:be({mb.Groups[1].Value});{'"'}>{mb.Groups[2].Value}";
+
+                    // 本文内のアイコンリンクは処理する必要ない
+                }
+                if (message.Contains("<span class="))
+                {
+                    // <span class="AA">を無視する
+                    message = Regex.Match(message, @"^<span class=.+?>(.+?)</span>$").Groups[1].Value;
+                }
+                if (Regex.IsMatch(message, $@" class=.reply_link.>") == true)
+                {
+                    // class="reply_link"を取り除く
+                    // rel="noopener noreferrer" target="_blank" の2つの属性だけが安価リンクには残る
+                    message = Regex.Replace(message, @" class=.reply_link.>", ">");
+
+                    // これ以上の安価リンク処理は必要ない
+                }
+
+                // 本文を先に追加
+                Bres.Append(message);
 
                 // p53など、レス前後にスペースが無いときに補う。
                 if (!Regex.IsMatch(message, @"^\s.+\s$"))
@@ -273,13 +310,16 @@ namespace _2chAPIProxy.HtmlConverter
                     Bres.Insert(0, " ");
                     Bres.Append(" ");
                 }
-                
-                //Bres.Insert(0, "：" + dateid + be + "<dd>");
-                //Bres.Insert(0, "<dt>" + number + " ：" + name);
-                //Bres.Append("<br><br>");
+
+                // ↓こうなるように変換
+                // <dt>{レス番} ：<b>{メールリンク}{名前}</b>：{日付} {ID}{beリンク}<dd> {本文} <br><br>
+                // IDがない時でも日付の後ろにスペースは入る
+
+                Bres.Insert(0, $"<dt>{resnumber} ：{name}：{date} {id}{be}<dd>");
+                Bres.Append("<br><br>");
                 // レス1つ分をdat形式へ変換
-                //Builddat.Append(html2dat(Bres.ToString()));
-                
+                Builddat.Append(html2dat(Bres.ToString()));
+
                 // 1レス目の末尾にはタイトルを付加する
                 if (!String.IsNullOrEmpty(title))
                 {
@@ -412,10 +452,13 @@ namespace _2chAPIProxy.HtmlConverter
                     // class="reply_link"
                     message = Regex.Replace(message, $@"\sclass={'"'}reply_link{'"'}>", ">");
                 }
-                //安価のリンク修正、http://potato.2ch.net/test/read.cgi/jisaku/1447271149/9→../test/read.cgi/jisaku/1447271149/9
+                // 安価のリンク修正、http://potato.2ch.net/test/read.cgi/jisaku/1447271149/9→../test/read.cgi/jisaku/1447271149/9
+                // どうやら現在はこれ治ってるらしく、一時的なものだった模様
                 Bres.Append(message);
                 foreach (Match item in Regex.Matches(message, @"(<a href=.)(?:https?:)?//\w+\.((?:2|5)ch\.net|bbspink\.com)(/test/read.cgi/\w+/\d+/\d{1,4}.\s.+?>&gt;&gt;\d{1,5}</a>)"))
                 {
+                    // こういう-> <a href="../test/read.cgi/software/1458275801/1" rel="noopener noreferrer" target="_blank">&gt;&gt;1</a>
+                    // 形式にしたい（rel="noopener noreferrer" target="_blank"の2つの属性はdatにもある、それ以外はない）
                     Bres.Replace(item.Groups[0].Value, item.Groups[1].Value + ".." + item.Groups[3].Value);
                 }
                 //お絵かきリンク修正
@@ -572,6 +615,12 @@ namespace _2chAPIProxy.HtmlConverter
         /// <returns>変換されたdat一行</returns>
         private static String html2dat(String res)
         {
+            // ここでの入力は1レス1行の、次のようなもの
+            // API導入以前のHTML形式
+            // <dt>126 ：<font color="green"><b>名無し募集中。。。</b></font>：2019/04/22(月) 00:42:21.47 0<dd> <a href="../test/read.cgi/morningcoffee/1555849244/67" rel="noopener noreferrer" target="_blank">&gt;&gt;67</a> <br> 待ってました！ <br><br>
+            // <dt>138 ：<a href="mailto:sage"><b>名無し募集中。。。</b></a>：2019/04/22(月) 01:25:43.27 0<dd> こりゃ陸上競技見に行かなあかんな <br><br>
+            // <dt>147 ：<font color="green"><b>名無し募集中。。。</b></font>：2019/04/22(月) 08:44:08.35 0<dd> 良スレ＝基地外がいないマターリスレになるからね <br><br>
+
             var BuildDat = new StringBuilder(res.Length * 2);
             String temp;
             bool be = false;
@@ -586,10 +635,18 @@ namespace _2chAPIProxy.HtmlConverter
             //あぼ～ん時の処理
             if (Regex.IsMatch(temp, @">：(.+\sID:DELETED)"))
             {
+                // 最終的なdatは"あぼ～ん<>あぼ～ん<>あぼ～ん ID:DELETED<>あぼ～ん<>あぼ～ん<>"のようになる（末尾足りてない？）
                 BuildDat.Append(Regex.Match(temp, @">：(.+\sID:DELETED)").Groups[1].Value + "<>");
                 goto honbun;
             }
-            
+            //あぼ～ん時の処理2、ID:DELETEDではない現在（2023/06頃）の形式（pinkはどうなる？
+            if (Regex.IsMatch(temp, @">：あぼーん "))
+            {
+                // 最終的なdatは"あぼーん<>あぼーん<>あぼーん<>あぼーん<>あぼーん"のようになる（末尾1つ多い）
+                BuildDat.Append("あぼーん<>あぼーん<>あぼーん");
+                goto skip_abone;
+            }
+
             //投稿日時+ID抽出
             var DateID = Regex.Match(temp, @"：(?:(?<date>\d{4}\/.+ID:.+)\s<a\s|(?<date>\d{4}\/.+ID:.+)<dd>|(?<date>\d{4}\/.+?)<dd>\s<a\s|(?<date>\d{4}\/.+?)\s<a\s|(?<date>\d{4}\/.+)<dd>)").Groups["date"].Value;
             BuildDat.Append(DateID);
@@ -670,6 +727,7 @@ namespace _2chAPIProxy.HtmlConverter
                 }
                 else
                 {
+                    // ssspの前にスペース入ってるのはバグではないのか？？
                     ResBody.Replace(mae[1].Value, " sssp:" + mae[2].Value + mae[3].Value);
                 }
             }
@@ -689,6 +747,8 @@ namespace _2chAPIProxy.HtmlConverter
             //<br>が文末or文頭にある時にスペースを補う
             BuildDat.Replace("<br> <>", "<br>  <>");
             BuildDat.Replace("<br> <>", "<br>  <>");
+
+            skip_abone: // あぼーん時のスキップ
 
             //<br>の連続時にスペースを補う
             BuildDat.Replace("<br> <br>", "<br>  <br>");
