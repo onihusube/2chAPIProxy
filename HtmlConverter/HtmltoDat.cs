@@ -189,6 +189,29 @@ namespace _2chAPIProxy.HtmlConverter
                                 // 2023年6月ごろから導入の新HTML形式
                                 System.Diagnostics.Debug.WriteLine("CGI ver202306形式");
 
+                                // 1400行ほど飛ばす
+                                for (int i = 0; i <= 1400; ++i)
+                                {
+                                    html.ReadLine();
+                                }
+
+                                // レス本文探索
+                                for (; !html.EndOfStream; line = html.ReadLine())
+                                {
+                                    if (line.Contains("<article"))
+                                    {
+                                        break;
+                                    }
+                                }
+
+                                // 先に終端に到達したらやめる
+                                if (html.EndOfStream)
+                                {
+                                    break;
+                                }
+
+                                line += html.ReadToEnd();
+
                                 Builddat = this.CGI202306_ConvertProcess(title, URI, line);
                                 break;
                             case CGIType.Until202306:
@@ -272,7 +295,7 @@ namespace _2chAPIProxy.HtmlConverter
             // レスの連続抽出はざっくりとやる
             var ResMatches = Regex.Matches(allres, @"<article id=.+?</section></article>");
             // ↑で抽出した1つのレス内で各要素を抽出
-            Regex ResContent = new Regex(@"<article id=.(?<num>\d+?).+?<summary>.+?<span class=.postusername.>(?<name><b>.+?</b>)</span></summary><span class=.date.>(?<date>.+?)</span><span class=.uid.>(?<id>.+?)</span>(?<be><span class=.be.+?</span>)?</details><section class=.post-content.>(?<massage>.+?)</section></article>");
+            Regex ResContent = new Regex(@"<article id=.(?<num>\d+?).+?<summary>.+?<span class=.postusername.>(?<name><b>.*?</b>)</span></summary><span class=.date.>(?<date>.+?)</span><span class=.uid.>(?<id>.*?)</span>(?<be><span class=.be.+?</span>)?</details><section class=.post-content.>(?<massage>.+?)</section></article>");
 
             // 旧型式（API移行直後のhtml形式）の処理を再利用するために、レス部分のhtmlを1レスづつ旧型式に変換する
             // 細部のハンドリングを継承するための措置
@@ -283,7 +306,7 @@ namespace _2chAPIProxy.HtmlConverter
                 string resnumber = res_content.Groups["num"].Value;
                 string name = res_content.Groups["name"].Value;
                 string date = res_content.Groups["date"].Value;
-                string id = res_content.Groups["id"].Value; // キャプチャ無し（IDなし）の場合は空文字列になる（らしい
+                string id = res_content.Groups["id"].Value; // 無ければ空文字列
                 string be = res_content.Groups["be"].Value; // 無ければ空文字列
                 string message = res_content.Groups["massage"].Value;
 
@@ -313,7 +336,7 @@ namespace _2chAPIProxy.HtmlConverter
                     date = "あぼーん";
                     id = "";
                 }
-                if (string.IsNullOrEmpty(be))
+                if (res_content.Groups["be"].Success)
                 {
                     // beリンクの変換
                     // <span class="be r2BP"><a href="http://be.5ch.net/user/823355746" target="_blank">?2BP(0)</a></span> これを
