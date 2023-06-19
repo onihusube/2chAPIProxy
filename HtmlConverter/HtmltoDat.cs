@@ -73,6 +73,14 @@ namespace _2chAPIProxy.HtmlConverter
         /// </summary>
         public bool IsHttpsReplace { get; set; }
 
+        private enum CGIType
+        {
+            Old,
+            Until202306,
+            Krsw,
+            Ver202306
+        }
+
         /// <summary>
         /// 指定されたスレのHTMLをdatへ変換する
         /// </summary>
@@ -85,10 +93,10 @@ namespace _2chAPIProxy.HtmlConverter
         public Byte[] Gethtml(String URI, int range, String UA, bool CRReplace, String LastMod = null)
         {
             // 現在（23/06/18）pinkはまだ新形式ではない
-            if (URI.Contains(".5ch.net/"))
-            {
-                URI = URI.Replace("test/read.cgi/", "test/read.cgi/c/");
-            }
+            //if (URI.Contains(".5ch.net/"))
+            //{
+            //    URI = URI.Replace("test/read.cgi/", "test/read.cgi/c/");
+            //}
 
             System.Diagnostics.Debug.WriteLine($"{URI} をHTML変換開始");
             System.Diagnostics.Debug.WriteLine($"Range:{range}, UA:{this.UserAgent}, CRReplace:{CRReplace}, LastMod:{LastMod}");
@@ -111,9 +119,12 @@ namespace _2chAPIProxy.HtmlConverter
                     {
                         String title = "もうずっと人大杉";
 
-                        bool NewCGI = false;
+                        CGIType cgiver = CGIType.Ver202306;
+
+                        //bool cgi_ver_202306 = false;
+                        //bool cgi_until_202306 = false;
                         // krsw鯖のHTML形式の検出
-                        bool is_krsw = false;
+                        //bool is_krsw = false;
 
                         string line = html.ReadLine();
 
@@ -126,19 +137,35 @@ namespace _2chAPIProxy.HtmlConverter
                                 if (Regex.IsMatch(line, @"<title>(.+?)<\/title>"))
                                 {
                                     title = Regex.Match(line, @"<title>(.+?)<\/title>").Groups[1].Value;
+                                    cgiver = CGIType.Old;
                                     break;
                                 }
                                 else if (Regex.IsMatch(line, @"<title>(.+?)$"))
                                 {
                                     title = Regex.Match(line, @"<title>(.+?)$").Groups[1].Value;
-                                    NewCGI = true;
+
+                                    // 202306以降かどうかを判定
+                                    bool is_until_202306 =
+                                        line.Contains("</script><title>") ||
+                                        line.Contains("bootstrap.min") ||
+                                        !line.Contains("ad-manager.min");
+
+                                    if (is_until_202306)
+                                    {
+                                        cgiver = CGIType.Until202306;
+                                    }
+                                    else
+                                    {
+                                        cgiver = CGIType.Ver202306;
+                                    }
+
                                     break;
                                 }
                             }
                         }
                         else
                         {
-                            is_krsw = true;
+                            cgiver = CGIType.Krsw;
                             title = Regex.Match(line, @"<title>(.+?)<\/title>").Groups[1].Value;
                         }
 
@@ -153,28 +180,38 @@ namespace _2chAPIProxy.HtmlConverter
                         System.Diagnostics.Debug.WriteLine($"Title:{title}");
 
                         StringBuilder Builddat = null;
-                        string ketu;
+                        string ketu = "0";
                         //新CGI形式と古いCGI形式で処理を分ける
-                        if (is_krsw)
-                        {
-                            // 2022/08/05頃に観測された、krsw鯖の形式（1行に詰まってる）
-                            System.Diagnostics.Debug.WriteLine("krsw鯖形式");
 
-                            Builddat = this.krswCGIFormat(title, URI, line, out ketu);
-                        }
-                        else if (NewCGI)
+                        switch (cgiver)
                         {
-                            // 2022年8月時点で主流のHTML形式（全5行くらいのやつ）
-                            System.Diagnostics.Debug.WriteLine("新CGI形式");
+                            case CGIType.Ver202306:
+                                // 2023年6月ごろから導入の新HTML形式
+                                System.Diagnostics.Debug.WriteLine("CGI ver202306形式");
 
-                            Builddat = this.PresentCGIFormat(title, URI, html, out ketu);
-                        }
-                        else
-                        {
-                            // API導入前の古い形式（1レス1行）
-                            System.Diagnostics.Debug.WriteLine("旧CGI形式");
+                                Builddat = this.CGI202306_ConvertProcess(title, URI, line);
+                                break;
+                            case CGIType.Until202306:
+                                // 2022年8月時点で主流のHTML形式（全5行くらいのやつ）
+                                System.Diagnostics.Debug.WriteLine("新CGI形式");
 
-                            Builddat = this.OldCGIFormat(title, html, out ketu);
+                                Builddat = this.PresentCGIFormat(title, URI, html, out ketu);
+                                break;
+                            case CGIType.Krsw:
+                                // 2022/08/05頃に観測された、krsw鯖の形式（1行に詰まってる）
+                                System.Diagnostics.Debug.WriteLine("krsw鯖形式");
+
+                                Builddat = this.krswCGIFormat(title, URI, line, out ketu);
+                                break;
+                            case CGIType.Old:
+                                // API導入前の古い形式（1レス1行）
+                                System.Diagnostics.Debug.WriteLine("旧CGI形式");
+
+                                Builddat = this.OldCGIFormat(title, html, out ketu);
+                                break;
+                            default:
+                                System.Diagnostics.Debug.WriteLine("未知のCGI形式");
+                                break;
                         }
 
                         //スレッドが生存している場合
