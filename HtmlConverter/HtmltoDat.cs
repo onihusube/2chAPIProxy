@@ -147,8 +147,7 @@ namespace _2chAPIProxy.HtmlConverter
                                     // 202306以降かどうかを判定
                                     bool is_until_202306 =
                                         line.Contains("</script><title>") ||
-                                        line.Contains("bootstrap.min") ||
-                                        !line.Contains("ad-manager.min");
+                                        line.Contains("bootstrap.min");
 
                                     if (is_until_202306)
                                     {
@@ -295,7 +294,7 @@ namespace _2chAPIProxy.HtmlConverter
             // レスの連続抽出はざっくりとやる
             var ResMatches = Regex.Matches(allres, @"<article id=.+?</section></article>");
             // ↑で抽出した1つのレス内で各要素を抽出
-            Regex ResContent = new Regex(@"<article id=.(?<num>\d+?).+?<summary>.+?<span class=.postusername.>(?<name><b>.*?</b>)</span></summary><span class=.date.>(?<date>.+?)</span><span class=.uid.>(?<id>.*?)</span>(?<be><span class=.be.+?</span>)?</details><section class=.post-content.>(?<massage>.+?)</section></article>");
+            Regex ResContent = new Regex(@"<article id=.(?<num>\d+?).+?<summary>.+?<span class=.postusername.>(?<name><b>.+?</b>)</span></summary><span class=.date.>(?<date>.+?)</span><span class=.uid.>(?<id>.*?)</span>(?<be><span class=.be.+?</span>)?</details><section class=.post-content.>(?<massage>.+?)</section></article>");
 
             // 旧型式（API移行直後のhtml形式）の処理を再利用するために、レス部分のhtmlを1レスづつ旧型式に変換する
             // 細部のハンドリングを継承するための措置
@@ -327,14 +326,34 @@ namespace _2chAPIProxy.HtmlConverter
                     }
                     datResnumber = htmlResnumber;
                 }
+                // 目欄が空の時フォントカラー指定を消す（少し昔のスレではこれが残ってることがある）
+                if (name.Contains(@"<font color="))
+                {
+                    name = Regex
+                        .Replace(name, @"<font color=.+?>", "")
+                        .Replace("</font>", "");
+                }
                 // あぼーんの検出（pinkはたぶんうふ～んになる）
                 if (date == "NG" && message == "あぼーん")
                 {
                     // 昔はID:DELETEDになっていたらしいが今は違う
                     // datでは "あぼーん<>あぼーん<>あぼーん<>あぼーん<>あぼーん"のようになる
-                    // ここで直でdat構築したほうが早そう
-                    date = "あぼーん";
-                    id = "";
+                    if (pink)
+                    {
+                        if (message == "うふ～ん")
+                        {
+                            Builddat.Append("うふ～ん<>うふ～ん<>うふ～ん<>うふ～ん<>うふ～ん");
+                        }
+                    }
+                    else
+                    {
+
+                        if (message == "あぼーん")
+                        {
+                            Builddat.Append("あぼーん<>あぼーん<>あぼーん<>あぼーん<>あぼーん");
+                        }
+                    }
+                    goto handle_abone;
                 }
                 if (res_content.Groups["be"].Success)
                 {
@@ -377,8 +396,11 @@ namespace _2chAPIProxy.HtmlConverter
 
                 Bres.Insert(0, $"<dt>{resnumber} ：{name}：{date} {id}{be}<dd>");
                 Bres.Append("<br><br>");
+
                 // レス1つ分をdat形式へ変換
                 Builddat.Append(html2dat(Bres.ToString()));
+
+             handle_abone:
 
                 // 1レス目の末尾にはタイトルを付加する
                 if (!String.IsNullOrEmpty(title))
@@ -486,7 +508,7 @@ namespace _2chAPIProxy.HtmlConverter
                 {
                     dateid = Regex.Replace(dateid, $"</span><span class={'"'}" + @"\w+?" + $"{'"'}>", " ");
                 }
-                //日付IDがNGになっているとき                         
+                // 日付IDがNGになっているとき（たとえばあぼーんのとき、古いスレだと普通にある場合もある？）                      
                 if (dateid.Contains("NG NG"))
                 {
                     DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -700,12 +722,12 @@ namespace _2chAPIProxy.HtmlConverter
                 goto honbun;
             }
             //あぼ～ん時の処理2、ID:DELETEDではない現在（2023/06頃）の形式（pinkはどうなる？
-            if (Regex.IsMatch(temp, @">：あぼーん "))
-            {
-                // 最終的なdatは"あぼーん<>あぼーん<>あぼーん<>あぼーん<>あぼーん"のようになる（末尾1つ多い）
-                BuildDat.Append("あぼーん<>あぼーん<>あぼーん");
-                goto skip_abone;
-            }
+            //if (Regex.IsMatch(temp, @">：あぼーん "))
+            //{
+            //    // 最終的なdatは"あぼーん<>あぼーん<>あぼーん<>あぼーん<>あぼーん"のようになる（末尾1つ多い）
+            //    BuildDat.Append("あぼーん<>あぼーん<>あぼーん");
+            //    goto skip_abone;
+            //}
 
             //投稿日時+ID抽出
             var DateID = Regex.Match(temp, @"：(?:(?<date>\d{4}\/.+ID:.+)\s<a\s|(?<date>\d{4}\/.+ID:.+)<dd>|(?<date>\d{4}\/.+?)<dd>\s<a\s|(?<date>\d{4}\/.+?)\s<a\s|(?<date>\d{4}\/.+)<dd>)").Groups["date"].Value;
@@ -808,7 +830,7 @@ namespace _2chAPIProxy.HtmlConverter
             BuildDat.Replace("<br> <>", "<br>  <>");
             BuildDat.Replace("<br> <>", "<br>  <>");
 
-            skip_abone: // あぼーん時のスキップ
+            //skip_abone: // あぼーん時のスキップ
 
             //<br>の連続時にスペースを補う
             BuildDat.Replace("<br> <br>", "<br>  <br>");
