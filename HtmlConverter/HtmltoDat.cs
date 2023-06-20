@@ -180,7 +180,7 @@ namespace _2chAPIProxy.HtmlConverter
                         System.Diagnostics.Debug.WriteLine($"Title:{title}");
 
                         StringBuilder Builddat = null;
-                        string ketu = "0";
+                        string display_datsize = "0";
                         //新CGI形式と古いCGI形式で処理を分ける
 
                         switch (cgiver)
@@ -198,7 +198,7 @@ namespace _2chAPIProxy.HtmlConverter
                                 // レス本文探索
                                 for (; !html.EndOfStream; line = html.ReadLine())
                                 {
-                                    if (line.Contains("<article"))
+                                    if (line.Contains(@"<span class=""metastats"">"))
                                     {
                                         break;
                                     }
@@ -210,27 +210,27 @@ namespace _2chAPIProxy.HtmlConverter
                                     break;
                                 }
 
-                                line += html.ReadToEnd();
+                                display_datsize = Regex.Match(line, @"<span class=.metastats.>(\d+?)KB</span>").Groups[1].Value;
 
-                                Builddat = this.CGI202306_ConvertProcess(title, URI, line);
+                                Builddat = this.CGI202306_ConvertProcess(title, URI, html.ReadToEnd());
                                 break;
                             case CGIType.Until202306:
                                 // 2022年8月時点で主流のHTML形式（全5行くらいのやつ）
                                 System.Diagnostics.Debug.WriteLine("新CGI形式");
 
-                                Builddat = this.PresentCGIFormat(title, URI, html, out ketu);
+                                Builddat = this.PresentCGIFormat(title, URI, html, out display_datsize);
                                 break;
                             case CGIType.Krsw:
                                 // 2022/08/05頃に観測された、krsw鯖の形式（1行に詰まってる）
                                 System.Diagnostics.Debug.WriteLine("krsw鯖形式");
 
-                                Builddat = this.krswCGIFormat(title, URI, line, out ketu);
+                                Builddat = this.krswCGIFormat(title, URI, line, out display_datsize);
                                 break;
                             case CGIType.Old:
                                 // API導入前の古い形式（1レス1行）
                                 System.Diagnostics.Debug.WriteLine("旧CGI形式");
 
-                                Builddat = this.OldCGIFormat(title, html, out ketu);
+                                Builddat = this.OldCGIFormat(title, html, out display_datsize);
                                 break;
                             default:
                                 System.Diagnostics.Debug.WriteLine("未知のCGI形式");
@@ -255,7 +255,7 @@ namespace _2chAPIProxy.HtmlConverter
                         int size;
                         try
                         {
-                            size = int.Parse(ketu);
+                            size = int.Parse(display_datsize);
                         }
                         catch (FormatException)
                         {
@@ -634,7 +634,7 @@ namespace _2chAPIProxy.HtmlConverter
                     {
                         String thredhtml = html.ReadToEnd();
                         if (t != null) dat = (String)t.InvokeMember("HTMLConvert", BindingFlags.InvokeMethod, null, null, new object[] { thredhtml });
-                        ketu = Regex.Match(thredhtml, @"<div class=.cLength.>(\d+)KB</div>").Groups[1].Value;
+                        ketu = Regex.Match(thredhtml, @"<(div|span) class=.(cLength|metastats).>(\d+?)KB</(div|span)>").Groups[1].Value;
                     }
                     if (this.Is5chURIReplace || this.IsHttpsReplace)
                     {
