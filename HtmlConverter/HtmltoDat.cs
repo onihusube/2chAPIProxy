@@ -289,7 +289,6 @@ namespace _2chAPIProxy.HtmlConverter
             // pinkレスずれ処理用
             bool pink = URI.Contains("bbspink.com");
             int datResnumber = 1, htmlResnumber = 0;
-            long ThreadTime = long.Parse(Regex.Match(URI, @"/(\d{9,})").Groups[1].Value);
 
             // レスの連続抽出はざっくりとやる
             var ResMatches = Regex.Matches(allres, @"<article id=.+?</section></article>");
@@ -334,7 +333,7 @@ namespace _2chAPIProxy.HtmlConverter
                         .Replace("</font>", "");
                 }
                 // あぼーんの検出（pinkはたぶんうふ～んになる）
-                if (date == "NG" && message == "あぼーん")
+                if (date == "NG")
                 {
                     // 昔はID:DELETEDになっていたらしいが今は違う
                     // datでは "あぼーん<>あぼーん<>あぼーん<>あぼーん<>あぼーん"のようになる
@@ -343,6 +342,7 @@ namespace _2chAPIProxy.HtmlConverter
                         if (message == "うふ～ん")
                         {
                             Builddat.Append("うふ～ん<>うふ～ん<>うふ～ん<>うふ～ん<>うふ～ん");
+                            goto handle_abone;
                         }
                     }
                     else
@@ -350,10 +350,11 @@ namespace _2chAPIProxy.HtmlConverter
 
                         if (message == "あぼーん")
                         {
+                            // ーじゃなくて〜にした方が良かったりするだろうか？
                             Builddat.Append("あぼーん<>あぼーん<>あぼーん<>あぼーん<>あぼーん");
+                            goto handle_abone;
                         }
                     }
-                    goto handle_abone;
                 }
                 if (res_content.Groups["be"].Success)
                 {
@@ -366,7 +367,7 @@ namespace _2chAPIProxy.HtmlConverter
 
                     // 本文内のアイコンリンクは処理する必要ない
                 }
-                if (message.Contains("<span class="))
+                if (message.StartsWith("<span class="))
                 {
                     // <span class="AA">を無視する
                     message = Regex.Match(message, @"^<span class=.+?>(.+?)</span>$").Groups[1].Value;
@@ -393,6 +394,7 @@ namespace _2chAPIProxy.HtmlConverter
                 // ↓こうなるように変換
                 // <dt>{レス番} ：<b>{メールリンク}{名前}</b>：{日付} {ID}{beリンク}<dd> {本文} <br><br>
                 // IDがない時でも日付の後ろにスペースは入る
+                // ここの'：'はasciiの':'とは異なる
 
                 Bres.Insert(0, $"<dt>{resnumber} ：{name}：{date} {id}{be}<dd>");
                 Bres.Append("<br><br>");
@@ -809,7 +811,7 @@ namespace _2chAPIProxy.HtmlConverter
                 }
                 else
                 {
-                    // ssspの前にスペース入ってるのはバグではないのか？？
+                    // img.5ch.netのリンクをsssp://にして前後をスペースで囲ってる、何をハンドルしてたのか・・・？
                     ResBody.Replace(mae[1].Value, " sssp:" + mae[2].Value + mae[3].Value);
                 }
             }
