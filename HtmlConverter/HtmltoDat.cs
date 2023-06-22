@@ -188,8 +188,9 @@ namespace _2chAPIProxy.HtmlConverter
                                 // 2023年6月ごろから導入の新HTML形式
                                 System.Diagnostics.Debug.WriteLine("CGI ver202306形式");
 
-                                // 1400行ほど飛ばす
-                                for (int i = 0; i <= 1400; ++i)
+                                // 1300行ほど飛ばす
+                                // /1-で取ると1300行くらいしか前がない場合がある（なんG/なんJとか）
+                                for (int i = 0; i <= 1300; ++i)
                                 {
                                     html.ReadLine();
                                 }
@@ -206,6 +207,7 @@ namespace _2chAPIProxy.HtmlConverter
                                 // 先に終端に到達したらやめる
                                 if (html.EndOfStream)
                                 {
+                                    System.Diagnostics.Debug.WriteLine("本文発見に失敗");
                                     break;
                                 }
 
