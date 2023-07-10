@@ -220,7 +220,7 @@ namespace _2chAPIProxy
             DatProxy.APIMediator.RouninID = this.RouninID;
             DatProxy.APIMediator.RouninPW = this.RouninPW;
             DatProxy.APIMediator.ProxyAddress = this.ProxyAddress;
-            DatProxy.UpdateAsync();
+            //DatProxy.UpdateAsync();
 
             //設定の適用、html変換クラス
             DatProxy.HtmlConverter.UserAgent = _UserAgent4;

@@ -149,14 +149,14 @@ namespace _2chAPIProxy
                         {
                             oSession.oRequest.headers["Referer"] = oSession.oRequest.headers["Referer"].Replace(".2ch.net/", ".5ch.net/");
                         }
-                        if (CheckDaturi.IsMatch(oSession.fullUrl))
+                        /*if (CheckDaturi.IsMatch(oSession.fullUrl))
                         {
                             //dat読みをAPIへ
                             oSession.utilCreateResponseAndBypassServer();
                             GetDat(ref oSession, is2ch);
                             return;
                         }
-                        else if (GetHTML && (CheckKakouri.IsMatch(oSession.fullUrl) || CheckKakouri2.IsMatch(oSession.fullUrl)))
+                        else*/ if (GetHTML && (CheckKakouri.IsMatch(oSession.fullUrl) || CheckKakouri2.IsMatch(oSession.fullUrl)))
                         {
                             //offlaw,rokka,kakoリンクのHTML変換応答
                             if (OtherLinkHTMLTrance(ref oSession)) return;
