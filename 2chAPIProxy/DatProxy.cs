@@ -157,6 +157,7 @@ namespace _2chAPIProxy
                             GetDat(ref oSession, is2ch);
                             return;
                             */
+                            if (ViewModel.Setting.UseTLSWrite) oSession.fullUrl = oSession.fullUrl.Replace("http://", "https://");
 
                             // レスポンス返し直前に介入する
                             oSession.bBufferResponse = true;
@@ -167,6 +168,9 @@ namespace _2chAPIProxy
                                 intervene_in_dat_response(ref ooSession, is2ch);
                             };
                             FiddlerApplication.BeforeResponse += BRHandler;
+
+                            System.Diagnostics.Debug.WriteLine("dat URI：" + oSession.fullUrl);
+
                             return;
                         }
                         else if (GetHTML && (CheckKakouri.IsMatch(oSession.fullUrl) || CheckKakouri2.IsMatch(oSession.fullUrl)))
@@ -1478,6 +1482,12 @@ namespace _2chAPIProxy
         {
             try
             {
+                if (is2ch && string.IsNullOrEmpty(oSession.oResponse.headers["Set-Cookie"]) == false)
+                {
+                    // クッキーのホストを変換
+                    oSession.oResponse.headers["Set-Cookie"] = oSession.oResponse.headers["Set-Cookie"].Replace("5ch.net", "2ch.net");
+                }
+
                 switch (oSession.responseCode)
                 {
                     case 206:
@@ -1491,6 +1501,34 @@ namespace _2chAPIProxy
                         return;
                     case 200:
                         // 全件取得
+                        if (ViewModel.Setting.Replace5chURI || ViewModel.Setting.ReplaceHttpsLink || CRReplace)
+                        {
+                            // 全件取得時のみgzip圧縮されている
+                            oSession.utilDecodeResponse();
+
+                            var resdat = Encoding.GetEncoding("Shift_JIS").GetString(oSession.responseBodyBytes);
+
+                            if (ViewModel.Setting.Replace5chURI || ViewModel.Setting.ReplaceHttpsLink)
+                            {
+                                resdat = HtmlConverter.ResContentReplace(resdat);
+                            }
+
+                            if (CRReplace)
+                            {
+                                // スレタイの©マークを置換
+                                var re = new Regex(@"^.+?<>.*?<>.+?<>.+?<>(.+?&#169;.+?)\t");
+
+                                if (re.IsMatch(resdat))
+                                {
+                                    // 最初の一個だけを置換
+                                    resdat = re.Replace(@"&#169;", "&copy;", 1);
+                                }
+                            }
+
+                            oSession.ResponseBody = Encoding.GetEncoding("Shift_JIS").GetBytes(resdat);
+                        }
+
+                        if (gZipRes) oSession.utilGZIPResponse();
                         return;
                     case 404:
                     case 302:
