@@ -149,14 +149,27 @@ namespace _2chAPIProxy
                         {
                             oSession.oRequest.headers["Referer"] = oSession.oRequest.headers["Referer"].Replace(".2ch.net/", ".5ch.net/");
                         }
-                        /*if (CheckDaturi.IsMatch(oSession.fullUrl))
+                        if (CheckDaturi.IsMatch(oSession.fullUrl))
                         {
+                            /*
                             //dat読みをAPIへ
                             oSession.utilCreateResponseAndBypassServer();
                             GetDat(ref oSession, is2ch);
                             return;
+                            */
+
+                            // レスポンス返し直前に介入する
+                            oSession.bBufferResponse = true;
+                            SessionStateHandler BRHandler = null;
+                            BRHandler = (ooSession) =>
+                            {
+                                FiddlerApplication.BeforeResponse -= BRHandler;
+                                intervene_in_dat_response(ref ooSession, is2ch);
+                            };
+                            FiddlerApplication.BeforeResponse += BRHandler;
+                            return;
                         }
-                        else*/ if (GetHTML && (CheckKakouri.IsMatch(oSession.fullUrl) || CheckKakouri2.IsMatch(oSession.fullUrl)))
+                        else if (GetHTML && (CheckKakouri.IsMatch(oSession.fullUrl) || CheckKakouri2.IsMatch(oSession.fullUrl)))
                         {
                             //offlaw,rokka,kakoリンクのHTML変換応答
                             if (OtherLinkHTMLTrance(ref oSession)) return;
@@ -1459,6 +1472,99 @@ namespace _2chAPIProxy
                 ViewModel.OnModelNotice("書き込み部でエラーです。\n" + err.ToString());
             }
             return;
+        }
+
+        private void intervene_in_dat_response(ref Session oSession, bool is2ch)
+        {
+            try
+            {
+                switch (oSession.responseCode)
+                {
+                    case 206:
+                        // 差分取得
+                        return;
+                    case 200:
+                        // 全件取得
+                        return;
+                    case 404:
+                    case 302:
+                        // dat落ち
+                        if (GetHTML && !OnlyORPerm)
+                        {
+                            // html変換 and 差分応答
+                            String last = oSession.oRequest.headers["If-Modified-Since"], hrange = oSession.oRequest.headers["Range"];
+                            if (String.IsNullOrEmpty(last)) last = "1970/12/1";
+
+                            int range = String.IsNullOrEmpty(hrange) switch
+                            {
+                                true => -1,
+                                false => int.Parse(Regex.Match(hrange, @"\d+").Value)
+                            };
+
+                            byte[] Htmldat = null;
+                            Match ch2uri = CheckDaturi.Match(oSession.fullUrl);
+                            string uri = @"https://" + ch2uri.Groups[1].Value + "." + ch2uri.Groups[2].Value + "/test/read.cgi/" + ch2uri.Groups[3].Value + @"/" + ch2uri.Groups[4].Value + @"/";
+                            string UA = oSession.oRequest.headers["User-Agent"];
+
+                            System.Threading.Thread HtmlTranceThread = new System.Threading.Thread(() =>
+                            {
+                                try
+                                {
+                                    //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+                                    //sw.Start();
+                                    //Htmldat = HTMLtoDat.Gethtml(uri, range, UA, CRReplace, (last != "1970/12/1") ? (last) : (null));
+                                    Htmldat = HtmlConverter.Gethtml(uri, range, UA, CRReplace, (last != "1970/12/1") ? (last) : (null));
+                                    //sw.Stop();
+                                    //System.Diagnostics.Debug.WriteLine("処理時間：" + sw.ElapsedMilliseconds + "ms");
+                                }
+                                catch (System.Threading.ThreadAbortException)
+                                {
+                                    ViewModel.OnModelNotice("タイムアウトによりHTML変換スレッドを中断。\nURI:" + uri);
+                                }
+                            });
+                            HtmlTranceThread.IsBackground = true;
+                            HtmlTranceThread.Start();
+                            if (!HtmlTranceThread.Join(30 * 1000))
+                            {
+                                //変換が終わらなかった場合
+                                HtmlTranceThread.Abort();
+                                Htmldat = new byte[] { 0 };
+                            }
+
+                            // 長さ3以上なら成功のはず
+                            if (Htmldat.Length < 3) return;
+
+                            ViewModel.OnModelNotice(uri + " をhtmlから変換");
+                            if (!ViewModel.Setting.AllReturn && range > 0)
+                            {
+                                oSession.oResponse.headers.HTTPResponseCode = 206;
+                                oSession.oResponse.headers.HTTPResponseStatus = "206 Partial Content";
+                                oSession.oResponse.headers["Accept-Ranges"] = "bytes";
+                                oSession.oResponse.headers["Content-Range"] = "bytes " + range + "-" + (range + Htmldat.Length - 1) + "/" + (range + Htmldat.Length);
+                            }
+                            else
+                            {
+                                oSession.oResponse.headers.HTTPResponseCode = 200;
+                                oSession.oResponse.headers.HTTPResponseStatus = "200 OK";
+                            }
+                            oSession.oResponse.headers["Last-Modified"] = DateTime.Now.ToUniversalTime().ToString("R");
+                            oSession.oResponse.headers["Content-Type"] = "text/plain";
+                            oSession.ResponseBody = Htmldat;
+                            return;
+                        }
+                        return;
+                    default:
+                        // その他の場合
+                        // 416 : あぼーん
+                        // 304 : 更新無し
+                        return;
+                }
+
+            }
+            catch (Exception err)
+            {
+                ViewModel.OnModelNotice("datアクセス部でエラーです。\n" + err.ToString());
+            }
         }
 
         private void GetDat(ref Session oSession, bool is2ch)
