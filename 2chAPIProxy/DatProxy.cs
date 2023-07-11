@@ -1482,6 +1482,12 @@ namespace _2chAPIProxy
                 {
                     case 206:
                         // 差分取得
+                        if (ViewModel.Setting.Replace5chURI || ViewModel.Setting.ReplaceHttpsLink)
+                        {
+                            var resdat = Encoding.GetEncoding("Shift_JIS").GetString(oSession.responseBodyBytes);
+                            resdat = HtmlConverter.ResContentReplace(resdat);
+                            oSession.ResponseBody = Encoding.GetEncoding("Shift_JIS").GetBytes(resdat);
+                        }
                         return;
                     case 200:
                         // 全件取得
@@ -1532,26 +1538,31 @@ namespace _2chAPIProxy
                             }
 
                             // 長さ3以上なら成功のはず
-                            if (Htmldat.Length < 3) return;
-
-                            ViewModel.OnModelNotice(uri + " をhtmlから変換");
-                            if (!ViewModel.Setting.AllReturn && range > 0)
+                            if (3 <= Htmldat.Length)
                             {
-                                oSession.oResponse.headers.HTTPResponseCode = 206;
-                                oSession.oResponse.headers.HTTPResponseStatus = "206 Partial Content";
-                                oSession.oResponse.headers["Accept-Ranges"] = "bytes";
-                                oSession.oResponse.headers["Content-Range"] = "bytes " + range + "-" + (range + Htmldat.Length - 1) + "/" + (range + Htmldat.Length);
+                                ViewModel.OnModelNotice(uri + " をhtmlから変換");
+                                if (!ViewModel.Setting.AllReturn && range > 0)
+                                {
+                                    oSession.oResponse.headers.HTTPResponseCode = 206;
+                                    oSession.oResponse.headers.HTTPResponseStatus = "206 Partial Content";
+                                    oSession.oResponse.headers["Accept-Ranges"] = "bytes";
+                                    oSession.oResponse.headers["Content-Range"] = "bytes " + range + "-" + (range + Htmldat.Length - 1) + "/" + (range + Htmldat.Length);
+                                }
+                                else
+                                {
+                                    oSession.oResponse.headers.HTTPResponseCode = 200;
+                                    oSession.oResponse.headers.HTTPResponseStatus = "200 OK";
+                                }
+                                oSession.oResponse.headers["Last-Modified"] = DateTime.Now.ToUniversalTime().ToString("R");
+                                oSession.oResponse.headers["Content-Type"] = "text/plain";
+                                oSession.ResponseBody = Htmldat;
+                                return;
                             }
-                            else
-                            {
-                                oSession.oResponse.headers.HTTPResponseCode = 200;
-                                oSession.oResponse.headers.HTTPResponseStatus = "200 OK";
-                            }
-                            oSession.oResponse.headers["Last-Modified"] = DateTime.Now.ToUniversalTime().ToString("R");
-                            oSession.oResponse.headers["Content-Type"] = "text/plain";
-                            oSession.ResponseBody = Htmldat;
-                            return;
                         }
+                        // dat落ち応答を404 -> 302に変換
+                        oSession.oResponse.headers.HTTPResponseCode = 302;
+                        oSession.oResponse.headers.HTTPResponseStatus = "302 Found";
+                        oSession.oResponse.headers["Content-Type"] = "text/html; charset=iso-8859-1";
                         return;
                     default:
                         // その他の場合
