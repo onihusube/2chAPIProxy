@@ -189,7 +189,7 @@ namespace _2chAPIProxy
 
                                 string thread_key = match.Groups[3].Value;
                                 // https://鯖名.5ch.net/板名/oyster/スレッドキー上位4桁の数字/スレッドキー.dat の形式に変換
-                                oSession.fullUrl = @$"https://{match.Groups[1].Value}/{match.Groups[2].Value}/oyster/{thread_key.substring(0, 4)}/{thread_key}.dat";
+                                oSession.fullUrl = @$"https://{match.Groups[1].Value}/{match.Groups[2].Value}/oyster/{thread_key.Substring(0, 4)}/{thread_key}.dat";
                                 
                                 // レスポンス返し直前に介入する
                                 oSession.bBufferResponse = true;
