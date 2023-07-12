@@ -173,10 +173,45 @@ namespace _2chAPIProxy
 
                             return;
                         }
-                        else if (GetHTML && (CheckKakouri.IsMatch(oSession.fullUrl) || CheckKakouri2.IsMatch(oSession.fullUrl)))
+                        else if (CheckKakouri2.IsMatch(oSession.fullUrl))
                         {
-                            //offlaw,rokka,kakoリンクのHTML変換応答
-                            if (OtherLinkHTMLTrance(ref oSession)) return;
+                            if (GetHTML && KakolinkPerm && !OnlyORPerm)
+                            {
+                                // kakoリンクのHTML変換応答
+                                if (OtherLinkHTMLTrance(ref oSession)) return;
+                            }
+                            else
+                            {
+                                // 2023/07/11導入？の過去ログURLへの振り替えを行う
+                                System.Diagnostics.Debug.WriteLine("kako URI：" + oSession.fullUrl);
+
+                                var match = CheckKakouri2.Match(oSession.fullUrl);
+
+                                string thread_key = match.Groups[3].Value;
+                                // https://鯖名.5ch.net/板名/oyster/スレッドキー上位4桁の数字/スレッドキー.dat の形式に変換
+                                oSession.fullUrl = @$"https://{match.Groups[1].Value}/{match.Groups[2].Value}/oyster/{thread_key.Substring(0, 4)}/{thread_key}.dat";
+                                
+                                // レスポンス返し直前に介入する
+                                oSession.bBufferResponse = true;
+                                SessionStateHandler BRHandler = null;
+                                BRHandler = (ooSession) =>
+                                {
+                                    FiddlerApplication.BeforeResponse -= BRHandler;
+                                    // ここにきている場合GetHTMLはfalseのはずで、この内部ではGetHTMLがtrueの時のみ変換するので追加の設定伝達は必要ない
+                                    intervene_in_dat_response(ref ooSession, is2ch);
+                                };
+                                FiddlerApplication.BeforeResponse += BRHandler;
+
+                                return;
+                            }
+                        } 
+                        else if (CheckKakouri.IsMatch(oSession.fullUrl))
+                        {
+                            if (GetHTML)
+                            {
+                                // offlaw,rokkaのHTML変換応答
+                                if (OtherLinkHTMLTrance(ref oSession)) return;
+                            }
                         }
                         else if (CheckWriteuri.IsMatch(oSession.fullUrl))
                         {
