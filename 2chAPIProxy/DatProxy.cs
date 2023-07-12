@@ -1516,12 +1516,12 @@ namespace _2chAPIProxy
                             if (CRReplace)
                             {
                                 // スレタイの©マークを置換
-                                var re = new Regex(@"^.+?<>.*?<>.+?<>.+?<>(.+?&#169;.+?)\t");
+                                var re = new Regex(@"^(.+?<>.*?<>.+?<>.+?<>.+?)&#169;(.+?\t)");
 
                                 if (re.IsMatch(resdat))
                                 {
-                                    // 最初の一個だけを置換
-                                    resdat = re.Replace(@"&#169;", "&copy;", 1);
+                                    // 正確にスレタイに含まれているもののみ置換
+                                    resdat = re.Replace(resdat, (match) => { return $"{match.Groups[1].Value}&copy;{match.Groups[2].Value}"; }, 1);
                                 }
                             }
 
