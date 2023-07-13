@@ -159,13 +159,17 @@ namespace _2chAPIProxy
                             */
                             if (ViewModel.Setting.UseTLSWrite) oSession.fullUrl = oSession.fullUrl.Replace("http://", "https://");
 
+                            var match = CheckDaturi.Match(oSession.fullUrl);
+                            // HTML取得用URL
+                            string threaduri = @$"https://{match.Groups[1].Value}.{match.Groups[2].Value}/test/read.cgi/{match.Groups[3].Value}/{match.Groups[4].Value}/";
+
                             // レスポンス返し直前に介入する
                             oSession.bBufferResponse = true;
                             SessionStateHandler BRHandler = null;
                             BRHandler = (ooSession) =>
                             {
                                 FiddlerApplication.BeforeResponse -= BRHandler;
-                                intervene_in_dat_response(ref ooSession, is2ch);
+                                intervene_in_dat_response(ref ooSession, is2ch, threaduri, false);
                             };
                             FiddlerApplication.BeforeResponse += BRHandler;
 
@@ -175,35 +179,29 @@ namespace _2chAPIProxy
                         }
                         else if (CheckKakouri2.IsMatch(oSession.fullUrl))
                         {
-                            if (GetHTML && KakolinkPerm && !OnlyORPerm)
+                            // 2023/07/11導入？の過去ログURLへの振り替えを行う
+                            // まず最初は過去ログ倉庫からの取得を試みる（HTML変換はそれが失敗してから）
+                            System.Diagnostics.Debug.WriteLine("kako URI：" + oSession.fullUrl);
+
+                            var match = CheckKakouri2.Match(oSession.fullUrl);
+
+                            string thread_key = match.Groups[3].Value;
+                            // https://鯖名.5ch.net/板名/oyster/スレッドキー上位4桁の数字/スレッドキー.dat の形式に変換
+                            oSession.fullUrl = @$"https://{match.Groups[1].Value}/{match.Groups[2].Value}/oyster/{thread_key.Substring(0, 4)}/{thread_key}.dat";
+                            // HTML取得用URL
+                            string threadurl = $@"https://{match.Groups[1].Value}/test/read.cgi/{match.Groups[2].Value}/{thread_key}/";
+
+                            // レスポンス返し直前に介入する
+                            oSession.bBufferResponse = true;
+                            SessionStateHandler BRHandler = null;
+                            BRHandler = (ooSession) =>
                             {
-                                // kakoリンクのHTML変換応答
-                                if (OtherLinkHTMLTrance(ref oSession)) return;
-                            }
-                            else
-                            {
-                                // 2023/07/11導入？の過去ログURLへの振り替えを行う
-                                System.Diagnostics.Debug.WriteLine("kako URI：" + oSession.fullUrl);
+                                FiddlerApplication.BeforeResponse -= BRHandler;
+                                intervene_in_dat_response(ref ooSession, is2ch, threadurl, true);
+                            };
+                            FiddlerApplication.BeforeResponse += BRHandler;
 
-                                var match = CheckKakouri2.Match(oSession.fullUrl);
-
-                                string thread_key = match.Groups[3].Value;
-                                // https://鯖名.5ch.net/板名/oyster/スレッドキー上位4桁の数字/スレッドキー.dat の形式に変換
-                                oSession.fullUrl = @$"https://{match.Groups[1].Value}/{match.Groups[2].Value}/oyster/{thread_key.Substring(0, 4)}/{thread_key}.dat";
-                                
-                                // レスポンス返し直前に介入する
-                                oSession.bBufferResponse = true;
-                                SessionStateHandler BRHandler = null;
-                                BRHandler = (ooSession) =>
-                                {
-                                    FiddlerApplication.BeforeResponse -= BRHandler;
-                                    // ここにきている場合GetHTMLはfalseのはずで、この内部ではGetHTMLがtrueの時のみ変換するので追加の設定伝達は必要ない
-                                    intervene_in_dat_response(ref ooSession, is2ch);
-                                };
-                                FiddlerApplication.BeforeResponse += BRHandler;
-
-                                return;
-                            }
+                            return;
                         } 
                         else if (CheckKakouri.IsMatch(oSession.fullUrl))
                         {
@@ -1513,7 +1511,7 @@ namespace _2chAPIProxy
             return;
         }
 
-        private void intervene_in_dat_response(ref Session oSession, bool is2ch)
+        private void intervene_in_dat_response(ref Session oSession, bool is2ch, string thread_url, bool accessing_kakolog)
         {
             try
             {
@@ -1568,6 +1566,16 @@ namespace _2chAPIProxy
                     case 404:
                     case 302:
                         // dat落ち
+                        
+                        // 過去ログ倉庫へのアクセスのレスポンス時で、過去ログ倉庫へのアクセス置換が無効の場合
+                        if (accessing_kakolog && KakolinkPerm == false) 
+                        {
+                            // 何もしない
+                            return;
+                        }
+
+                        // 過去ログ倉庫へのアクセスを優先させたい場合、ここでHTML変換を行わない方が良い可能性がある？
+                        // ここで変換してしまうと、過去ログ倉庫へのアクセスがそもそも発生しえないため・・・
                         if (GetHTML && !OnlyORPerm)
                         {
                             // html変換 and 差分応答
@@ -1581,8 +1589,6 @@ namespace _2chAPIProxy
                             };
 
                             byte[] Htmldat = null;
-                            Match ch2uri = CheckDaturi.Match(oSession.fullUrl);
-                            string uri = @"https://" + ch2uri.Groups[1].Value + "." + ch2uri.Groups[2].Value + "/test/read.cgi/" + ch2uri.Groups[3].Value + @"/" + ch2uri.Groups[4].Value + @"/";
                             string UA = oSession.oRequest.headers["User-Agent"];
 
                             System.Threading.Thread HtmlTranceThread = new System.Threading.Thread(() =>
@@ -1592,13 +1598,13 @@ namespace _2chAPIProxy
                                     //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
                                     //sw.Start();
                                     //Htmldat = HTMLtoDat.Gethtml(uri, range, UA, CRReplace, (last != "1970/12/1") ? (last) : (null));
-                                    Htmldat = HtmlConverter.Gethtml(uri, range, UA, CRReplace, (last != "1970/12/1") ? (last) : (null));
+                                    Htmldat = HtmlConverter.Gethtml(thread_url, range, UA, CRReplace, (last != "1970/12/1") ? (last) : (null));
                                     //sw.Stop();
                                     //System.Diagnostics.Debug.WriteLine("処理時間：" + sw.ElapsedMilliseconds + "ms");
                                 }
                                 catch (System.Threading.ThreadAbortException)
                                 {
-                                    ViewModel.OnModelNotice("タイムアウトによりHTML変換スレッドを中断。\nURI:" + uri);
+                                    ViewModel.OnModelNotice("タイムアウトによりHTML変換スレッドを中断。\nURI:" + thread_url);
                                 }
                             });
                             HtmlTranceThread.IsBackground = true;
@@ -1613,7 +1619,7 @@ namespace _2chAPIProxy
                             // 長さ3以上なら成功のはず
                             if (3 <= Htmldat.Length)
                             {
-                                ViewModel.OnModelNotice(uri + " をhtmlから変換");
+                                ViewModel.OnModelNotice(thread_url + " をhtmlから変換");
                                 if (!ViewModel.Setting.AllReturn && range > 0)
                                 {
                                     oSession.oResponse.headers.HTTPResponseCode = 206;
