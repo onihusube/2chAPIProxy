@@ -70,7 +70,7 @@ namespace _2chAPIProxy
             _KakotoHTML = Setting.KakotoHTML;
             _OfflawRokkaPermutation = Setting.OfflawRokkaPermutation;
             _AllReturn = Setting.AllReturn;
-            _OnlyORPerm = Setting.OnlyORPerm;
+            _NotReplaceNormalDatAccess = Setting.OnlyORPerm;
             _ChunkedResponse = Setting.ChunkedResponse;
             _SyncEnd = Setting.SyncEnd;
             _WANAccess = Setting.WANAccess;
@@ -193,7 +193,7 @@ namespace _2chAPIProxy
             DatProxy.SocksPoxy = Socks4aProxy;
             DatProxy.gZipRes = gZipResponse;
             DatProxy.ChunkRes = ChunkedResponse;
-            DatProxy.OnlyORPerm = OnlyORPerm;
+            DatProxy.NotReplaceNormalDatAccess = NotReplaceNormalDatAccess;
             DatProxy.CRReplace = CRReplace;
             DatProxy.KakolinkPerm = KakolinkPermutation;
             DatProxy.AllUAReplace = (UserAgent3 == "") ? (false) : (AllUAReplace);
@@ -554,8 +554,8 @@ namespace _2chAPIProxy
                 if (_OfflawRokkaPermutation != value)
                 {
                     DatProxy.OfflawRokkaPerm = Setting.OfflawRokkaPermutation = _OfflawRokkaPermutation = value;
-                    if (!value) DatProxy.OnlyORPerm = false;
-                    else DatProxy.OnlyORPerm = OnlyORPerm;
+                    if (!value) DatProxy.NotReplaceNormalDatAccess = false;
+                    else DatProxy.NotReplaceNormalDatAccess = NotReplaceNormalDatAccess;
                     NoticePropertyChanged("OfflawRokkaPermutation");
                 }
             }
@@ -576,16 +576,16 @@ namespace _2chAPIProxy
             }
         }
 
-        bool _OnlyORPerm;
-        public bool OnlyORPerm
+        bool _NotReplaceNormalDatAccess;
+        public bool NotReplaceNormalDatAccess
         {
-            get { return _OnlyORPerm; }
+            get { return _NotReplaceNormalDatAccess; }
             set
             {
-                if (_OnlyORPerm != value)
+                if (_NotReplaceNormalDatAccess != value)
                 {
-                    DatProxy.OnlyORPerm = Setting.OnlyORPerm = _OnlyORPerm = value;
-                    NoticePropertyChanged("OnlyORPerm");
+                    DatProxy.NotReplaceNormalDatAccess = Setting.OnlyORPerm = _NotReplaceNormalDatAccess = value;
+                    NoticePropertyChanged("NotReplaceNormalDatAccess");
                 }
             }
         }

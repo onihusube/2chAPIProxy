@@ -60,7 +60,7 @@ namespace _2chAPIProxy
         public bool gZipRes { get; set; }
         public bool ChunkRes { get; set; }
         public bool SocksPoxy { get; set; }
-        public bool OnlyORPerm { get; set; }
+        public bool NotReplaceNormalDatAccess { get; set; }
         public bool CRReplace { get; set; }
         public bool KakolinkPerm { get; set; }
         public bool AllUAReplace { get; set; }
@@ -515,7 +515,7 @@ namespace _2chAPIProxy
                         }
                     });
                 }
-                else if (KakolinkPerm && !OnlyORPerm && CheckKakouri2.IsMatch(oSession.fullUrl))
+                else if (KakolinkPerm && CheckKakouri2.IsMatch(oSession.fullUrl))
                 {
                     //kakoリンクのHTML変換応答置換
                     offlowperm = false;
@@ -1567,16 +1567,14 @@ namespace _2chAPIProxy
                     case 302:
                         // dat落ち
                         
-                        // 過去ログ倉庫へのアクセスのレスポンス時で、過去ログ倉庫へのアクセス置換が無効の場合
-                        if (accessing_kakolog && KakolinkPerm == false) 
+                        // 過去ログのHTML変換を行うかどうかを判定
+                        bool is_convert = accessing_kakolog switch
                         {
-                            // 何もしない
-                            return;
-                        }
+                            true => GetHTML && KakolinkPerm,                // 過去ログ倉庫で見つからなかった場合 : 過去ログ変換が有効 かつ 過去ログ倉庫へのアクセス置換が有効
+                            false => GetHTML && !NotReplaceNormalDatAccess  // 通常datアクセス時にdat落ちの場合 : 過去ログ変換が有効 かつ dat落ち検出時の変換が有効
+                        };
 
-                        // 過去ログ倉庫へのアクセスを優先させたい場合、ここでHTML変換を行わない方が良い可能性がある？
-                        // ここで変換してしまうと、過去ログ倉庫へのアクセスがそもそも発生しえないため・・・
-                        if (GetHTML && !OnlyORPerm)
+                        if (is_convert)
                         {
                             // html変換 and 差分応答
                             String last = oSession.oRequest.headers["If-Modified-Since"], hrange = oSession.oRequest.headers["Range"];
@@ -1653,7 +1651,7 @@ namespace _2chAPIProxy
             }
             catch (Exception err)
             {
-                ViewModel.OnModelNotice("datアクセス部でエラーです。\n" + err.ToString());
+                ViewModel.OnModelNotice("dat応答介入時にエラーです。\n" + err.ToString());
             }
         }
 
@@ -1824,7 +1822,7 @@ namespace _2chAPIProxy
                         if (gZipRes) oSession.utilGZIPResponse();
                         break;
                     case HttpStatusCode.NotImplemented:
-                        if (!GetHTML || OnlyORPerm)
+                        if (!GetHTML || NotReplaceNormalDatAccess)
                         {
                             oSession.oResponse.headers.HTTPResponseCode = 302;
                             oSession.oResponse.headers.HTTPResponseStatus = "302 Found";
@@ -1878,7 +1876,7 @@ namespace _2chAPIProxy
                     case HttpStatusCode.InternalServerError:
                         Byte[] Htmldat = null;
                         String uri = @"https://" + ch2uri.Groups[1].Value + "." + ch2uri.Groups[2].Value + "/test/read.cgi/" + ch2uri.Groups[3].Value + @"/" + ch2uri.Groups[4].Value + @"/";
-                        if (GetHTML && !OnlyORPerm)
+                        if (GetHTML && !NotReplaceNormalDatAccess)
                         {
                             String UA = oSession.oRequest.headers["User-Agent"];
                             System.Threading.Thread HtmlTranceThread = new System.Threading.Thread(() =>
