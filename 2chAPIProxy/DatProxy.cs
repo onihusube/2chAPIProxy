@@ -905,21 +905,16 @@ namespace _2chAPIProxy
 
                 //送信クッキーのセット
                 String domain = CheckWriteuri.Match(oSession.fullUrl).Groups[1].Value;
-                //String domain = ".5ch.net";
-                foreach (var cook in Cookie)
+                foreach (var cook in Cookie.Where(c => string.IsNullOrEmpty(c.Value) == false))
                 {
-                    if (cook.Value != "")
+                    var m = Regex.Match(cook.Value, @"^(.+?)=(.*?)(;|$)");
+                    try
                     {
-                        var m = Regex.Match(cook.Value, @"^(.+?)=(.*?)(;|$)");
-                        try
-                        {
-                            Write.CookieContainer.Add(new Cookie(m.Groups[1].Value, m.Groups[2].Value, "/", domain));
-                        }
-                        catch (CookieException)
-                        {
-                            continue;
-                        }
-                        //if (cook.Key == "PREN" || cook.Key == "yuki" || cook.Key == "MDMD" || cook.Key == "DMDM")
+                        Write.CookieContainer.Add(new Cookie(m.Groups[1].Value, m.Groups[2].Value, "/", domain));
+                    }
+                    catch (CookieException)
+                    {
+                        continue;
                     }
                 }
                 //浪人を無効化
@@ -970,6 +965,13 @@ namespace _2chAPIProxy
 
                         if (wres.Headers.AllKeys.Contains("X-Chx-Error") == true)
                         {
+                            // どんぐりが枯れてしまいました。
+                            // X-Chx-Error:1930 Acorn have dried up.
+                            if (wres.Headers["X-Chx-Error"].Contains("1930"))
+                            {
+                                // どんぐり枯れを検知したら、acornクッキーを削除する
+                                Cookie["acorn"] = "";
+                            }
                             ViewModel.OnModelNotice("X-Chx-Error : " + wres.Headers["X-Chx-Error"]);
                         }
 
