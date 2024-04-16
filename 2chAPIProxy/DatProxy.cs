@@ -891,17 +891,42 @@ namespace _2chAPIProxy
                 Write.Referer = referer;
 
                 if (string.IsNullOrEmpty(Proxy) == false) Write.Proxy = new WebProxy(Proxy);
+
                 Write.CookieContainer = new CookieContainer();
-                //送信されてきたクッキーを抽出
-                foreach (Match mc in Regex.Matches(oSession.oRequest.headers["Cookie"], @"(?:\s+|^)((.+?)=(?:|.+?)(?:;|$))"))
+
+                // どんぐり枯れレスポンスを検知するマーカー
+                const string mark_acorn_dride_up = "ignore next acorn";
+                // どんぐりクッキー名
+                const string acorn_cookie = "acorn";
+
                 {
-                    Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
+                    bool ignore_acorn = false;
+
+                    // どんぐりが枯れた次のレス投稿の場合、acornを送らない
+                    if (Cookie.ContainsKey(acorn_cookie) && Cookie[acorn_cookie] == mark_acorn_dride_up)
+                    {
+                        ignore_acorn = true;
+                        Cookie[acorn_cookie] = "";
+                    }
+
+                    //送信されてきたクッキーを抽出
+                    foreach (Match mc in Regex.Matches(oSession.oRequest.headers["Cookie"], @"(?:\s+|^)((.+?)=(?:|.+?)(?:;|$))"))
+                    {
+                        Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
+                    }
+
+                    // acornクッキーを削除し、送らないようにする
+                    if (ignore_acorn)
+                    {
+                        Cookie.Remove(acorn_cookie);
+                    }
                 }
+
                 Cookie.Remove("sid");
                 Cookie.Remove("SID");
-
                 // TAKO=ODORIを消す
                 Cookie.Remove("TAKO");
+
 
                 //送信クッキーのセット
                 String domain = CheckWriteuri.Match(oSession.fullUrl).Groups[1].Value;
@@ -917,6 +942,7 @@ namespace _2chAPIProxy
                         continue;
                     }
                 }
+
                 //浪人を無効化
                 if (ViewModel.Setting.PostRoninInvalid && ReqBody.Contains("sid="))
                 {
@@ -950,6 +976,8 @@ namespace _2chAPIProxy
                         }
 
                         HttpWebResponse wres = (HttpWebResponse)Write.GetResponse();
+
+                        // Set-Cookieの抽出
                         if (wres.Cookies.Count > 0)
                         {
                             var cul = new System.Globalization.CultureInfo("en-US");
@@ -970,7 +998,8 @@ namespace _2chAPIProxy
                             if (wres.Headers["X-Chx-Error"].Contains("1930"))
                             {
                                 // どんぐり枯れを検知したら、acornクッキーを削除する
-                                Cookie["acorn"] = "";
+                                // 本当に削除するのは、次の投稿時
+                                Cookie[acorn_cookie] = mark_acorn_dride_up;
                             }
                             ViewModel.OnModelNotice("X-Chx-Error : " + wres.Headers["X-Chx-Error"]);
                         }
