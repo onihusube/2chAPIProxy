@@ -189,7 +189,7 @@ namespace _2chAPIProxy.HtmlConverter
                                 System.Diagnostics.Debug.WriteLine("CGI ver202306形式");
 
                                 // 1300行ほど飛ばす
-                                // /1-で取ると1300行くらいしか前がない場合がある（なんG/なんJとか）
+                                // /1-で取ると1390行くらいしか前がない場合がある（なんG/なんJとか）
                                 for (int i = 0; i <= 1300; ++i)
                                 {
                                     html.ReadLine();
@@ -295,13 +295,27 @@ namespace _2chAPIProxy.HtmlConverter
             // レスの連続抽出はざっくりとやる
             var ResMatches = Regex.Matches(allres, @"<article id=.+?</section></article>");
             // ↑で抽出した1つのレス内で各要素を抽出
-            Regex ResContent = new Regex(@"<article id=.(?<num>\d+?).+?<summary>.+?<span class=.postusername.>(?<name><b>.+?</b>)</span></summary><span class=.date.>(?<date>.+?)</span><span class=.uid.>(?<id>.*?)</span>(?<be><span class=.be.+?</span>)?</details><section class=.post-content.>(?<massage>.+?)</section></article>");
+            Regex ResContent 
+                = new Regex(@"<article id=.(?<num>\d+?).+?<summary>.+?<span class=.postusername.>(?<name><b>.+?</b>)</span></summary><span class=.date.>(?<date>.+?)</span><span class=.uid.>(?<id>.*?)</span>(?<be><span class=.be.+?</span>)?</details><section class=.post-content.>(?<massage>.+?)</section></article>");
+            Regex ResContentWithAcorn
+                = new Regex(@"<article id=.(?<num>\d+?).+?<summary>.+?<span class=.postusername.>(?<name><b>.+?</b>)</span><span style=.+?</summary><span style=.+?><span class=.date.>(?<date>.+?)</span><span class=.uid.>(?<id>.*?)</span></span>(?<be><span class=.be.+?</span>)?</details><section class=.post-content.>(?<massage>.+?)</section></article>");
 
             // 旧型式（API移行直後のhtml形式）の処理を再利用するために、レス部分のhtmlを1レスづつ旧型式に変換する
             // 細部のハンドリングを継承するための措置
             foreach (Match resmatch in ResMatches)
             {
-                Match res_content = ResContent.Match(resmatch.Value);
+                Match res_content;
+
+                // どんぐりの有効性によって抽出方法を変更
+                if (ResContent.IsMatch(resmatch.Value))
+                {
+                    res_content = ResContent.Match(resmatch.Value);
+                }
+                else
+                {
+                    res_content = ResContentWithAcorn.Match(resmatch.Value);
+                }
+
 
                 string resnumber = res_content.Groups["num"].Value;
                 string name = res_content.Groups["name"].Value;
@@ -800,13 +814,13 @@ namespace _2chAPIProxy.HtmlConverter
             {
                 ResBody.Replace(m.Groups[0].Value, "sssp:" + m.Groups[1].Value);
             }
-            
+
             //Beアイコン、絵文字リンクの成型http:→sssp:
             //先頭行のリンク処理
-            if (Regex.IsMatch(temp, @"^\s(<img src=.(?:https?:)?(\/\/img\.(?:2|5)ch\.net.+?).>)(?:(\s)<br>)?"))
+            const string top_imglink_pattern = @"^ (<img src=.(?:https?:)?(\/\/img\.(?:2|5)ch\.net.+?).>)(?:( )<br>)?";
+            if (Regex.IsMatch(temp, top_imglink_pattern))
             {
-                var mae = Regex.Match(temp, @"^\s(<img src=.(?:https?:)?(\/\/img\.(?:2|5)ch\.net.+?).>)(?:(\s)<br>)?").Groups;
-                //if (Regex.IsMatch(BuildDat.ToString(), @"BE:\d+"))
+                var mae = Regex.Match(temp, top_imglink_pattern).Groups;
                 if (be == true)
                 {
                     ResBody.Replace(mae[1].Value, "sssp:" + mae[2].Value);
@@ -816,6 +830,18 @@ namespace _2chAPIProxy.HtmlConverter
                     // img.5ch.netのリンクをsssp://にして前後をスペースで囲ってる、何をハンドルしてたのか・・・？
                     ResBody.Replace(mae[1].Value, " sssp:" + mae[2].Value + mae[3].Value);
                 }
+            }
+            // 行頭のお絵描きリンク処理
+            const string top_oekakilink_pattern = @"^<br> <img src=.(//o.5ch.net/.+?)"">";
+            if (Regex.IsMatch(temp, top_oekakilink_pattern))
+            {
+                /*
+                 * こんな感じの対応
+                 * <section class="post-content"> <br> <img src="//o.5ch.net/20vzd.png"> </section>
+                 * <>  <br> sssp://o.5ch.net/20vzd.png <>
+                 */
+                var match = Regex.Match(temp, top_oekakilink_pattern).Groups;
+                ResBody.Replace(match[0].Value, $"  <br> sssp:{match[1].Value} ");
             }
 
             //その他本文中リンク処理
