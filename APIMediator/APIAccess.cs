@@ -46,10 +46,10 @@ namespace _2chAPIProxy.APIMediator
         ConcurrentDictionary<string, HoboData> m_HoboCache = new ConcurrentDictionary<string, HoboData>();
 
         //SID自動更新用タイマー
-        Timer m_HoboCheck = null;
+        //Timer m_HoboCheck = null;
 
         //タイマーの間隔
-        int m_ElapsedTime = 0;
+        //int m_ElapsedTime = 0;
 
         //デフォルトのSID、これでdat取得等をすると更新が帰ってくる
         static readonly string DefaultSID = "24435386Z78507D59284D46893Z55945T45741Z29183f65630d66139T82258c3442O53506n58942M48038D83651D14687r50234R6786f19427I86154p86883o54015c71781T19953D19830n36479K17338A62340746Z84798";
@@ -142,40 +142,40 @@ namespace _2chAPIProxy.APIMediator
             // ServicePointManagerの設定はプログラム？で共通。ここで設定すれば本体および他のdllでも設定されている
 
             //SID自動更新タイマー開始
-            this.m_HoboCheck = new Timer((o) => {
-                //更新回数2回以下のデータを削除
-                var rmkey = from db in this.m_HoboCache.ToArray().AsParallel()
-                            where db.Value.Count < 2
-                            select db.Key;
-                foreach (var key in rmkey) this.m_HoboCache.TryRemove(key, out HoboData value);
-                //更新回数5回以下のデータをリセット
-                var rkey = from db in this.m_HoboCache.ToArray().AsParallel()
-                           where db.Value.Count <= 5
-                           select db.Key;
-                foreach (var key in rkey) this.m_HoboCache[key].Count = 0;
-                //更新回数6回以上のデータを5にセット
-                var skey = from db in this.m_HoboCache.ToArray().AsParallel()
-                           where db.Value.Count > 5
-                           select db.Key;
-                foreach (var key in skey) this.m_HoboCache[key].Count = 5;
+            //this.m_HoboCheck = new Timer((o) => {
+            //    //更新回数2回以下のデータを削除
+            //    var rmkey = from db in this.m_HoboCache.ToArray().AsParallel()
+            //                where db.Value.Count < 2
+            //                select db.Key;
+            //    foreach (var key in rmkey) this.m_HoboCache.TryRemove(key, out HoboData value);
+            //    //更新回数5回以下のデータをリセット
+            //    var rkey = from db in this.m_HoboCache.ToArray().AsParallel()
+            //               where db.Value.Count <= 5
+            //               select db.Key;
+            //    foreach (var key in rkey) this.m_HoboCache[key].Count = 0;
+            //    //更新回数6回以上のデータを5にセット
+            //    var skey = from db in this.m_HoboCache.ToArray().AsParallel()
+            //               where db.Value.Count > 5
+            //               select db.Key;
+            //    foreach (var key in skey) this.m_HoboCache[key].Count = 5;
 
-                this.m_ElapsedTime += 8;
-                if (this.m_ElapsedTime >= 24)
-                {
-                    try
-                    {
-                        this.UpdateSID();
-                    }
-                    catch (Exception err)
-                    {
-                        System.Diagnostics.Debug.WriteLine(err.ToString());
-                        CurrentError = $"SessionIDの更新に失敗しました。\n{err.ToString()}";
-                        //ViewModel.OnModelNotice("SessionIDの更新に失敗しました。\n" + err.ToString());
-                    }
-                    this.m_ElapsedTime = 0;
-                }
-                this.m_HoboCheck.Change(3600000 * 8, -1);
-            }, null, 3600000 * 8, -1);
+            //    this.m_ElapsedTime += 8;
+            //    if (this.m_ElapsedTime >= 24)
+            //    {
+            //        try
+            //        {
+            //            this.UpdateSID();
+            //        }
+            //        catch (Exception err)
+            //        {
+            //            System.Diagnostics.Debug.WriteLine(err.ToString());
+            //            CurrentError = $"SessionIDの更新に失敗しました。\n{err.ToString()}";
+            //            //ViewModel.OnModelNotice("SessionIDの更新に失敗しました。\n" + err.ToString());
+            //        }
+            //        this.m_ElapsedTime = 0;
+            //    }
+            //    this.m_HoboCheck.Change(3600000 * 8, -1);
+            //}, null, 3600000 * 8, -1);
         }
 
         /// <summary>
@@ -256,8 +256,8 @@ namespace _2chAPIProxy.APIMediator
                 String hobo = KeyGen("/v1/" + key.Key + m_SID + this.AppKey);
                 this.m_HoboCache[key.Key].Hobo = Encoding.ASCII.GetBytes("sid=" + m_SID + "&hobo=" + hobo + "&appkey=" + this.AppKey);
             }
-            this.m_HoboCheck.Change(3600000 * 8, -1);
-            this.m_ElapsedTime = 0;
+            //this.m_HoboCheck.Change(3600000 * 8, -1);
+            //this.m_ElapsedTime = 0;
         }
 
         /// <summary>

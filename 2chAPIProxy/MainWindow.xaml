@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:local="clr-namespace:_2chAPIProxy" mc:Ignorable="d" x:Class="_2chAPIProxy.MainWindow"
-        Title="2chAPIProxy Ver:2024.04.17 nonAPI test" Height="480" Width="640"
+        Title="2chAPIProxy Ver:2024.04.26 nonAPI" Height="480" Width="640"
         Icon="icon3.ico" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" Background="White" d:DataContext="{d:DesignInstance {x:Type local:ViewModel}}">
     <Window.InputBindings>
         <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveSetting}"/>
