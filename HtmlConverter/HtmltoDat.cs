@@ -111,6 +111,7 @@ namespace _2chAPIProxy.HtmlConverter
             using (WebClient get = new WebClient())
             {
                 get.Headers["User-Agent"] = this.UserAgent;
+                get.Headers["Set-Cookie"] = "5chClassic=on";
 
                 try
                 {
