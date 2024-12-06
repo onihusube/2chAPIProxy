@@ -1594,10 +1594,11 @@ namespace _2chAPIProxy
 
                         if (gZipRes) oSession.utilGZIPResponse();
                         return;
+                    case 301:
                     case 404:
                     case 302:
                         // dat落ち
-                        
+
                         // 過去ログのHTML変換を行うかどうかを判定
                         bool is_convert = accessing_kakolog switch
                         {

@@ -78,7 +78,8 @@ namespace _2chAPIProxy.HtmlConverter
             Old,
             Until202306,
             Krsw,
-            Ver202306
+            Ver202306,
+            Kako202412
         }
 
         /// <summary>
@@ -153,6 +154,12 @@ namespace _2chAPIProxy.HtmlConverter
                                     if (is_until_202306)
                                     {
                                         cgiver = CGIType.Until202306;
+                                        break;
+                                    }
+
+                                    if (line.Contains($"<base href={'"'}https://kako.5ch.net/poverty/{'"'}><title>"))
+                                    {
+                                        cgiver = CGIType.Kako202412;
                                     }
                                     else
                                     {
@@ -215,6 +222,30 @@ namespace _2chAPIProxy.HtmlConverter
                                 display_datsize = Regex.Match(line, @"<span class=.metastats.>(\d+?)KB</span>").Groups[1].Value;
 
                                 Builddat = this.CGI202306_ConvertProcess(title, URI, html.ReadToEnd());
+                                break;
+                            case CGIType.Kako202412:
+                                // 2024年12月頃から？の301リダイレクトを返してくる場合のHTML形式
+                                System.Diagnostics.Debug.WriteLine("Kako");
+
+                                // レス本文探索
+                                for (; !html.EndOfStream; line = html.ReadLine())
+                                {
+                                    if (line.Contains(@"<span class=""metastats"">"))
+                                    {
+                                        break;
+                                    }
+                                }
+
+                                // 先に終端に到達したらやめる
+                                if (html.EndOfStream)
+                                {
+                                    System.Diagnostics.Debug.WriteLine("本文発見に失敗");
+                                    break;
+                                }
+
+                                display_datsize = Regex.Match(line, @"<span class=.metastats.>(\d+?)KB</span>").Groups[1].Value;
+
+                                Builddat = this.Kako202412_ConvertProcess(title, URI, html.ReadToEnd());
                                 break;
                             case CGIType.Until202306:
                                 // 2022年8月時点で主流のHTML形式（全5行くらいのやつ）
@@ -432,6 +463,107 @@ namespace _2chAPIProxy.HtmlConverter
                     Builddat.Append("\n");
                 }
 
+                Bres.Clear();
+                datResnumber++;
+            }
+
+            return Builddat;
+        }
+
+
+        private StringBuilder Kako202412_ConvertProcess(string title, string URI, string allres)
+        {
+            // datの全体保持用
+            var Builddat = new StringBuilder(510 * 1024);
+            // 1レス分のhtml保持用
+            var Bres = new StringBuilder(5 * 1024);
+            //pinkレスずれ処理用
+            bool pink = URI.Contains("bbspink.com");
+            int datResnumber = 1, htmlResnumber = 0;
+            long ThreadTime = long.Parse(Regex.Match(URI, @"/(\d{9,})").Groups[1].Value);
+            var ResMatches = Regex.Matches(allres, @"<summary><span class=.postid.>(\d+?)</span>(.+?</section></div>)");
+
+            // 旧型式の処理を再利用するために、レス部分のhtmlを1レスづつ旧型式に変換する
+            foreach (Match Res in ResMatches)
+            {
+                // 日付 ID be を抽出
+                Match date = Regex.Match(Res.Groups[2].Value, @"<span class=.date.>(.+?(?:</span><span class=.uid.>(.+?))?)(?:</span>)?</span>(?:<span class=.be\s.+?.>(.+?)</span>)?");
+                String number = Res.Groups[1].Value;
+                //0,NGの検出
+                if ((number == "0" || number == "0000") && date.Groups[1].Value == "NG")
+                {
+                    //飛ばす
+                    continue;
+                }
+                //htmlでレスが飛んでいるときを検出
+                if (pink && int.TryParse(number, out htmlResnumber) && datResnumber < htmlResnumber)
+                {
+                    for (int j = htmlResnumber - datResnumber; j > 0; --j)
+                    {
+                        Builddat.Append("うふ～ん<>うふ～ん<>うふ～ん ID:DELETED<>うふ～ん<>うふ～ん<>\n");
+                    }
+                    datResnumber = htmlResnumber;
+                }
+                String name = Regex.Match(Res.Groups[2].Value, $"<span class=.postusername.>(.+?(?:</b>|</a>))</span>").Groups[1].Value;
+                // 目欄のnofollow削除
+                name = name.Replace($"rel={'"'}nofollow{'"'} ", "");
+                //ID部のspanタグ削除
+                String dateid = date.Groups[1].Value;
+                if (dateid.Contains("</span><span "))
+                {
+                    dateid = dateid.Replace($"</span><span class={'"'}uid{'"'}>", " ");
+                }
+                // 日付IDがNGになっているとき（たとえばあぼーんのとき、古いスレだと普通にある場合もある？）                      
+                if (dateid.Contains("NG NG"))
+                {
+                    DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                    UnixEpoch = UnixEpoch.AddSeconds(ThreadTime);
+                    String time = UnixEpoch.ToLocalTime().ToString("yyyy/MM/dd(ddd) HH:mm:ss.00");
+                    dateid = time + " ID:NG0";
+                }
+                //beリンク処理
+                String be = "";
+                if (!string.IsNullOrEmpty(date.Groups[3].Value))
+                {
+                    var mb = Regex.Match(date.Groups[3].Value, @"<a href.+?(\d{2,}).+?>(.+)$");
+                    be = $" <a href={'"'}javascript:be({mb.Groups[1].Value});{'"'}>{mb.Groups[2].Value}";
+                }
+                String message = Regex.Match(Res.Groups[2].Value, @"<section class=.post-content.>(?:<span class=.escaped.>)?(.+?)</section></div>").Groups[1].Value;
+                if (message.Contains("<span class=") == true)
+                {
+                    //<span class="AA">を無視する
+                    message = Regex.Match(message, @"<span class=.+?>(\s.+?\s)(?:</span>)").Groups[1].Value;
+                }
+                if (Regex.IsMatch(message, $@"\sclass={'"'}reply_link{'"'}>") == true)
+                {
+                    // class="reply_link"
+                    message = Regex.Replace(message, $@"\sclass={'"'}reply_link{'"'}>", ">");
+                }
+                // 本文追加
+                Bres.Append(message);
+
+                //お絵かきリンク修正
+                foreach (Match item in Regex.Matches(message, $@"<a\s(?:class={'"'}image{'"'}\s)?href=" + '"' + @"(?:https?:)?//jump.(?:2|5)ch\.net/\?(https?://[a-zA-Z\d]+?\.8ch.net\/.+?\.\w+?)" + '"' + @">https?://[a-zA-Z\d]+?\.8ch\.net\/.+?\.\w+?</a>"))
+                {
+                    Bres.Replace(item.Groups[0].Value, "<img src=" + '"' + item.Groups[1].Value + '"' + ">");
+                }
+                //p53など、レス前後にスペースが無いときに補う。
+                if (!Regex.IsMatch(message, @"^\s.+\s$"))
+                {
+                    Bres.Insert(0, " ");
+                    Bres.Append(" ");
+                }
+                Bres.Insert(0, "：" + dateid + be + "<dd>");
+                Bres.Insert(0, "<dt>" + number + " ：" + name);
+                Bres.Append("<br><br>");
+                // レス1つ分をdat形式へ変換
+                Builddat.Append(html2dat(Bres.ToString()));
+                if (!String.IsNullOrEmpty(title))
+                {
+                    Builddat.Append(title + "\n");
+                    title = "";
+                }
+                else Builddat.Append("\n");
                 Bres.Clear();
                 datResnumber++;
             }
@@ -809,11 +941,11 @@ namespace _2chAPIProxy.HtmlConverter
                 ResBody.Replace(m.Groups[0].Value, m.Groups[1].Value);
             }
 
-            //お絵カキコリンクを処理
+            //お絵カキコリンクを処理（うろ覚えだけど、この形式は8ch.netオンリー・・・？
             var oekakiko = Regex.Matches(temp, @"<img\ssrc=" + '"' + @"(?:https?:)?(\/\/[a-zA-Z\d]+?\.8ch\.net\/\w+?\.\w+?)" + '"' + ">");
             foreach (Match m in oekakiko)
             {
-                ResBody.Replace(m.Groups[0].Value, "sssp:" + m.Groups[1].Value);
+                ResBody.Replace(m.Groups[0].Value, "sssp:" + m.Groups[1].Value.Replace("8ch.net", "5ch.net"));
             }
 
             //Beアイコン、絵文字リンクの成型http:→sssp:
