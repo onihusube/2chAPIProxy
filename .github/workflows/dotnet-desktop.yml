@@ -78,7 +78,7 @@ jobs:
     - name: Build solution
       run: msbuild 2chAPIProxy.sln -t:rebuild -property:Configuration=Release
       
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
           name: provisional_binary
           path: |
