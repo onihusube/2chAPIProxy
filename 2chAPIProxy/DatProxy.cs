@@ -995,7 +995,8 @@ namespace _2chAPIProxy
                         {
                             // どんぐりが枯れてしまいました。
                             // X-Chx-Error:1930 Acorn have dried up.
-                            if (wres.Headers["X-Chx-Error"].Contains("1930"))
+                            // X-Chx-Error:1932 should login to the donguri system.;
+                            if (wres.Headers["X-Chx-Error"].Contains("1930") || wres.Headers["X-Chx-Error"].Contains("1932"))
                             {
                                 // どんぐり枯れを検知したら、acornクッキーを削除する
                                 // 本当に削除するのは、次の投稿時
