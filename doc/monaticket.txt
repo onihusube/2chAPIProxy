@@ -1,0 +1,189 @@
+# 送信初回（書き込み確認
+https://egg.5ch.net/test/bbs.cgi
+
+:authority:
+egg.5ch.net
+:method:
+POST
+:path:
+/test/bbs.cgi
+:scheme:
+https
+accept:
+text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+accept-encoding:
+gzip, deflate, br, zstd
+accept-language:
+ja,en;q=0.9,en-GB;q=0.8,en-US;q=0.7
+cache-control:
+max-age=0
+content-length:
+135
+content-type:
+application/x-www-form-urlencoded
+cookie:
+READJS="off"
+origin:
+https://egg.5ch.net
+priority:
+u=0, i
+referer:
+https://egg.5ch.net/test/read.cgi/streaming/1740234012/
+sec-ch-ua:
+"Chromium";v="134", "Not:A-Brand";v="24", "Microsoft Edge";v="134"
+sec-ch-ua-mobile:
+?0
+sec-ch-ua-platform:
+"Windows"
+sec-fetch-dest:
+document
+sec-fetch-mode:
+navigate
+sec-fetch-site:
+same-origin
+sec-fetch-user:
+?1
+upgrade-insecure-requests:
+1
+user-agent:
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0
+
+```
+FROM: 
+mail: sage
+MESSAGE: (値をデコードできません)
+bbs: streaming
+key: 1740234012
+time: 1741779411
+submit: (値をデコードできません)
+oekaki_thread1: 
+```
+
+## 応答
+
+cf-cache-status:
+DYNAMIC
+cf-ray:
+91f2ff73aa7ed797-NRT
+content-encoding:
+br
+content-type:
+text/html; charset=Shift_JIS
+date:
+Wed, 12 Mar 2025 11:37:09 GMT
+server:
+cloudflare
+server-timing:
+cfCacheStatus;desc="DYNAMIC"
+vary:
+Accept-Encoding
+x-bbx-stat:
+2400:4050:82e3:de00:dd6f:7b15:f2c0:18d3, NONE
+x-postplace:
+streaming/1740234012
+x-ronin-stat:
+NONE
+
+# 送信2回目（書き込みました
+https://egg.5ch.net/test/bbs.cgi?guid=ON
+
+:authority:
+egg.5ch.net
+:method:
+POST
+:path:
+/test/bbs.cgi?guid=ON
+:scheme:
+https
+accept:
+text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+accept-encoding:
+gzip, deflate, br, zstd
+accept-language:
+ja,en;q=0.9,en-GB;q=0.8,en-US;q=0.7
+cache-control:
+max-age=0
+content-length:
+246
+content-type:
+application/x-www-form-urlencoded
+cookie:
+READJS="off"
+origin:
+https://egg.5ch.net
+priority:
+u=0, i
+referer:
+https://egg.5ch.net/test/bbs.cgi
+sec-ch-ua:
+"Chromium";v="134", "Not:A-Brand";v="24", "Microsoft Edge";v="134"
+sec-ch-ua-mobile:
+?0
+sec-ch-ua-platform:
+"Windows"
+sec-fetch-dest:
+document
+sec-fetch-mode:
+navigate
+sec-fetch-site:
+same-origin
+sec-fetch-user:
+?1
+upgrade-insecure-requests:
+1
+user-agent:
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0
+
+```
+FROM: 
+mail: sage
+MESSAGE: (値をデコードできません)
+bbs: streaming
+time: 1741779411
+key: 1740234012
+oekaki_thread1: 
+feature: confirmed:b3952944012d9b165753096a5de4b5c691024afb
+submit: (値をデコードできません)
+```
+
+## 応答
+
+cf-cache-status:
+DYNAMIC
+cf-ray:
+91f2ffa65d2dd797-NRT
+content-encoding:
+br
+content-type:
+text/html; charset=Shift_JIS
+date:
+Wed, 12 Mar 2025 11:37:18 GMT
+server:
+cloudflare
+server-timing:
+cfCacheStatus;desc="DYNAMIC"
+set-cookie:
+acorn=75592N607C535C446O522l498B217E627S265S702I0601b298G60G395C415S05k934Y770Z490B313f8582N4495d9326S8019Y3478X6987q1016E3403W4307e7243U6283o673B679r1740s86d3031X368l079H08y9613J395K7046J5121k664X971C256j324q5551u1044F861n6707T323T0101d3234Q055s948M350b6851D509F8876Q509U02p71R643A576T3031B162T3049F1352O6349T1753o737i489E509F8876f0608h5855x1740m077c767T564q3941j212E5095j0036p458b6763h3636X082S0796N230P6525A380U735A642W1851U; expires=Mon, 17-Mar-2025 00:00:00 GMT; path=/; domain=.5ch.net
+set-cookie:
+MonaTicket=5f312e5dd171c67ecd787447f; expires=Wed, 26-Mar-2025 00:00:00 GMT; path=/; domain=.5ch.net
+vary:
+Accept-Encoding
+x-bbx-stat:
+2400:4050:82e3:de00:dd6f:7b15:f2c0:18d3, NONE
+x-donguri-stat:
+è­¦å‚™å“¡[Lv.0][æ–°èŠ½][----]
+x-postdate:
+1741779436.98
+x-posterid:
+4bppGRuP
+x-postplace:
+streaming/1740234012
+x-proc-time:
+1.189619 sec.
+x-regioninfo:
+æ—¥æœ¬:74:ã¿ã‹ã‹:2400:4050::/32:AS4713:NTT Communications Corporation
+x-resnum:
+254
+x-uplift-stat:
+NONE
+

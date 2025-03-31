@@ -894,19 +894,28 @@ namespace _2chAPIProxy
 
                 Write.CookieContainer = new CookieContainer();
 
-                // どんぐり枯れレスポンスを検知するマーカー
+                // どんぐり枯れレスポンス/MonaTicket無効化を検知するマーカー
                 const string mark_acorn_dride_up = "ignore next acorn";
                 // どんぐりクッキー名
                 const string acorn_cookie = "acorn";
+                // MonaTicketクッキー名
+                const string monaticket_cookie = "MonaTicket";
 
                 {
                     bool ignore_acorn = false;
+                    bool ignore_monaticket = false;
 
                     // どんぐりが枯れた次のレス投稿の場合、acornを送らない
                     if (Cookie.ContainsKey(acorn_cookie) && Cookie[acorn_cookie] == mark_acorn_dride_up)
                     {
                         ignore_acorn = true;
                         Cookie[acorn_cookie] = "";
+                    }
+                    // Monaticketも同様に削除
+                    if (Cookie.ContainsKey(acorn_cookie) && Cookie[acorn_cookie] == mark_acorn_dride_up)
+                    {
+                        ignore_monaticket = true;
+                        Cookie[monaticket_cookie] = "";
                     }
 
                     //送信されてきたクッキーを抽出
@@ -919,6 +928,11 @@ namespace _2chAPIProxy
                     if (ignore_acorn)
                     {
                         Cookie.Remove(acorn_cookie);
+                    }
+                    // MonaTicketクッキーを削除し、送らないようにする
+                    if (ignore_monaticket)
+                    {
+                        Cookie.Remove(monaticket_cookie);
                     }
                 }
 
@@ -1002,6 +1016,18 @@ namespace _2chAPIProxy
                                 // 本当に削除するのは、次の投稿時
                                 Cookie[acorn_cookie] = mark_acorn_dride_up;
                             }
+
+                            // ただ今あなたの投稿を拒否しております。
+                            // X-Chx-Error : E4000 Reject your post.;
+                            // Cookie の内容が壊れていますのでいったん削除してください。
+                            // X-Chx-Error : E3000 Delete your cookie.
+                            if (wres.Headers["X-Chx-Error"].Contains("Delete your cookie") || wres.Headers["X-Chx-Error"].Contains("Reject your post"))
+                            {
+                                // MonaTicketクッキーの削除
+                                // 本当に削除するのは、次の投稿時
+                                Cookie[monaticket_cookie] = mark_acorn_dride_up;
+                            }
+
                             ViewModel.OnModelNotice("X-Chx-Error : " + wres.Headers["X-Chx-Error"]);
                         }
 
