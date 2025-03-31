@@ -737,6 +737,8 @@ namespace _2chAPIProxy
             return;
         }
 
+        private string post_form_feature = "";
+
         private void ResPost(Session oSession, bool is2ch)
         {
             try
@@ -963,6 +965,18 @@ namespace _2chAPIProxy
                     ReqBody = Regex.Replace(ReqBody, @"sid=.+?(?:&|$)", "");
                     ReqBody = Regex.Replace(ReqBody, @"&$", "");
                 }
+                // feature=confirmed:xxxを追加
+                if (string.IsNullOrEmpty(post_form_feature) == false)
+                {
+                    // 送られてきてない場合のみ
+                    if (ReqBody.Contains("&feature=confirmed%3A") == false)
+                    {
+                        ReqBody = ReqBody.Replace("\r\n", "");
+                        ReqBody += $"&feature=confirmed%3A{post_form_feature}";
+
+                        post_form_feature = "";
+                    }                    
+                }
                 //お絵かき用のデータ追加
                 if (IsResPost)
                 {
@@ -1043,8 +1057,13 @@ namespace _2chAPIProxy
                             oSession.oResponse.headers["Vary"] = "Accept-Encoding";
                             String resdat = Res.ReadToEnd();
                             oSession.utilSetResponseBody(resdat);
-                            //oSession.utilSetResponseBody(Res.ReadToEnd());
-                            //if (gZipRes) oSession.utilGZIPResponse();
+
+                            // 書き込み確認画面の処理
+                            if (resdat.Contains("<title>■ 書き込み確認 ■</title>"))
+                            {
+                                // feature パラメータを抽出しておく
+                                post_form_feature = Regex.Match(resdat, $@"<input type=hidden name={'"'}feature{'"'} value={'"'}confirmed:(\w+?){'"'}>").Groups[1].Value;
+                            }
                         }
 
                         System.Diagnostics.Debug.WriteLine("リクエストヘッダ");
