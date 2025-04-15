@@ -1058,6 +1058,13 @@ namespace _2chAPIProxy
                             oSession.oResponse.headers["Date"] = wres.Headers[HttpResponseHeader.Date];
                             oSession.oResponse.headers["Vary"] = "Accept-Encoding";
                             String resdat = Res.ReadToEnd();
+
+                            // "ただ今あなたの投稿を拒否しております"メッセージを変える
+                            if (Cookie.ContainsKey(monaticket_cookie) && Cookie[monaticket_cookie] == mark_acorn_dride_up)
+                            {
+                                resdat.Replace("ただ今あなたの投稿を拒否しております", "MonaTicketを更新するので、しばらく経ってからもう一度書き込んでみてください（by 2chAPIProxy）");
+                            }
+
                             oSession.utilSetResponseBody(resdat);
 
                             // 書き込み確認画面の処理
