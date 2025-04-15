@@ -914,7 +914,7 @@ namespace _2chAPIProxy
                         Cookie[acorn_cookie] = "";
                     }
                     // Monaticketも同様に削除
-                    if (Cookie.ContainsKey(acorn_cookie) && Cookie[acorn_cookie] == mark_acorn_dride_up)
+                    if (Cookie.ContainsKey(monaticket_cookie) && Cookie[monaticket_cookie] == mark_acorn_dride_up)
                     {
                         ignore_monaticket = true;
                         Cookie[monaticket_cookie] = "";
@@ -942,6 +942,8 @@ namespace _2chAPIProxy
                 Cookie.Remove("SID");
                 // TAKO=ODORIを消す
                 Cookie.Remove("TAKO");
+                // yuki=akariを送らない
+                Cookie.Remove("yuki");
 
 
                 //送信クッキーのセット
@@ -1066,13 +1068,13 @@ namespace _2chAPIProxy
                             }
                         }
 
-                        System.Diagnostics.Debug.WriteLine("リクエストヘッダ");
+                        System.Diagnostics.Debug.WriteLine("書き込みリクエストヘッダ");
                         foreach (var header in Write.Headers.AllKeys)
                         {
                             System.Diagnostics.Debug.WriteLine($"{header}:{Write.Headers[header].ToString()}");
                         }
 
-                        System.Diagnostics.Debug.WriteLine("レスポンスヘッダ");
+                        System.Diagnostics.Debug.WriteLine("書き込みレスポンスヘッダ");
                         foreach (var header in wres.Headers.AllKeys)
                         {
                             System.Diagnostics.Debug.WriteLine($"{header}:{wres.Headers[header].ToString()}");
