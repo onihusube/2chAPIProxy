@@ -208,8 +208,7 @@ namespace _2chAPIProxy
             DatProxy.AddX2chUAHeader = AddX2chUAHeader;
             DatProxy.AddMsToNonce = AddMsToNonce;
             DatProxy.AssumeReqBodyIsUTF8 = AssumeReqBodyIsUTF8;
-            DatProxy.Monakey = Setting.Monakey;
-            if (string.IsNullOrEmpty(Setting.Monakey)) DatProxy.ResetMonakey();
+            DatProxy.MonaTicket = Setting.MonaTicket;
 
             //設定の適用、APIアクセスクラス
             DatProxy.APIMediator.AppKey = this.Appkey;
@@ -231,14 +230,17 @@ namespace _2chAPIProxy
             DatProxy.HtmlConverter.IsHttpsReplace = _ReplaceHttpsLink;
             DatProxy.HtmlConverter.IsExternalConverterUse = _CEExternalRead;
 
-            // Monakeyの即時保存処理
+            // MonaTicketの即時保存処理
             DatProxy.PropertyChanged += (sender, e) =>
             {
-                if (e.PropertyName == nameof(DatProxy.Monakey))
+                if (e.PropertyName == nameof(DatProxy.MonaTicket))
                 {
-                    // Monakeyを保存
-                    Setting.Monakey = DatProxy.Monakey;
-                    SaveSettings();
+                    if (string.IsNullOrEmpty(DatProxy.MonaTicket) == false)
+                    {
+                        // MonaTicketを保存
+                        Setting.MonaTicket = DatProxy.MonaTicket;
+                        SaveSettings();
+                    }
                 }
             };
 
@@ -1348,8 +1350,6 @@ namespace _2chAPIProxy
                             SystemLog = "現在の設定を保存しました。";
                             this.PopupVisible = true;
 
-                            // Monakeyをリセット
-                            DatProxy.ResetMonakey();
                             break;
                         case "KeyReset":
                             var defaultSetting = new AppSetting();
@@ -1375,7 +1375,7 @@ namespace _2chAPIProxy
                                 }));
                             });
                             // Monakeyをリセット
-                            DatProxy.ResetMonakey();
+                            DatProxy.ResetMonaTicket();
                             break;
                         case "UpdateSID":
                             DatProxy.UpdateAsync()

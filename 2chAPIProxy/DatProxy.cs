@@ -229,22 +229,7 @@ namespace _2chAPIProxy
                                 //書き込みをバイパスする
                                 oSession.utilCreateResponseAndBypassServer();
 
-                                if (EnablePostv2)
-                                {
-                                    if (!EnablePostv2onPink && oSession.fullUrl.Contains("bbspink.com"))
-                                    {
-                                        // pinkはまだ新書き込み仕様になってないらしい？
-                                        ResPost(oSession, is2ch);
-                                    }
-                                    else
-                                    {
-                                        ResPostv2(oSession, is2ch);
-                                    }
-                                }
-                                else
-                                {
-                                    ResPost(oSession, is2ch);
-                                }
+                                ResPost(oSession, is2ch);
                             }
                             return;
                         }
@@ -940,7 +925,12 @@ namespace _2chAPIProxy
                             Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
                         }
                     }
-                    
+
+                    // 送られてきていなければ、保存されていたものを使用する
+                    if (string.IsNullOrEmpty(MonaTicket) == false && Cookie.ContainsKey(monaticket_cookie) == false)
+                    {
+                        Cookie[monaticket_cookie] = MonaTicket;
+                    }
 
                     // acornクッキーを削除し、送らないようにする
                     if (ignore_acorn)
@@ -1060,6 +1050,12 @@ namespace _2chAPIProxy
                             }
                         }
 
+                        // MonaTicketを保存
+                        if (Cookie.ContainsKey(monaticket_cookie))
+                        {
+                            MonaTicket = Cookie[monaticket_cookie];
+                        }
+
                         if (wres.Headers.AllKeys.Contains("X-Chx-Error") == true)
                         {
                             // どんぐりが枯れてしまいました。
@@ -1083,6 +1079,7 @@ namespace _2chAPIProxy
                                 // MonaTicketクッキーの削除
                                 // 本当に削除するのは、次の投稿時
                                 Cookie[monaticket_cookie] = mark_acorn_dride_up;
+                                ResetMonaTicket();
 
                                 need_retry = true;
                             }
@@ -1172,30 +1169,30 @@ namespace _2chAPIProxy
             return;
         }
 
-        private string monakey = "00000000-0000-0000-0000-000000000000";
-        public string Monakey
+        private string monaticket = "";
+        public string MonaTicket
         {
-            get => monakey;
+            get => monaticket;
             set
             {
                 if (string.IsNullOrEmpty(value))
                 {
-                    monakey = "00000000-0000-0000-0000-000000000000";
+                    monaticket = "";
                 }
                 else
                 {
-                    _ = SetProperty(ref monakey, value, nameof(Monakey));
+                    _ = SetProperty(ref monaticket, value, nameof(MonaTicket));
                 }
             }
         }
 
-        public void ResetMonakey()
+        public void ResetMonaTicket()
         {
-            Monakey = "";
-            ViewModel.OnModelNotice("MonaKeyをリセットしました。");
+            MonaTicket = "";
+            ViewModel.OnModelNotice("MonaTicketをリセットしました。");
         }
 
-        //private string Monakey = "7b6799cc2bb1eef3acadffeecc180df6d1c7caab887326120056660f6ac05b45";
+        //private string MonaTicket = "7b6799cc2bb1eef3acadffeecc180df6d1c7caab887326120056660f6ac05b45";
 
 
         // キー要素があればそれを、無ければ空文字
@@ -1207,7 +1204,7 @@ namespace _2chAPIProxy
         private string CreatePostsignature(Dictionary<string, string> post_filed, string nonce, string UA, Encoding dst_encoding)
         {
             // PostSig計算用文字列
-            string sigstr = $"{ValueOr(post_filed, "bbs")}<>{ValueOr(post_filed, "key")}<>{ValueOr(post_filed, "time")}<>{ValueOr(post_filed, "FROM")}<>{ValueOr(post_filed, "mail")}<>{ValueOr(post_filed, "MESSAGE")}<>{ValueOr(post_filed, "subject")}<>{UA}<>{Monakey}<><>{nonce}";
+            string sigstr = $"{ValueOr(post_filed, "bbs")}<>{ValueOr(post_filed, "key")}<>{ValueOr(post_filed, "time")}<>{ValueOr(post_filed, "FROM")}<>{ValueOr(post_filed, "mail")}<>{ValueOr(post_filed, "MESSAGE")}<>{ValueOr(post_filed, "subject")}<>{UA}<>{MonaTicket}<><>{nonce}";
 
             using (HMACSHA256 hs256 = new HMACSHA256(Encoding.UTF8.GetBytes(this.APIMediator.HMKey)))
             {
@@ -1415,7 +1412,7 @@ namespace _2chAPIProxy
                 Write.Headers.Add("X-PostSig", CreatePostsignature(post_field_map, nonce, UA, dst_encoding));
                 Write.Headers.Add("X-APIKey", this.APIMediator.AppKey);
                 Write.Headers.Add("X-PostNonce", nonce);
-                Write.Headers.Add("X-MonaKey", Monakey);
+                Write.Headers.Add("X-MonaKey", MonaTicket);
                 if (AddX2chUAHeader) Write.Headers.Add("X-2ch-UA", APIMediator.X2chUA);
 
                 // 浪人sidを適切に再配置
@@ -1582,7 +1579,7 @@ namespace _2chAPIProxy
                         // MonaKeyの更新
                         if (wres.Headers.AllKeys.Contains("X-MonaKey") == true)
                         {
-                            this.Monakey = wres.Headers["X-MonaKey"];
+                            this.MonaTicket = wres.Headers["X-MonaKey"];
                             ViewModel.OnModelNotice("MonaKeyを更新しました。");
 
                             // 5秒待機する
@@ -1599,7 +1596,7 @@ namespace _2chAPIProxy
                             // E3331 Invalid signature.はリセットの必要がない（Postsigの計算が間違ってる）
                             if (wres.Headers["X-Chx-Error"].Contains("E3331") == false && wres.Headers["X-Chx-Error"].Contains("E33"))
                             {
-                                ResetMonakey();
+                                ResetMonaTicket();
                             }
 
                             // 鍵の有効期限切れ（と思われる）場合は出力しない
