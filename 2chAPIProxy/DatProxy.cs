@@ -889,22 +889,15 @@ namespace _2chAPIProxy
 
                 // referer調整
                 String referer = oSession.oRequest.headers["Referer"];
-                if (in_retry == false)
+                if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
                 {
-                    if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
-                    {
-                        var bbs = post_field_map["bbs"];
-                        var key = post_field_map["key"];
-                        referer = @$"https://{Write.Host}/test/read.cgi/{bbs}/{key}/";
-                    }
-                    else
-                    {
-                        referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net").Replace("http:", "https:");
-                    }
-                } 
+                    var bbs = post_field_map["bbs"];
+                    var key = post_field_map["key"];
+                    referer = @$"https://{Write.Host}/test/read.cgi/{bbs}/{key}/";
+                }
                 else
                 {
-                    referer = @$"https://{Write.Host}/test/bbs.cgi";
+                    referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net").Replace("http:", "https:");
                 }
                 
                 Write.Referer = referer;
@@ -1014,26 +1007,22 @@ namespace _2chAPIProxy
                     post_field_map["time"] = new_time_field;
 
                     // submit調整
-                    post_field_map["submit"] = "%8F%E3%8BL%91S%82%C4%82%F0%8F%B3%91%F8%82%B5%82%C4%8F%91%82%AB%8D%9E%82%DE";
+                    //post_field_map["submit"] = "%8F%E3%8BL%91S%82%C4%82%F0%8F%B3%91%F8%82%B5%82%C4%8F%91%82%AB%8D%9E%82%DE";
                 }
 
                 //お絵かき用のデータ追加
-                //if (IsResPost)
-                //{
-                //    // 投稿設定でお絵描きデータを付加する設定になっていて、フィールドに含まれていない場合
-                //    if (PostSetting.SetOekaki && post_field_map.ContainsKey("oekaki_thread1") == false)
-                //    {
-                //        post_field_map.Add("oekaki_thread1", "");
-                //    }
-                //    else if (PostSetting.SetOekaki == false && post_field_map.ContainsKey("oekaki_thread1"))
-                //    {
-                //        // 逆にお絵描きデータ追加が無効になっている場合
-                //        post_field_map.Remove("oekaki_thread1");
-                //    }
-                //}
-                if (post_field_map.ContainsKey("oekaki_thread1") == false)
+                if (IsResPost)
                 {
-                    post_field_map.Add("oekaki_thread1", "");
+                    // 投稿設定でお絵描きデータを付加する設定になっていて、フィールドに含まれていない場合
+                    if (PostSetting.SetOekaki && post_field_map.ContainsKey("oekaki_thread1") == false)
+                    {
+                        post_field_map.Add("oekaki_thread1", "");
+                    }
+                    else if (PostSetting.SetOekaki == false && post_field_map.ContainsKey("oekaki_thread1"))
+                    {
+                        // 逆にお絵描きデータ追加が無効になっている場合
+                        post_field_map.Remove("oekaki_thread1");
+                    }
                 }
 
                 ReqBody = ReConstructPostField(post_field_map);
@@ -1149,11 +1138,6 @@ namespace _2chAPIProxy
                     {
                         // ちょっと待機
                         Thread.Sleep(1000);
-
-                        if (oSession.fullUrl.Contains("guid=ON") == false)
-                        {
-                            oSession.fullUrl += "?guid=ON";
-                        }
 
                         ResPost(oSession, is2ch, true);
                     }
