@@ -48,23 +48,12 @@
                     <TextBlock HorizontalAlignment="Left" Height="25" Margin="93,14,0,0" TextWrapping="Wrap" VerticalAlignment="Top" TextAlignment="Center"><Run Language="ja-jp" Text="ポート番号"/></TextBlock>
                     <CheckBox x:Name="AutoStart" Content="起動と同時に開始" HorizontalAlignment="Left" Height="20" Margin="428,10,0,0" VerticalAlignment="Top" Width="115" ToolTip="起動時に自動でプロクシとして動作を開始します。次の起動時から有効" IsChecked="{Binding AutoStart, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="3"/>
                     <CheckBox x:Name="AutoSelect" Content="ポートを自動選択" HorizontalAlignment="Left" Height="20" Margin="428,30,0,0" VerticalAlignment="Top" Width="115" ToolTip="空いているポートを自動選択、ポート番号欄に選択されたポート番号が表示されます。起動と同時に開始と併用しないでください。" IsChecked="{Binding AutoSelect, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="4"/>
-                    <Button x:Name="UpdateSIS" Content="SID更新" HorizontalAlignment="Left" Height="25" Margin="248,41.84,0,0" VerticalAlignment="Top" Width="85" ToolTip="現在使用しているSessionIDを更新" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="UpdateSID" TabIndex="7"/>
                     <GroupBox Header="動作ログ" Margin="10,222,10,0" Height="186" VerticalAlignment="Top">
                         <TextBox x:Name="OutText" Margin="10,10,10,5.4" TextWrapping="NoWrap" SpellCheck.IsEnabled="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnlyCaretVisible="True" Text="{Binding SystemLog, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="12"/>
                     </GroupBox>
-                    <TextBox x:Name="appkey" HorizontalAlignment="Left" Height="25" Margin="158,72,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="385" ToolTip="AppKey入力欄、変更後は&quot;変更を適用&quot;を押してください" Text="{Binding Appkey, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="8"/>
-                    <TextBox x:Name="hmkey" HorizontalAlignment="Left" Height="25" Margin="158,102,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="385" ToolTip="HMKey入力欄、変更後は&quot;変更を適用&quot;を押してください" Text="{Binding HMkey, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="9"/>
-                    <TextBlock HorizontalAlignment="Left" Height="20" Margin="102,77,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="47.462" TextAlignment="Center"><Run Language="ja-jp" Text="AppKey"/></TextBlock>
-                    <TextBlock HorizontalAlignment="Left" Height="20" Margin="103,107,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="42.544" TextAlignment="Center"><Run Language="ja-jp" Text="HMKey"/></TextBlock>
                     <Button x:Name="UpdateKey" Content="変更を適用" HorizontalAlignment="Left" Height="25" Margin="158,41.84,0,0" VerticalAlignment="Top" Width="85" ToolTip="以下5つのkeyの変更を反映し保存します" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="UpdateKey" TabIndex="6"/>
-                    <TextBox x:Name="ua1" HorizontalAlignment="Left" Height="25" Margin="158,132,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="385" ToolTip="SessionID取得時認証用のX-2cUA、変更後は&quot;変更を適用&quot;を押してください" Text="{Binding UserAgent1, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="10"/>
-                    <TextBlock HorizontalAlignment="Left" Height="20" Margin="101,137,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="50" TextAlignment="Center" Text="X2chUA"/>
-                    <TextBox x:Name="ua2" HorizontalAlignment="Left" Height="25" Margin="158,162,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="385" ToolTip="SessionID取得時のUA、変更後は&quot;変更を適用&quot;を押してください" TabIndex="11" Text="{Binding UserAgent0, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}"/>
-                    <TextBlock HorizontalAlignment="Left" Height="20" Margin="105,167,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="50" Text="UA(SID)"/>
                     <!--<CheckBox Content="2chへのアクセスを5chに置換する" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="428,50,0,0" IsChecked="{Binding Use5chnet, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="5"/>-->
-                    <TextBox x:Name="ua2_Copy" HorizontalAlignment="Left" Height="25" Margin="158,192,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="385" ToolTip="dat取得時のUA、変更後は&quot;変更を適用&quot;を押してください" Text="{Binding UserAgent2, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="11"/>
-                    <TextBlock HorizontalAlignment="Left" Height="20" Margin="105,197,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="50"><Run Language="ja-jp" Text="UA(dat)"/></TextBlock>
-                    <Button x:Name="KeyReset" Content="Key/UAリセット" HorizontalAlignment="Left" Height="25" Margin="338,42,0,0" VerticalAlignment="Top" Width="85" ToolTip="SID取得に必要なAPIキーとUAを最新のデフォルト設定にリセットします。SIDやdatが取得できない場合に試してみてください。" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="KeyReset" TabIndex="7"/>
+                    <Button x:Name="KeyReset" Content="Key/UAリセット" HorizontalAlignment="Left" Height="25" Margin="248,42,0,0" VerticalAlignment="Top" Width="85" ToolTip="SID取得に必要なAPIキーとUAを最新のデフォルト設定にリセットします。SIDやdatが取得できない場合に試してみてください。" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="KeyReset" TabIndex="7"/>
                 </Grid>
             </TabItem>
             <TabItem x:Name="SetTab1" Header="動作設定" KeyboardNavigation.TabNavigation="Local">
@@ -325,34 +314,6 @@
                             </Style>
                         </CheckBox.Style>
                     </CheckBox>
-                    <GroupBox x:Name="Postv2Setting" Header="新書き込み仕様関連" HorizontalAlignment="Left" Height="172" Margin="10,206,0,0" VerticalAlignment="Top" Width="604"/>
-                    <CheckBox x:Name="EnablePostv2" Content="新書き込み方式を有効にする" VerticalAlignment="Top" Margin="33,242,428,0" Height="20" ToolTip="2022年4月頃導入の新しい書き込み方式を使用します" TabIndex="3" IsChecked="{Binding EnablePostv2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    <CheckBox x:Name="EnablePostv2Pink" Content="bbspinkでも有効にする" VerticalAlignment="Top" Margin="237,242,253,0" Height="20" ToolTip="新しい書き込み方式をbbspinkでも使用します" TabIndex="3" IsChecked="{Binding EnablePostv2onPink, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                        <CheckBox.Style>
-                            <Style TargetType="{x:Type CheckBox}">
-                                <Setter Property="FontSize" Value="12px"/>
-                                <Setter Property="IsEnabled" Value="True"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding EnablePostv2}" Value="False">
-                                        <Setter Property="IsEnabled" Value="False"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </CheckBox.Style>
-                    </CheckBox>
-                    <CheckBox x:Name="PostUTF8" Content="UTF-8で書き込む" VerticalAlignment="Top" Margin="410,242,95,0" Height="20" ToolTip="書き込み時に元のテキストデータをUTF-8エンコーディングに変換して書き込みます" TabIndex="3" IsChecked="{Binding EnableUTF8Post, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                        <CheckBox.Style>
-                            <Style TargetType="{x:Type CheckBox}">
-                                <Setter Property="FontSize" Value="12px"/>
-                                <Setter Property="IsEnabled" Value="True"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding EnablePostv2}" Value="False">
-                                        <Setter Property="IsEnabled" Value="False"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </CheckBox.Style>
-                    </CheckBox>
                     <Button Width="85" VerticalAlignment="Top" ToolTip="全タブの設定変更をファイルへ保存します" TabIndex="13" x:Name="SettingSave4" Margin="10,383.4,0,0" Height="25" HorizontalAlignment="Left" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="UpdateKey">
                         <StackPanel>
                             <TextBlock>変更を保存</TextBlock>
@@ -361,50 +322,7 @@
                             </Popup>
                         </StackPanel>
                     </Button>
-                    <TextBox x:Name="field_order" HorizontalAlignment="Left" Height="25" Margin="168,343,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="416" ToolTip="スレ立て時に送信するデータの順序を指定します。＆区切りで左から右に並べてください。無いものは末尾に追加されます。" Text="{Binding ThreadPostFieldOrder, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="1" IsEnabled="{Binding EnablePostv2, Mode=OneWay}"/>
-                    <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="フィールド順序（スレ立て）" VerticalAlignment="Top" Margin="30,344,0,0" Height="20"/>
                     <CheckBox x:Name="PostRoninInvalid" Content="書き込み時に浪人を無効化する" HorizontalAlignment="Left" Height="20" Margin="33,156,0,0" VerticalAlignment="Top" IsChecked="{Binding PostRoninInvalid, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="12" ToolTip="書き込み(スレ立て)時に浪人関連の情報を削除して書き込みます。書き込みに浪人を利用したくない場合にご利用ください。"/>
-                    <CheckBox x:Name="AddX2chUAHeader" Content="X-2ch-UAヘッダを送信する" VerticalAlignment="Top" Margin="33,267,428,0" Height="20" ToolTip="書き込み時のヘッダにX2chUAを追加します" TabIndex="3" IsChecked="{Binding AddX2chUAHeader, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                        <CheckBox.Style>
-                            <Style TargetType="{x:Type CheckBox}">
-                                <Setter Property="FontSize" Value="12px"/>
-                                <Setter Property="IsEnabled" Value="True"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding EnablePostv2}" Value="False">
-                                        <Setter Property="IsEnabled" Value="False"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </CheckBox.Style>
-                    </CheckBox>
-                    <CheckBox x:Name="AddMsToNonce" Content="nonce値にミリ秒を付加する" VerticalAlignment="Top" Margin="237,267,232,0" Height="20" ToolTip="書き込み時に使用するnonce（時間）値に小数点以下3桁を含めるようにします" TabIndex="3" IsChecked="{Binding AddMsToNonce, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                        <CheckBox.Style>
-                            <Style TargetType="{x:Type CheckBox}">
-                                <Setter Property="FontSize" Value="12px"/>
-                                <Setter Property="IsEnabled" Value="True"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding EnablePostv2}" Value="False">
-                                        <Setter Property="IsEnabled" Value="False"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </CheckBox.Style>
-                    </CheckBox>
-                    <CheckBox x:Name="PostUTF8_Copy" Content="UTF-8エンコーディングを仮定する" VerticalAlignment="Top" Margin="410,267,30,0" Height="20" ToolTip="書き込み時、送られてきたデータがUTF-8エンコーディングであると仮定して処理します。どうしても文字化けする場合に試してみてください" TabIndex="3" IsChecked="{Binding AssumeReqBodyIsUTF8, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                        <CheckBox.Style>
-                            <Style TargetType="{x:Type CheckBox}">
-                                <Setter Property="FontSize" Value="12px"/>
-                                <Setter Property="IsEnabled" Value="True"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding EnablePostv2}" Value="False">
-                                        <Setter Property="IsEnabled" Value="False"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </CheckBox.Style>
-                    </CheckBox>
-                    <TextBox x:Name="field_order_Copy" HorizontalAlignment="Left" Height="25" Margin="168,318,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="416" ToolTip="書き込み時に送信するデータの順序を指定します。＆区切りで左から右に並べてください。無いものは末尾に追加されます。" Text="{Binding PostFieldOrder, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="1" IsEnabled="{Binding EnablePostv2, Mode=OneWay}"/>
-                    <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="30,319,0,0" Height="20"><Run Text="フィールド順序"/><Run Text="（書き込み）"/></TextBlock>
                 </Grid>
             </TabItem>
         </TabControl>

@@ -1359,21 +1359,7 @@ namespace _2chAPIProxy
                             this.UserAgent0 = defaultSetting.UserAgent0;
                             this.UserAgent2 = defaultSetting.UserAgent2;
                             this.SystemLog = "各キーとUAをリセットしました。";
-                            DatProxy.UpdateAsync()
-                            .ContinueWith(task =>
-                            {
-                                App.Current.Dispatcher.BeginInvoke((Action)(() =>
-                                {
-                                    if (task.IsFaulted == true)
-                                    {
-                                        this.SystemLog = task.Exception.ToString();
-                                    }
-                                    else
-                                    {
-                                        this.SystemLog = "SessionIDを更新しました。（ユーザー操作）";
-                                    }
-                                }));
-                            });
+                            
                             // Monakeyをリセット
                             DatProxy.ResetMonaTicket();
                             break;
