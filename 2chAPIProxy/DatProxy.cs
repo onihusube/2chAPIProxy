@@ -755,8 +755,10 @@ namespace _2chAPIProxy
                     oSession.fullUrl = oSession.fullUrl.Replace("subbbs.cgi", "bbs.cgi");
                 }
 
-
                 String PostURI = (ViewModel.Setting.UseTLSWrite) ? (oSession.fullUrl.Replace("http://", "https://")) : (oSession.fullUrl);
+
+                System.Diagnostics.Debug.WriteLine($"POST URL: {PostURI}");
+
                 HttpWebRequest Write = (HttpWebRequest)WebRequest.Create(PostURI);
                 Write.Method = "POST";
                 Write.ServicePoint.Expect100Continue = false;
@@ -878,18 +880,33 @@ namespace _2chAPIProxy
                     }
                 }
 
+                System.Diagnostics.Debug.WriteLine($"オリジナルリクエストボディ: {ReqBody}");
+
+                // リクエストボディの分解（URLデコードはしない）
+                var post_field_map = ReqBody.Split('&')
+                                    .Select(kvpair => kvpair.Split('='))
+                                    .ToDictionary(pair => pair[0], pair => pair[1]);
+
                 // referer調整
                 String referer = oSession.oRequest.headers["Referer"];
-                if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
+                if (in_retry == false)
                 {
-                    var bbs = Regex.Match(ReqBody, @"bbs=(\w+)").Groups[1].Value;
-                    var key = Regex.Match(ReqBody, @"key=(\w+)").Groups[1].Value;
-                    referer = @$"https://{Write.Host}/test/read.cgi/{bbs}/{key}/";
-                }
+                    if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
+                    {
+                        var bbs = post_field_map["bbs"];
+                        var key = post_field_map["key"];
+                        referer = @$"https://{Write.Host}/test/read.cgi/{bbs}/{key}/";
+                    }
+                    else
+                    {
+                        referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net").Replace("http:", "https:");
+                    }
+                } 
                 else
                 {
-                    referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net").Replace("http:", "https:");
+                    referer = @$"https://{Write.Host}/test/bbs.cgi";
                 }
+                
                 Write.Referer = referer;
 
                 if (string.IsNullOrEmpty(Proxy) == false) Write.Proxy = new WebProxy(Proxy);
@@ -921,10 +938,16 @@ namespace _2chAPIProxy
                     }
 
                     //送信されてきたクッキーを抽出
-                    foreach (Match mc in Regex.Matches(oSession.oRequest.headers["Cookie"], @"(?:\s+|^)((.+?)=(?:|.+?)(?:;|$))"))
+                    foreach (string semicolon_separated_str in oSession.oRequest.headers["Cookie"].Split(';'))
                     {
-                        Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
+                        Match mc = Regex.Match(semicolon_separated_str, @"(?:\s+|^)((.+?)=(?:|.+?)$)");
+
+                        if (mc.Success)
+                        {
+                            Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
+                        }
                     }
+                    
 
                     // acornクッキーを削除し、送らないようにする
                     if (ignore_acorn)
@@ -955,46 +978,70 @@ namespace _2chAPIProxy
                     {
                         Write.CookieContainer.Add(new Cookie(m.Groups[1].Value, m.Groups[2].Value, "/", domain));
                     }
-                    catch (CookieException)
+                    catch (CookieException ex)
                     {
+                        System.Diagnostics.Debug.WriteLine($"CookieException({m.Groups[1].Value}, {m.Groups[2].Value}, {domain}): {ex.Message}");
                         continue;
                     }
                 }
 
                 //浪人を無効化
-                if (ViewModel.Setting.PostRoninInvalid && ReqBody.Contains("sid="))
+                if (ViewModel.Setting.PostRoninInvalid && post_field_map.ContainsKey("sid"))
                 {
-                    ReqBody = Regex.Replace(ReqBody, @"sid=.+?(?:&|$)", "");
-                    ReqBody = Regex.Replace(ReqBody, @"&$", "");
+                    post_field_map.Remove("sid");
                 }
+
                 // feature=confirmed:xxxを追加
                 if (string.IsNullOrEmpty(post_form_feature) == false)
                 {
                     // 送られてきてない場合のみ
-                    if (ReqBody.Contains("&feature=confirmed%3A") == false)
+                    if (post_field_map.ContainsKey("feature") == false)
                     {
-                        ReqBody = ReqBody.Replace("\r\n", "");
-                        ReqBody += $"&feature=confirmed%3A{post_form_feature}";
+                        post_field_map["feature"] = $"confirmed%3A{post_form_feature}";
 
+                        // 一回送ったらいらない（？
                         post_form_feature = "";
-                    }                    
+                    }
                 }
-                //お絵かき用のデータ追加
-                if (IsResPost)
+
+                if (in_retry)
                 {
-                    if (PostSetting.SetOekaki && !ReqBody.Contains("&oekaki_thread"))
-                    {
-                        ReqBody = ReqBody.Replace("\r\n", "");
-                        ReqBody += "&oekaki_thread1=";
-                    }
-                    else if (PostSetting.SetOekaki == false && ReqBody.Contains("&oekaki_thread"))
-                    {
-                        ReqBody = ReqBody.Replace("&oekaki_thread1=", "");
-                    }
+                    // timeフィールドを更新
+                    string new_time_field = string.Format("{0}", (ulong)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds - 10);
+
+                    System.Diagnostics.Debug.WriteLine($"time更新: {post_field_map["time"]} -> {new_time_field}");
+
+                    post_field_map["time"] = new_time_field;
+
+                    // submit調整
+                    post_field_map["submit"] = "%8F%E3%8BL%91S%82%C4%82%F0%8F%B3%91%F8%82%B5%82%C4%8F%91%82%AB%8D%9E%82%DE";
                 }
-                
+
+                //お絵かき用のデータ追加
+                //if (IsResPost)
+                //{
+                //    // 投稿設定でお絵描きデータを付加する設定になっていて、フィールドに含まれていない場合
+                //    if (PostSetting.SetOekaki && post_field_map.ContainsKey("oekaki_thread1") == false)
+                //    {
+                //        post_field_map.Add("oekaki_thread1", "");
+                //    }
+                //    else if (PostSetting.SetOekaki == false && post_field_map.ContainsKey("oekaki_thread1"))
+                //    {
+                //        // 逆にお絵描きデータ追加が無効になっている場合
+                //        post_field_map.Remove("oekaki_thread1");
+                //    }
+                //}
+                if (post_field_map.ContainsKey("oekaki_thread1") == false)
+                {
+                    post_field_map.Add("oekaki_thread1", "");
+                }
+
+                ReqBody = ReConstructPostField(post_field_map);
+                System.Diagnostics.Debug.WriteLine($"再構成後リクエストボディ: {ReqBody}");
+
                 Byte[] Body = Encoding.GetEncoding("Shift_JIS").GetBytes(ReqBody);
                 Write.ContentLength = Body.Length;
+
                 try
                 {
                     // リトライの必要性をマーク
@@ -1074,8 +1121,12 @@ namespace _2chAPIProxy
                                 // feature パラメータを抽出しておく
                                 post_form_feature = Regex.Match(resdat, $@"<input type=hidden name={'"'}feature{'"'} value={'"'}confirmed:(\w+?){'"'}>").Groups[1].Value;
 
+                                System.Diagnostics.Debug.WriteLine($"保存フォームパラメータ(feature): {post_form_feature}");
+
                                 need_retry = true;
                             }
+
+                            System.Diagnostics.Debug.WriteLine($"本文: {resdat}");
                         }
 
                         System.Diagnostics.Debug.WriteLine("書き込みリクエストヘッダ");
@@ -1091,18 +1142,23 @@ namespace _2chAPIProxy
                         }
 
                         if (wres != null) wres.Close();
+                    }
 
-                        // 書き込みリトライ（再帰的にはしない）
-                        if (need_retry == true && in_retry == false)
+                    // 書き込みリトライ（再帰的にはしない）
+                    if (need_retry == true && in_retry == false)
+                    {
+                        // ちょっと待機
+                        Thread.Sleep(1000);
+
+                        if (oSession.fullUrl.Contains("guid=ON") == false)
                         {
-                            // ちょっと待機
-                            Thread.Sleep(1000);
-
-                            ResPost(oSession, is2ch, true);
+                            oSession.fullUrl += "?guid=ON";
                         }
 
-                        return;
+                        ResPost(oSession, is2ch, true);
                     }
+
+                    return;
                 }
                 catch (WebException err)
                 {
@@ -1190,6 +1246,32 @@ namespace _2chAPIProxy
             // RFC的には大文字が正しいらしい
             string lowerstr = HttpUtility.UrlEncode(input, encoding);
             return Regex.Replace(lowerstr, @"%[\x00-\xFF]{2}", m => m.Value.ToUpperInvariant());
+        }
+
+        readonly string[] form_field_order = { "FROM", "mail", "MESSAGE", "bbs", "time", "key", "oekaki_thread1", "feature", "submit" };
+
+        private string ReConstructPostField(Dictionary<string, string> post_filed_map)
+        {
+            string postfield = "";
+
+            // フォームの順序を維持
+            foreach (string key in form_field_order)
+            {
+                // データが送られてきてる場合のみ追加（無い場合に空文字を追加しない）
+                if (post_filed_map.ContainsKey(key))
+                {
+                    postfield += $"{key}={post_filed_map[key]}&";
+                }
+            }
+
+            // 残りはその後ろに
+            foreach (var kvpair in post_filed_map.Where(kv => !form_field_order.Contains(kv.Key)))
+            {
+                postfield += $"{kvpair.Key}={kvpair.Value}&";
+            }
+
+            // 余分にくっついてるのを削除
+            return postfield.TrimEnd('&');
         }
 
         private string ReConstructPostField(string[] field_order, Dictionary<string, string> post_filed_map, Encoding dst_encoding)
