@@ -739,7 +739,7 @@ namespace _2chAPIProxy
 
         private string post_form_feature = "";
 
-        private void ResPost(Session oSession, bool is2ch)
+        private void ResPost(Session oSession, bool is2ch, bool in_retry = false)
         {
             try
             {
@@ -997,6 +997,9 @@ namespace _2chAPIProxy
                 Write.ContentLength = Body.Length;
                 try
                 {
+                    // リトライの必要性をマーク
+                    bool need_retry = false;
+
                     using (System.IO.Stream PostStream = Write.GetRequestStream())
                     {
                         PostStream.Write(Body, 0, Body.Length);
@@ -1031,6 +1034,8 @@ namespace _2chAPIProxy
                                 // どんぐり枯れを検知したら、acornクッキーを削除する
                                 // 本当に削除するのは、次の投稿時
                                 Cookie[acorn_cookie] = mark_acorn_dride_up;
+
+                                need_retry = true;
                             }
 
                             // ただ今あなたの投稿を拒否しております。
@@ -1042,6 +1047,8 @@ namespace _2chAPIProxy
                                 // MonaTicketクッキーの削除
                                 // 本当に削除するのは、次の投稿時
                                 Cookie[monaticket_cookie] = mark_acorn_dride_up;
+
+                                need_retry = true;
                             }
 
                             ViewModel.OnModelNotice("X-Chx-Error : " + wres.Headers["X-Chx-Error"]);
@@ -1059,12 +1066,6 @@ namespace _2chAPIProxy
                             oSession.oResponse.headers["Vary"] = "Accept-Encoding";
                             String resdat = Res.ReadToEnd();
 
-                            // "ただ今あなたの投稿を拒否しております"メッセージを変える
-                            if (Cookie.ContainsKey(monaticket_cookie) && Cookie[monaticket_cookie] == mark_acorn_dride_up)
-                            {
-                                resdat.Replace("ただ今あなたの投稿を拒否しております", "MonaTicketを更新するので、しばらく経ってからもう一度書き込んでみてください（by 2chAPIProxy）");
-                            }
-
                             oSession.utilSetResponseBody(resdat);
 
                             // 書き込み確認画面の処理
@@ -1072,6 +1073,8 @@ namespace _2chAPIProxy
                             {
                                 // feature パラメータを抽出しておく
                                 post_form_feature = Regex.Match(resdat, $@"<input type=hidden name={'"'}feature{'"'} value={'"'}confirmed:(\w+?){'"'}>").Groups[1].Value;
+
+                                need_retry = true;
                             }
                         }
 
@@ -1088,6 +1091,16 @@ namespace _2chAPIProxy
                         }
 
                         if (wres != null) wres.Close();
+
+                        // 書き込みリトライ（再帰的にはしない）
+                        if (need_retry == true && in_retry == false)
+                        {
+                            // ちょっと待機
+                            Thread.Sleep(1000);
+
+                            ResPost(oSession, is2ch, true);
+                        }
+
                         return;
                     }
                 }
