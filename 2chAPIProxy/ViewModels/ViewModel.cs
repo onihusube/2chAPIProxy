@@ -91,11 +91,11 @@ namespace _2chAPIProxy
             _PortNumber = Setting.PortNumber;
             _Appkey = Setting.Appkey;
             _HMkey = Setting.HMkey;
-            _UserAgent0 = Setting.UserAgent0;
-            _UserAgent1 = Setting.UserAgent1;
-            _UserAgent2 = Setting.UserAgent2;
-            _UserAgent3 = Setting.UserAgent3;
-            _UserAgent4 = Setting.UserAgent4;
+            _UserAgent0 = Setting.UserAgent0;   // SessionID取得時のUA
+            _UserAgent1 = Setting.UserAgent1;   // X-2cUA
+            _UserAgent2 = Setting.UserAgent2;   // APIでのdat取得時のUA
+            _UserAgent3 = Setting.UserAgent3;   // 書き込みUA
+            _UserAgent4 = Setting.UserAgent4;   // その他UA（HTML変換時のUA
             try
             {
                 _RouninID = (Setting.RouninID != "") ? (Setting.CryptData(Setting.RouninID, false)) : ("");
@@ -134,7 +134,7 @@ namespace _2chAPIProxy
             //プロクシ処理用クラス初期化
             try
             {
-                DatProxy = new DatProxy(Appkey, HMkey, UserAgent1, UserAgent0, UserAgent2, RouninID, RouninPW, ProxyAddress)
+                DatProxy = new DatProxy()
                 {
                     APIMediator = fuctory.CreateAPIMediator(),
                     HtmlConverter = fuctory.CreateHtmlConverter()
@@ -1359,8 +1359,8 @@ namespace _2chAPIProxy
                             this.UserAgent0 = defaultSetting.UserAgent0;
                             this.UserAgent2 = defaultSetting.UserAgent2;
                             this.SystemLog = "各キーとUAをリセットしました。";
-                            
-                            // Monakeyをリセット
+
+                            // MonaTicketをリセット
                             DatProxy.ResetMonaTicket();
                             break;
                         case "UpdateSID":
