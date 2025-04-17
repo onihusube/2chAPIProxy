@@ -100,19 +100,8 @@ namespace _2chAPIProxy
             }
         }
 
-        public DatProxy(String Akey, String Hkey, String ua1, String sidUA, String ua2, String RID, String RPW, String ProxyAddrese)
+        public DatProxy()
         {
-            //System.Threading.Timer GetSid = null;
-            //GetSid = new System.Threading.Timer((e) =>
-            //{
-            //    using (GetSid)
-            //    {
-            //        APIMediator.RouninID = RID;
-            //        APIMediator.RouninPW = RPW;
-            //        APIMediator.Init(Akey, Hkey, ua1, sidUA, ua2, ProxyAddrese);
-            //        //APIMediator = new APIAccess(Akey, Hkey, ua1, sidUA, ua2, RID, RPW, ProxyAddrese);
-            //    }
-            //}, null, 0, System.Threading.Timeout.Infinite);
             //Fiddler設定変更
             Fiddler.CONFIG.bReuseClientSockets = true;
             Fiddler.CONFIG.bReuseServerSockets = true;
@@ -723,6 +712,7 @@ namespace _2chAPIProxy
         }
 
         private string post_form_feature = "";
+        private string post_time = "";
 
         private void ResPost(Session oSession, bool is2ch, bool in_retry = false)
         {
@@ -865,6 +855,8 @@ namespace _2chAPIProxy
                     }
                 }
 
+                Write.Headers.Add("Origin", @$"https://{Write.Host}");
+
                 System.Diagnostics.Debug.WriteLine($"オリジナルリクエストボディ: {ReqBody}");
 
                 // リクエストボディの分解（URLデコードはしない）
@@ -874,17 +866,24 @@ namespace _2chAPIProxy
 
                 // referer調整
                 String referer = oSession.oRequest.headers["Referer"];
-                if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
+                if (in_retry == false || oSession.fullUrl.Contains("guid=ON") == false)
                 {
-                    var bbs = post_field_map["bbs"];
-                    var key = post_field_map["key"];
-                    referer = @$"https://{Write.Host}/test/read.cgi/{bbs}/{key}/";
+                    if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
+                    {
+                        var bbs = post_field_map["bbs"];
+                        var key = post_field_map["key"];
+                        referer = @$"https://{Write.Host}/test/read.cgi/{bbs}/{key}/";
+                    }
+                    else
+                    {
+                        referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net").Replace("http:", "https:");
+                    }
                 }
                 else
                 {
-                    referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net").Replace("http:", "https:");
+                    referer = @$"https://{Write.Host}/test/bbs.cgi";
                 }
-                
+
                 Write.Referer = referer;
 
                 if (string.IsNullOrEmpty(Proxy) == false) Write.Proxy = new WebProxy(Proxy);
@@ -957,6 +956,11 @@ namespace _2chAPIProxy
                 foreach (var cook in Cookie.Where(c => string.IsNullOrEmpty(c.Value) == false))
                 {
                     var m = Regex.Match(cook.Value, @"^(.+?)=(.*?)(;|$)");
+                    if (m.Success == false)
+                    {
+                        continue;
+                    }
+
                     try
                     {
                         Write.CookieContainer.Add(new Cookie(m.Groups[1].Value, m.Groups[2].Value, "/", domain));
@@ -989,15 +993,24 @@ namespace _2chAPIProxy
 
                 if (in_retry)
                 {
+                    // submit調整
+                    post_field_map["submit"] = "%8F%E3%8BL%91S%82%C4%82%F0%8F%B3%91%F8%82%B5%82%C4%8F%91%82%AB%8D%9E%82%DE";
+
+                    if (string.IsNullOrEmpty(post_time) == false)
+                    {
+                        post_field_map["time"] = post_time;
+                        post_time = "";
+                    }
+                }
+                else
+                {
                     // timeフィールドを更新
                     string new_time_field = string.Format("{0}", (ulong)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds - 10);
 
                     System.Diagnostics.Debug.WriteLine($"time更新: {post_field_map["time"]} -> {new_time_field}");
 
                     post_field_map["time"] = new_time_field;
-
-                    // submit調整
-                    //post_field_map["submit"] = "%8F%E3%8BL%91S%82%C4%82%F0%8F%B3%91%F8%82%B5%82%C4%8F%91%82%AB%8D%9E%82%DE";
+                    post_time = new_time_field;
                 }
 
                 //お絵かき用のデータ追加
@@ -1135,6 +1148,11 @@ namespace _2chAPIProxy
                     {
                         // ちょっと待機
                         Thread.Sleep(1000);
+
+                        if (oSession.fullUrl.Contains("guid=ON") == false)
+                        {
+                            oSession.fullUrl += "?guid=ON";
+                        }
 
                         ResPost(oSession, is2ch, true);
                     }
