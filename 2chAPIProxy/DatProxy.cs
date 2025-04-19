@@ -866,24 +866,27 @@ namespace _2chAPIProxy
 
                 // referer調整
                 String referer = oSession.oRequest.headers["Referer"];
-                if (in_retry == false || oSession.fullUrl.Contains("guid=ON") == false)
+                if (oSession.fullUrl.Contains("guid=ON") == false)
                 {
                     if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
                     {
                         var bbs = post_field_map["bbs"];
                         var key = post_field_map["key"];
-                        referer = @$"https://{Write.Host}/test/read.cgi/{bbs}/{key}/";
+                        referer = @$"http://{Write.Host}/test/read.cgi/{bbs}/{key}/";
                     }
                     else
                     {
-                        referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net").Replace("http:", "https:");
+                        referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net");
                     }
                 }
                 else
                 {
-                    referer = @$"https://{Write.Host}/test/bbs.cgi";
+                    referer = @$"http://{Write.Host}/test/bbs.cgi";
                 }
-
+                if (ViewModel.Setting.UseTLSWrite)
+                {
+                    referer = referer.Replace("http://", "https://");
+                }
                 Write.Referer = referer;
 
                 if (string.IsNullOrEmpty(Proxy) == false) Write.Proxy = new WebProxy(Proxy);
