@@ -864,6 +864,15 @@ namespace _2chAPIProxy
                                     .Select(kvpair => kvpair.Split('='))
                                     .ToDictionary(pair => pair[0], pair => pair[1]);
 
+                // 送信されてきたエンコーディング判別
+                bool original_post_is_utf8 = oSession.RequestHeaders["Content-Type"].Contains("UTF-8");
+
+                if (original_post_is_utf8)
+                {
+                    // UTF-8でポスト（BordSettingの設定を上書きする
+                    Write.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+                }
+
                 // referer調整
                 String referer = oSession.oRequest.headers["Referer"];
                 if (oSession.fullUrl.Contains("guid=ON") == false)
@@ -997,7 +1006,15 @@ namespace _2chAPIProxy
                 if (in_retry)
                 {
                     // submit調整
-                    post_field_map["submit"] = "%8F%E3%8BL%91S%82%C4%82%F0%8F%B3%91%F8%82%B5%82%C4%8F%91%82%AB%8D%9E%82%DE";
+                    // どちらも"上記全てを承諾して書き込む"にしている
+                    if (original_post_is_utf8)
+                    {
+                        post_field_map["submit"] = "%E4%B8%8A%E8%A8%98%E5%85%A8%E3%81%A6%E3%82%92%E6%89%BF%E8%AB%BE%E3%81%97%E3%81%A6%E6%9B%B8%E3%81%8D%E8%BE%BC%E3%82%80";
+                    }
+                    else
+                    {
+                        post_field_map["submit"] = "%8F%E3%8BL%91S%82%C4%82%F0%8F%B3%91%F8%82%B5%82%C4%8F%91%82%AB%8D%9E%82%DE";
+                    }
 
                     if (string.IsNullOrEmpty(post_time) == false)
                     {
@@ -1034,7 +1051,11 @@ namespace _2chAPIProxy
                 ReqBody = ReConstructPostField(post_field_map);
                 System.Diagnostics.Debug.WriteLine($"再構成後リクエストボディ: {ReqBody}");
 
-                Byte[] Body = Encoding.GetEncoding("Shift_JIS").GetBytes(ReqBody);
+                Byte[] Body = original_post_is_utf8 switch
+                {
+                    true => Encoding.GetEncoding("UTF-8").GetBytes(ReqBody),
+                    false => Encoding.GetEncoding("Shift_JIS").GetBytes(ReqBody)
+                };
                 Write.ContentLength = Body.Length;
 
                 try
