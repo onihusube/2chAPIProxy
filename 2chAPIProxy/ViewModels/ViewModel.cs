@@ -170,13 +170,10 @@ namespace _2chAPIProxy
             this.SystemLog = $"{DatProxy.BoardSettings.Count()}板分の設定を読み込みました。";
             if (DatProxy.BoardSettings.ContainsKey("2chapiproxy_default") == false)
             {
-                // ファイルが無いかデフォルト設定が無い時、JaneStyleの設定を使用
-                var def = new BoardSettings { UserAgent = "Monazilla/1.00 JaneStyle/4.22 Windows/10.0.22000", SetOekaki = false, KeepAlive = false };
-                def.Headers.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-                def.Headers.Add("Accept-Encoding", "gzip, identity");
-                def.Headers.Add("ContentType", "application/x-www-form-urlencoded");
+                // ファイルが無いかデフォルト設定が無い時、空の設定を入れておく
+                var def = new BoardSettings { UserAgent = "", SetOekaki = false, KeepAlive = false };
                 DatProxy.BoardSettings.Add("2chapiproxy_default", def);
-                this.SystemLog = "書き込みのデフォルト設定としてJaneStyleのものを使用します";
+                this.SystemLog = "2chapiproxy_default 設定を読み込めませんでした。専ブラのポストリクエストの設定を使用します。";
             }
 
             //外部コードのコンパイル

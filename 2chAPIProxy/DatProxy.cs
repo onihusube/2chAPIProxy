@@ -751,8 +751,19 @@ namespace _2chAPIProxy
                     System.Diagnostics.Debug.WriteLine($"{header.Name}:{header.Value}");
                 }
 
-                // デフォルトUAを設定（優先度最低、空の時は知らない）
-                Write.UserAgent = BoardSettings["2chapiproxy_default"].UserAgent;
+                System.Diagnostics.Debug.WriteLine($"オリジナルリクエストボディ: {ReqBody}");
+
+                // リクエストボディの分解（URLデコードはしない）
+                var post_field_map = ReqBody.Split('&')
+                                    .Select(kvpair => kvpair.Split('='))
+                                    .ToDictionary(pair => pair[0], pair => pair[1]);
+
+                // デフォルトUAを設定（優先度最低）
+                Write.UserAgent = BoardSettings.ContainsKey("2chapiproxy_default") switch
+                {
+                    true => BoardSettings["2chapiproxy_default"].UserAgent,
+                    false => oSession.oRequest.headers["User-Agent"] ?? ""
+                };
 
                 // pinkへの書き込みを識別
                 bool is_pink = oSession.fullUrl.Contains("bbspink.com") && BoardSettings.ContainsKey("2chapiproxy_pink_common");
@@ -767,13 +778,10 @@ namespace _2chAPIProxy
                         PostSetting = BoardSettings["2chapiproxy_pink_common"];
                     }
 
-                    // 板名を抽出
-                    var bbs_match = Regex.Match(ReqBody, @"bbs=(\w+)");
-
                     // 板事設定があればそれが最優先
-                    if (bbs_match.Success)
+                    if (post_field_map.ContainsKey("bbs"))
                     {
-                        var bbs = bbs_match.Groups[1].Value;
+                        var bbs = post_field_map["bbs"];
                         if (BoardSettings.ContainsKey(bbs))
                         {
                             PostSetting = BoardSettings[bbs];
@@ -808,6 +816,46 @@ namespace _2chAPIProxy
                 {
                     // デフォルト設定の引き当て（Pink投稿時は共通設定がないときのみ
                     PostSetting ??= BoardSettings["2chapiproxy_default"];
+                }
+
+                // デフォルト設定が無かった場合など、リクエストヘッダから拾う
+                if (PostSetting == null)
+                {
+                    // 個別の設定項目があるやつ
+                    if (oSession.RequestHeaders.Exists("Accept") == true)
+                    {
+                        PostSetting.Headers.Add("Accept", oSession.RequestHeaders["Accept"]);
+                    }
+                    if (oSession.RequestHeaders.Exists("Expect") == true)
+                    {
+                        PostSetting.Headers.Add("Expect", oSession.RequestHeaders["Expect"]);
+                    }
+                    if (oSession.RequestHeaders.Exists("Content-Type") == true)
+                    {
+                        PostSetting.Headers.Add("Content-Type", oSession.RequestHeaders["Content-Type"]);
+                    }
+                    if (oSession.RequestHeaders.Exists("Connection"))
+                    {
+                        // Connection: closeを確認（先頭大文字ありえそうなのでc以降をチェック
+                        if (oSession.RequestHeaders["Connection"].Contains("lose"))
+                        {
+                            PostSetting.KeepAlive = true;
+                        }
+                    }
+
+                    // 直接設定できるのはまとめて
+                    foreach (var header in oSession.RequestHeaders)
+                    {
+                        try
+                        {
+                            if (Regex.IsMatch(header.Name, @"(^HTTPVer$|^Accept$|^User-Agent$|^Expect$|^Content-Type$|^Connection$|^Cookie$)") == true) continue;
+                            PostSetting.Headers.Add(header.Name, header.Value);
+                        }
+                        catch (Exception err)
+                        {
+                            System.Diagnostics.Debug.WriteLine("●リクエストヘッダからヘッダ設定構成中のエラー\n" + err.ToString());
+                        }
+                    }
                 }
 
                 // ヘッダの設定
@@ -857,15 +905,8 @@ namespace _2chAPIProxy
 
                 Write.Headers.Add("Origin", @$"https://{Write.Host}");
 
-                System.Diagnostics.Debug.WriteLine($"オリジナルリクエストボディ: {ReqBody}");
-
-                // リクエストボディの分解（URLデコードはしない）
-                var post_field_map = ReqBody.Split('&')
-                                    .Select(kvpair => kvpair.Split('='))
-                                    .ToDictionary(pair => pair[0], pair => pair[1]);
-
                 // 送信されてきたエンコーディング判別
-                bool original_post_is_utf8 = oSession.RequestHeaders["Content-Type"].Contains("UTF-8");
+                bool original_post_is_utf8 = oSession.RequestHeaders["Content-Type"]?.Contains("UTF-8") ?? false;
 
                 if (original_post_is_utf8)
                 {
@@ -874,7 +915,7 @@ namespace _2chAPIProxy
                 }
 
                 // referer調整
-                String referer = oSession.oRequest.headers["Referer"];
+                String referer = oSession.RequestHeaders["Referer"];
                 if (oSession.fullUrl.Contains("guid=ON") == false)
                 {
                     if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
@@ -885,13 +926,14 @@ namespace _2chAPIProxy
                     }
                     else
                     {
-                        referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net");
+                        referer = oSession.RequestHeaders["Referer"].Replace("2ch.net", "5ch.net");
                     }
                 }
                 else
                 {
                     referer = @$"http://{Write.Host}/test/bbs.cgi";
                 }
+                // TLS接続の場合にのみhttpsにする
                 if (ViewModel.Setting.UseTLSWrite)
                 {
                     referer = referer.Replace("http://", "https://");
