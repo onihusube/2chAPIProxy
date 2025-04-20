@@ -170,10 +170,8 @@ namespace _2chAPIProxy
             this.SystemLog = $"{DatProxy.BoardSettings.Count()}板分の設定を読み込みました。";
             if (DatProxy.BoardSettings.ContainsKey("2chapiproxy_default") == false)
             {
-                // ファイルが無いかデフォルト設定が無い時、空の設定を入れておく
-                var def = new BoardSettings { UserAgent = "", SetOekaki = false, KeepAlive = false };
-                DatProxy.BoardSettings.Add("2chapiproxy_default", def);
-                this.SystemLog = "2chapiproxy_default 設定を読み込めませんでした。専ブラのポストリクエストの設定を使用します。";
+                // ファイルが無いかデフォルト設定が無い時
+                this.SystemLog = "2chapiproxy_default 設定を読み込めませんでした。ポストリクエストの設定を使用します。";
             }
 
             //外部コードのコンパイル
