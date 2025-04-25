@@ -122,6 +122,7 @@ namespace _2chAPIProxy
             addX2chUAHeader = Setting.AddX2chUAHeader;
             addMsToNonce = Setting.AddMsToNonce;
             assumeReqBodyIsUTF8 = Setting.AssumeReqBodyIsUTF8;
+            notReturnMonaticket = Setting.NotReturnMonaticket;
 
             //スリープ/休止状態時の処理
             Microsoft.Win32.SystemEvents.PowerModeChanged += new Microsoft.Win32.PowerModeChangedEventHandler(PowermodeChanged);
@@ -955,6 +956,21 @@ namespace _2chAPIProxy
                 {
                     Setting.AssumeReqBodyIsUTF8 = DatProxy.AssumeReqBodyIsUTF8 = assumeReqBodyIsUTF8 = value;
                     NoticePropertyChanged("AssumeReqBodyIsUTF8");
+                }
+            }
+        }
+
+        private bool notReturnMonaticket;
+
+        public bool NotReturnMonaticket
+        {
+            get => notReturnMonaticket;
+            set
+            {
+                if (notReturnMonaticket != value)
+                {
+                    Setting.NotReturnMonaticket = notReturnMonaticket = value;
+                    NoticePropertyChanged("NotReturnMonaticket");
                 }
             }
         }

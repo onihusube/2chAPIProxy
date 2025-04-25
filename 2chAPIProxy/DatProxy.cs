@@ -1121,10 +1121,23 @@ namespace _2chAPIProxy
                             var cul = new System.Globalization.CultureInfo("en-US");
                             foreach (System.Net.Cookie cookie in wres.Cookies)
                             {
+                                // クッキーキャッシュに保存
                                 String tc = Cookie[cookie.Name] = cookie.ToString();
+
+                                if (ViewModel.Setting.NotReturnMonaticket == true)
+                                {
+                                    // Monaticketを返さない
+                                    if (cookie.Name == monaticket_cookie)
+                                    {
+                                        continue;
+                                    }
+                                }
+
+                                // set-cookieヘッダの組み立て
                                 if (cookie.Expires != null) tc += "; expires=" + cookie.Expires.ToUniversalTime().ToString("ddd, dd-MMM-yyyy HH:mm:ss", cul) + " GMT";
                                 if (!String.IsNullOrEmpty(cookie.Path)) tc += "; path=" + cookie.Path;
                                 if (!String.IsNullOrEmpty(cookie.Domain)) tc += "; domain=" + ((is2ch) ? (cookie.Domain.Replace("5ch.net", "2ch.net")) : (cookie.Domain));
+                                
                                 oSession.oResponse.headers.Add("Set-Cookie", tc);
                             }
                         }

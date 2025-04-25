@@ -285,7 +285,7 @@
                     <GroupBox x:Name="PostUAGroup" Header="User Agent" HorizontalAlignment="Left" Height="99" Margin="10,10,0,0" VerticalAlignment="Top" Width="604"/>
                     <TextBox x:Name="PostUA" HorizontalAlignment="Left" Height="25" Margin="84,51,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="500" ToolTip="書き込み（スレ立て）時に使用するUseAgent。空欄ならアクセス元のUAをそのまま利用します" Text="{Binding UserAgent3, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="1"/>
                     <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="書き込み" VerticalAlignment="Top" Margin="30,56,0,0" Width="50" Height="20"/>
-                    <GroupBox x:Name="PostSettingGroup" Header="書き込み時の動作" HorizontalAlignment="Left" Height="71" Margin="10,121,0,0" VerticalAlignment="Top" Width="604"/>
+                    <GroupBox x:Name="PostSettingGroup" Header="書き込み時の動作" HorizontalAlignment="Left" Height="123" Margin="10,121,0,0" VerticalAlignment="Top" Width="604"/>
                     <CheckBox x:Name="AllUAReplace_Copy" Content="2chへの全アクセスのUAを変更" VerticalAlignment="Top" Margin="84,81,335,0" Height="20" ToolTip="2chAPIProxyを通る全ての2ch.netへのアクセス(API、HTML取得を除く)のUAを書き込みUAに変更します" IsChecked="{Binding AllUAReplace, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="3">
                         <CheckBox.Style>
                             <Style TargetType="{x:Type CheckBox}">
@@ -313,6 +313,7 @@
                             </Style>
                         </CheckBox.Style>
                     </CheckBox>
+                    <CheckBox x:Name="NotReturnMonaticket" Content="Monaticketクッキーを返さない" Height="20" Margin="33,194,407,0" VerticalAlignment="Top" ToolTip="サーバーから受け取ったMonaticketクッキーを専ブラに対して返送しません。専ブラと異なる書き込みUAを使用している場合に、専ブラのMonaticketを上書きしないようにします。" IsChecked="{Binding NotReturnMonaticket, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="6"/>
                     <Button Width="85" VerticalAlignment="Top" ToolTip="全タブの設定変更をファイルへ保存します" TabIndex="13" x:Name="SettingSave4" Margin="10,383.4,0,0" Height="25" HorizontalAlignment="Left" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="UpdateKey">
                         <StackPanel>
                             <TextBlock>変更を保存</TextBlock>
@@ -322,6 +323,7 @@
                         </StackPanel>
                     </Button>
                     <CheckBox x:Name="PostRoninInvalid" Content="書き込み時に浪人を無効化する" HorizontalAlignment="Left" Height="20" Margin="33,156,0,0" VerticalAlignment="Top" IsChecked="{Binding PostRoninInvalid, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="12" ToolTip="書き込み(スレ立て)時に浪人関連の情報を削除して書き込みます。書き込みに浪人を利用したくない場合にご利用ください。"/>
+                    <CheckBox x:Name="PostRoninInvalid_Copy" Content="書き込み時に浪人を無効化する" HorizontalAlignment="Left" Height="20" Margin="33,156,0,0" VerticalAlignment="Top" IsChecked="{Binding PostRoninInvalid, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="12" ToolTip="書き込み(スレ立て)時に浪人関連の情報を削除して書き込みます。書き込みに浪人を利用したくない場合にご利用ください。"/>
                 </Grid>
             </TabItem>
         </TabControl>
