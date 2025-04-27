@@ -313,7 +313,7 @@
                             </Style>
                         </CheckBox.Style>
                     </CheckBox>
-                    <CheckBox x:Name="NotReturnMonaticket" Content="Monaticketクッキーを返さない" Height="20" Margin="33,194,407,0" VerticalAlignment="Top" ToolTip="サーバーから受け取ったMonaticketクッキーを専ブラに対して返送しません。専ブラと異なる書き込みUAを使用している場合に、専ブラのMonaticketを上書きしないようにします。" IsChecked="{Binding NotReturnMonaticket, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="6"/>
+                    <CheckBox x:Name="NotReturnMonaticketAndAcorn" Content="Monaticket/Acornクッキーを返さない" Height="20" Margin="33,194,375,0" VerticalAlignment="Top" ToolTip="サーバーから受け取ったMonaticket/どんぐりクッキーを専ブラに対して返送しません。専ブラと異なる書き込みUAを使用している場合に、専ブラのクッキーを上書きしないようにします。" IsChecked="{Binding NotReturnMonaticketAndAcorn, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="6"/>
                     <Button Width="85" VerticalAlignment="Top" ToolTip="全タブの設定変更をファイルへ保存します" TabIndex="13" x:Name="SettingSave4" Margin="10,383.4,0,0" Height="25" HorizontalAlignment="Left" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="UpdateKey">
                         <StackPanel>
                             <TextBlock>変更を保存</TextBlock>

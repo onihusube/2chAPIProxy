@@ -711,6 +711,52 @@ namespace _2chAPIProxy
             return;
         }
 
+        private string monaticket = "";
+        public string MonaTicket
+        {
+            get => monaticket;
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    monaticket = "";
+                }
+                else
+                {
+                    _ = SetProperty(ref monaticket, value, nameof(MonaTicket));
+                }
+            }
+        }
+
+        private string acorn = "";
+        public string Acorn
+        {
+            get => acorn;
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    acorn = "";
+                }
+                else
+                {
+                    _ = SetProperty(ref acorn, value, nameof(Acorn));
+                }
+            }
+        }
+
+        public void ResetMonaTicket()
+        {
+            MonaTicket = "";
+            ViewModel.OnModelNotice("MonaTicket🍪をリセットしました。");
+        }
+
+        public void ResetAcorn()
+        {
+            Acorn = "";
+            ViewModel.OnModelNotice("Acorn🍪をリセットしました。");
+        }
+
         private string post_form_feature = "";
         private string post_time = "";
 
@@ -945,7 +991,7 @@ namespace _2chAPIProxy
                 Write.CookieContainer = new CookieContainer();
 
                 // どんぐり枯れレスポンス/MonaTicket無効化を検知するマーカー
-                const string mark_acorn_dride_up = "ignore next acorn";
+                const string mark_cookie_invalidated = "ignore next cookie";
                 // どんぐりクッキー名
                 const string acorn_cookie = "acorn";
                 // MonaTicketクッキー名
@@ -956,13 +1002,13 @@ namespace _2chAPIProxy
                     bool ignore_monaticket = false;
 
                     // どんぐりが枯れた次のレス投稿の場合、acornを送らない
-                    if (Cookie.ContainsKey(acorn_cookie) && Cookie[acorn_cookie] == mark_acorn_dride_up)
+                    if (Cookie.ContainsKey(acorn_cookie) && Cookie[acorn_cookie] == mark_cookie_invalidated)
                     {
                         ignore_acorn = true;
                         Cookie[acorn_cookie] = "";
                     }
                     // Monaticketも同様に削除
-                    if (Cookie.ContainsKey(monaticket_cookie) && Cookie[monaticket_cookie] == mark_acorn_dride_up)
+                    if (Cookie.ContainsKey(monaticket_cookie) && Cookie[monaticket_cookie] == mark_cookie_invalidated)
                     {
                         ignore_monaticket = true;
                         Cookie[monaticket_cookie] = "";
@@ -983,6 +1029,10 @@ namespace _2chAPIProxy
                     if (string.IsNullOrEmpty(MonaTicket) == false && Cookie.ContainsKey(monaticket_cookie) == false)
                     {
                         Cookie[monaticket_cookie] = MonaTicket;
+                    }
+                    if (string.IsNullOrEmpty(Acorn) == false && Cookie.ContainsKey(acorn_cookie) == false)
+                    {
+                        Cookie[acorn_cookie] = Acorn;
                     }
 
                     // acornクッキーを削除し、送らないようにする
@@ -1126,9 +1176,10 @@ namespace _2chAPIProxy
 
                                 if (ViewModel.Setting.NotReturnMonaticket == true)
                                 {
-                                    // Monaticketを返さない
-                                    if (cookie.Name == monaticket_cookie)
+                                    // Monaticket/Acornクッキーを返さない
+                                    if (cookie.Name == monaticket_cookie || cookie.Name == acorn_cookie)
                                     {
+                                        System.Diagnostics.Debug.WriteLine($"{cookie.Name} のSet-Cookieをスキップ");
                                         continue;
                                     }
                                 }
@@ -1147,6 +1198,11 @@ namespace _2chAPIProxy
                         {
                             MonaTicket = Cookie[monaticket_cookie];
                         }
+                        // Acornを保存
+                        if (Cookie.ContainsKey(acorn_cookie))
+                        {
+                            Acorn = Cookie[acorn_cookie];
+                        }
 
                         if (wres.Headers.AllKeys.Contains("X-Chx-Error") == true)
                         {
@@ -1157,7 +1213,8 @@ namespace _2chAPIProxy
                             {
                                 // どんぐり枯れを検知したら、acornクッキーを削除する
                                 // 本当に削除するのは、次の投稿時
-                                Cookie[acorn_cookie] = mark_acorn_dride_up;
+                                Cookie[acorn_cookie] = mark_cookie_invalidated;
+                                ResetAcorn();
 
                                 need_retry = true;
                             }
@@ -1166,11 +1223,13 @@ namespace _2chAPIProxy
                             // X-Chx-Error : E4000 Reject your post.;
                             // Cookie の内容が壊れていますのでいったん削除してください。
                             // X-Chx-Error : E3000 Delete your cookie.
-                            if (wres.Headers["X-Chx-Error"].Contains("Delete your cookie") || wres.Headers["X-Chx-Error"].Contains("Reject your post"))
+                            // ?
+                            // X-Chx-Error : E3100 ...
+                            if (wres.Headers["X-Chx-Error"].Contains("Delete your cookie") || wres.Headers["X-Chx-Error"].Contains("Reject your post") || wres.Headers["X-Chx-Error"].Contains("E3100"))
                             {
                                 // MonaTicketクッキーの削除
                                 // 本当に削除するのは、次の投稿時
-                                Cookie[monaticket_cookie] = mark_acorn_dride_up;
+                                Cookie[monaticket_cookie] = mark_cookie_invalidated;
                                 ResetMonaTicket();
 
                                 need_retry = true;
@@ -1265,32 +1324,6 @@ namespace _2chAPIProxy
             }
             return;
         }
-
-        private string monaticket = "";
-        public string MonaTicket
-        {
-            get => monaticket;
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                {
-                    monaticket = "";
-                }
-                else
-                {
-                    _ = SetProperty(ref monaticket, value, nameof(MonaTicket));
-                }
-            }
-        }
-
-        public void ResetMonaTicket()
-        {
-            MonaTicket = "";
-            ViewModel.OnModelNotice("MonaTicketをリセットしました。");
-        }
-
-        //private string MonaTicket = "7b6799cc2bb1eef3acadffeecc180df6d1c7caab887326120056660f6ac05b45";
-
 
         // キー要素があればそれを、無ければ空文字
         private string ValueOr(Dictionary<string, string> dict, string key)

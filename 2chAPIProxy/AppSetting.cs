@@ -63,6 +63,7 @@ namespace _2chAPIProxy
         private string threadPostFieldOrder = "subject&FROM&mail&MESSAGE&bbs&submit&time";
         private string monaKey = "00000000-0000-0000-0000-000000000000";
         private string monaTicket = "00000000-0000-0000-0000-000000000000";
+        private string acorn = "";
         private bool not_return_monaticket = false;
 
         public bool change = false;
@@ -386,6 +387,12 @@ namespace _2chAPIProxy
         {
             get => monaTicket;
             set { monaTicket = value; change = true; }
+        }
+
+        public string Acorn
+        {
+            get => acorn;
+            set { acorn = value; change = true; }
         }
 
         public bool NotReturnMonaticket

@@ -122,7 +122,7 @@ namespace _2chAPIProxy
             addX2chUAHeader = Setting.AddX2chUAHeader;
             addMsToNonce = Setting.AddMsToNonce;
             assumeReqBodyIsUTF8 = Setting.AssumeReqBodyIsUTF8;
-            notReturnMonaticket = Setting.NotReturnMonaticket;
+            notReturnMonaticketAndAcorn = Setting.NotReturnMonaticket;
 
             //スリープ/休止状態時の処理
             Microsoft.Win32.SystemEvents.PowerModeChanged += new Microsoft.Win32.PowerModeChangedEventHandler(PowermodeChanged);
@@ -205,6 +205,7 @@ namespace _2chAPIProxy
             DatProxy.AddMsToNonce = AddMsToNonce;
             DatProxy.AssumeReqBodyIsUTF8 = AssumeReqBodyIsUTF8;
             DatProxy.MonaTicket = Setting.MonaTicket;
+            DatProxy.Acorn = Setting.Acorn;
 
             //設定の適用、APIアクセスクラス
             DatProxy.APIMediator.AppKey = this.Appkey;
@@ -226,7 +227,7 @@ namespace _2chAPIProxy
             DatProxy.HtmlConverter.IsHttpsReplace = _ReplaceHttpsLink;
             DatProxy.HtmlConverter.IsExternalConverterUse = _CEExternalRead;
 
-            // MonaTicketの即時保存処理
+            // MonaTicket/Acornの即時保存処理
             DatProxy.PropertyChanged += (sender, e) =>
             {
                 if (e.PropertyName == nameof(DatProxy.MonaTicket))
@@ -235,6 +236,15 @@ namespace _2chAPIProxy
                     {
                         // MonaTicketを保存
                         Setting.MonaTicket = DatProxy.MonaTicket;
+                        SaveSettings();
+                    }
+                }
+                else if (e.PropertyName == nameof(DatProxy.Acorn))
+                {
+                    if (string.IsNullOrEmpty(DatProxy.Acorn) == false)
+                    {
+                        // Acornを保存
+                        Setting.Acorn = DatProxy.Acorn;
                         SaveSettings();
                     }
                 }
@@ -960,17 +970,17 @@ namespace _2chAPIProxy
             }
         }
 
-        private bool notReturnMonaticket;
+        private bool notReturnMonaticketAndAcorn;
 
-        public bool NotReturnMonaticket
+        public bool NotReturnMonaticketAndAcorn
         {
-            get => notReturnMonaticket;
+            get => notReturnMonaticketAndAcorn;
             set
             {
-                if (notReturnMonaticket != value)
+                if (notReturnMonaticketAndAcorn != value)
                 {
-                    Setting.NotReturnMonaticket = notReturnMonaticket = value;
-                    NoticePropertyChanged("NotReturnMonaticket");
+                    Setting.NotReturnMonaticket = notReturnMonaticketAndAcorn = value;
+                    NoticePropertyChanged("NotReturnMonaticketAndAcorn");
                 }
             }
         }
@@ -1373,6 +1383,8 @@ namespace _2chAPIProxy
 
                             // MonaTicketをリセット
                             DatProxy.ResetMonaTicket();
+                            // Acornをリセット
+                            DatProxy.ResetAcorn();
                             break;
                         case "UpdateSID":
                             DatProxy.UpdateAsync()
