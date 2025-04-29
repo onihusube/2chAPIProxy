@@ -65,6 +65,7 @@ namespace _2chAPIProxy
         private string monaTicket = "00000000-0000-0000-0000-000000000000";
         private string acorn = "";
         private bool not_return_monaticket = false;
+        private bool ignore_receive_cookie = false;
 
         public bool change = false;
 
@@ -399,6 +400,12 @@ namespace _2chAPIProxy
         {
             get => not_return_monaticket;
             set { not_return_monaticket = value; change = true; }
+        }
+
+        public bool IgnoreReceiveCookie
+        {
+            get => ignore_receive_cookie;
+            set { ignore_receive_cookie = value; change = true; }
         }
 
         public string ThreadPostFieldOrder

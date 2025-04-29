@@ -949,7 +949,14 @@ namespace _2chAPIProxy
                     }
                 }
 
-                Write.Headers.Add("Origin", @$"https://{Write.Host}");
+                if (ViewModel.Setting.UseTLSWrite)
+                {
+                    Write.Headers.Add("Origin", @$"https://{Write.Host}");
+                }
+                else
+                {
+                    Write.Headers.Add("Origin", @$"http://{Write.Host}");
+                }
 
                 // 送信されてきたエンコーディング判別
                 bool original_post_is_utf8 = oSession.RequestHeaders["Content-Type"]?.Contains("UTF-8") ?? false;
@@ -977,6 +984,7 @@ namespace _2chAPIProxy
                 }
                 else
                 {
+                    // こっち（"guid=ON"）の場合はおそらくこうするのが正しいので、SetReferrerの設定を無視する
                     referer = @$"http://{Write.Host}/test/bbs.cgi";
                 }
                 // TLS接続の場合にのみhttpsにする
@@ -1014,15 +1022,20 @@ namespace _2chAPIProxy
                         Cookie[monaticket_cookie] = "";
                     }
 
-                    //送信されてきたクッキーを抽出
-                    foreach (string semicolon_separated_str in oSession.oRequest.headers["Cookie"].Split(';'))
+                    if (ViewModel.Setting.IgnoreReceiveCookie == false)
                     {
-                        Match mc = Regex.Match(semicolon_separated_str, @"(?:\s+|^)((.+?)=(?:|.+?)$)");
-
-                        if (mc.Success)
+                        // 送信されてきたクッキーを抽出
+                        foreach (string semicolon_separated_str in oSession.oRequest.headers["Cookie"].Split(';'))
                         {
-                            Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
+                            Match mc = Regex.Match(semicolon_separated_str, @"(?:\s+|^)((.+?)=(?:|.+?)$)");
+
+                            if (mc.Success)
+                            {
+                                Cookie[mc.Groups[2].Value] = mc.Groups[1].Value;
+                            }
                         }
+
+                        System.Diagnostics.Debug.WriteLine($"🍪 専ブラからのクッキーを使用します: {oSession.oRequest.headers["Cookie"]}");
                     }
 
                     // 送られてきていなければ、保存されていたものを使用する

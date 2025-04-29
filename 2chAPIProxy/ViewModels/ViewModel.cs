@@ -123,6 +123,7 @@ namespace _2chAPIProxy
             addMsToNonce = Setting.AddMsToNonce;
             assumeReqBodyIsUTF8 = Setting.AssumeReqBodyIsUTF8;
             notReturnMonaticketAndAcorn = Setting.NotReturnMonaticket;
+            ignoreReceiveCookie = Setting.IgnoreReceiveCookie;
 
             //スリープ/休止状態時の処理
             Microsoft.Win32.SystemEvents.PowerModeChanged += new Microsoft.Win32.PowerModeChangedEventHandler(PowermodeChanged);
@@ -981,6 +982,21 @@ namespace _2chAPIProxy
                 {
                     Setting.NotReturnMonaticket = notReturnMonaticketAndAcorn = value;
                     NoticePropertyChanged("NotReturnMonaticketAndAcorn");
+                }
+            }
+        }
+
+        private bool ignoreReceiveCookie;
+
+        public bool IgnoreReceiveCookie
+        {
+            get => ignoreReceiveCookie;
+            set
+            {
+                if (ignoreReceiveCookie != value)
+                {
+                    Setting.IgnoreReceiveCookie = ignoreReceiveCookie = value;
+                    NoticePropertyChanged("IgnoreReceiveCookie");
                 }
             }
         }

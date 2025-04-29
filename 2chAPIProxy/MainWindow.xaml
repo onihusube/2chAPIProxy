@@ -323,6 +323,7 @@
                         </StackPanel>
                     </Button>
                     <CheckBox x:Name="PostRoninInvalid" Content="書き込み時に浪人を無効化する" HorizontalAlignment="Left" Height="20" Margin="33,156,0,0" VerticalAlignment="Top" IsChecked="{Binding PostRoninInvalid, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="12" ToolTip="書き込み(スレ立て)時に浪人関連の情報を削除して書き込みます。書き込みに浪人を利用したくない場合にご利用ください。"/>
+                    <CheckBox x:Name="IgnoreReceiveCookie" Content="専ブラからのクッキーを使用しない" Height="20" Margin="378,194,30,0" VerticalAlignment="Top" ToolTip="書き込みにおいて、専ブラから送信されてきたクッキーを使用せずに通信を行います。" IsChecked="{Binding IgnoreReceiveCookie, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="14"/>
                 </Grid>
             </TabItem>
         </TabControl>
