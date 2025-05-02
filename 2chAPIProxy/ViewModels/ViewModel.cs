@@ -1365,26 +1365,11 @@ namespace _2chAPIProxy
                             break;
                         case "UpdateKey":
                             this.PopupVisible = false;
-                            //DatProxy.Update(Appkey, HMkey, UserAgent1, UserAgent0, UserAgent2, RouninID, RouninPW);
-                            DatProxy.UpdateAsync()
-                            .ContinueWith(task =>
-                            {
-                                App.Current.Dispatcher.BeginInvoke((Action)(() =>
-                                {
-                                    if (task.IsFaulted == true)
-                                    {
-                                        this.SystemLog = task.Exception.ToString();
-                                    }
-                                    else
-                                    {
-                                        this.SystemLog = "SessionIDを更新しました。（ユーザー操作）";
-                                    }
-                                }));
-                            });
 
                             // 無条件設定保存と通知
                             SaveSettings();
                             SystemLog = "現在の設定を保存しました。";
+
                             this.PopupVisible = true;
 
                             break;
@@ -1401,6 +1386,18 @@ namespace _2chAPIProxy
                             DatProxy.ResetMonaTicket();
                             // Acornをリセット
                             DatProxy.ResetAcorn();
+                            break;
+                        case "CookieClear":
+                            // クッキーのクリア
+                            DatProxy.CookieClear();
+
+                            // 保存してあるクッキーのクリア
+                            Setting.MonaTicket = "";
+                            Setting.Acorn = "";
+
+                            SaveSettings();
+
+                            this.SystemLog = "保持しているクッキーをクリアしました。";
                             break;
                         case "UpdateSID":
                             DatProxy.UpdateAsync()

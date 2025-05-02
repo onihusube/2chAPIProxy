@@ -2290,6 +2290,13 @@ namespace _2chAPIProxy
             return;
         }
 
+        public void CookieClear()
+        {
+            Cookie.Clear();
+            ResetMonaTicket();
+            ResetAcorn();
+        }
+
         String CMD5(String value)
         {
             using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
