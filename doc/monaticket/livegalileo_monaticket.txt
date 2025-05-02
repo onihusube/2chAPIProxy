@@ -1,0 +1,172 @@
+# リクエスト1
+URL: https://nova.5ch.net/test/bbs.cgi
+payload: FROM=&mail=&MESSAGE=tete&bbs=livegalileo&key=1744897399&time=1744906622&submit=%8F%91%82%AB%8D%9E%82%DE&oekaki_thread1=
+
+
+:authority:
+nova.5ch.net
+:method:
+POST
+:path:
+/test/bbs.cgi
+:scheme:
+https
+accept:
+text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+accept-encoding:
+gzip, deflate, br, zstd
+accept-language:
+ja,en;q=0.9,en-GB;q=0.8,en-US;q=0.7
+cache-control:
+max-age=0
+content-length:
+119
+content-type:
+application/x-www-form-urlencoded
+cookie:
+READJS="off"; 5chClassic=on
+origin:
+https://nova.5ch.net
+priority:
+u=0, i
+referer:
+https://nova.5ch.net/test/read.cgi/livegalileo/1744897399/l50
+sec-ch-ua:
+"Microsoft Edge";v="135", "Not-A.Brand";v="8", "Chromium";v="135"
+sec-ch-ua-mobile:
+?0
+sec-ch-ua-platform:
+"Windows"
+sec-fetch-dest:
+document
+sec-fetch-mode:
+navigate
+sec-fetch-site:
+same-origin
+sec-fetch-user:
+?1
+upgrade-insecure-requests:
+1
+user-agent:
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0
+
+## レスポンス1
+
+cf-cache-status:
+DYNAMIC
+cf-ray:
+931d3b3979542627-NRT
+content-encoding:
+br
+content-type:
+text/html; charset=Shift_JIS
+date:
+Thu, 17 Apr 2025 16:17:13 GMT
+server:
+cloudflare
+server-timing:
+cfCacheStatus;desc="DYNAMIC"
+vary:
+Accept-Encoding
+x-bbx-stat:
+2400:4050:82e3:de00:90e7:7d43:a9f4:c5ac, NONE
+x-chx-error:
+0000 Confirmation
+x-postplace:
+livegalileo/1744897399
+x-ronin-stat:
+NONE
+
+# リクエスト2
+
+https://nova.5ch.net/test/bbs.cgi?guid=ON
+payload: FROM=&mail=&MESSAGE=tete&bbs=livegalileo&time=1744906622&key=1744897399&oekaki_thread1=&feature=confirmed%3A2741d2d272a330656038df0c738e5a1d08d90bdc&submit=%8F%E3%8BL%91S%82%C4%82%F0%8F%B3%91%F8%82%B5%82%C4%8F%91%82%AB%8D%9E%82%DE
+
+
+:authority:
+nova.5ch.net
+:method:
+POST
+:path:
+/test/bbs.cgi?guid=ON
+:scheme:
+https
+accept:
+text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+accept-encoding:
+gzip, deflate, br, zstd
+accept-language:
+ja,en;q=0.9,en-GB;q=0.8,en-US;q=0.7
+cache-control:
+max-age=0
+content-length:
+230
+content-type:
+application/x-www-form-urlencoded
+cookie:
+READJS="off"; 5chClassic=on
+origin:
+https://nova.5ch.net
+priority:
+u=0, i
+referer:
+https://nova.5ch.net/test/bbs.cgi
+sec-ch-ua:
+"Microsoft Edge";v="135", "Not-A.Brand";v="8", "Chromium";v="135"
+sec-ch-ua-mobile:
+?0
+sec-ch-ua-platform:
+"Windows"
+sec-fetch-dest:
+document
+sec-fetch-mode:
+navigate
+sec-fetch-site:
+same-origin
+sec-fetch-user:
+?1
+upgrade-insecure-requests:
+1
+user-agent:
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0
+
+## レスポンス2
+
+cf-cache-status:
+DYNAMIC
+cf-ray:
+931d3b686bfa2627-NRT
+content-encoding:
+br
+content-type:
+text/html; charset=Shift_JIS
+date:
+Thu, 17 Apr 2025 16:17:22 GMT
+server:
+cloudflare
+server-timing:
+cfCacheStatus;desc="DYNAMIC"
+set-cookie:
+acorn=53558r521g425g630e400G572y033I50d577b254Y0131z546f228f861a231E83q324o95k965y887s2878i3752f2302a6483g4002d7353A2492J8608w6433N7160b9120J3421X319K361H976J3789P7809M025F1492G755N732d552h751e676v361q1769o965W243S665O672r475F186y051z4242J949y317j565Z529N511z815S324I648x57A495l665h824U309p542m28z263y566c831B0274L316z819b949d220D389W293U6975E7956J116F957I063u571q1326c817z66Q9866F457e970L361m1683g041s6041i1808A; expires=Tue, 22-Apr-2025 00:00:00 GMT; path=/; domain=.5ch.net
+set-cookie:
+MonaTicket=82bfa342019112968a074ad37; expires=Thu, 01-May-2025 00:00:00 GMT; path=/; domain=.5ch.net
+vary:
+Accept-Encoding
+x-bbx-stat:
+2400:4050:82e3:de00:90e7:7d43:a9f4:c5ac, NONE
+x-donguri-stat:
+è­¦å‚™å“¡[Lv.0][æ–°èŠ½][----]
+x-postdate:
+1744906641.14
+x-posterid:
+ssumw7XG
+x-postplace:
+livegalileo/1744897399
+x-proc-time:
+0.811284 sec.
+x-regioninfo:
+æ—¥æœ¬:74:ã¿ã‹ã‹[13:æ±äº¬éƒ½]:2400:4050::/32:AS4713:NTT Communications Corporation
+x-resnum:
+727
+x-uplift-stat:
+NONE
