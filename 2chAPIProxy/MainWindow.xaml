@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:local="clr-namespace:_2chAPIProxy" mc:Ignorable="d" x:Class="_2chAPIProxy.MainWindow"
-        Title="2chAPIProxy Ver:2025.04.18 nonAPI test" Height="480" Width="640"
+        Title="2chAPIProxy Ver:2025.05.02 nonAPI test" Height="480" Width="640"
         Icon="icon3.ico" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" Background="White" d:DataContext="{d:DesignInstance {x:Type local:ViewModel}}">
     <Window.InputBindings>
         <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveSetting}"/>
@@ -121,9 +121,8 @@
                     </CheckBox>
                     <CheckBox x:Name="BeLogin" Content="Beログイン処理を代行する" HorizontalAlignment="Left" Height="20" Margin="300,302,0,0" VerticalAlignment="Top" ToolTip="Be2.1移行に伴ってログインできない場合にご利用ください。特に問題ない專ブラでもhttps経由でログインするので多少セキュアになります。" TabIndex="10" IsChecked="{Binding BeLogin, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"/>
                     <CheckBox x:Name="UseTLSWrite" Content="2chへのアクセスにhttps(TLS)を利用する" Height="20" Margin="30,326.8,0,0" VerticalAlignment="Top" ToolTip="2chへのアクセスに内部的にTLSを利用します。非対応の板で書き込みできない等の場合は無効にしてください。" IsChecked="{Binding UseTLSWrite, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="11" HorizontalAlignment="Left"/>
-                    <CheckBox Content="5chのリンクを2chに置換する" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="30,351.8,0,0" Height="20" TabIndex="13" ToolTip="dat内の5ch.netへのリンクを2ch.netに置き換えます。" IsChecked="{Binding Replace5chURI, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"/>
-                    <CheckBox Content="2chのhttpsをhttpに置換する" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="300,327,0,0" Height="20" TabIndex="14" ToolTip="2ch(5ch)のスレや板等のhttpsリンクをhttpに置換します。その際URLの頭に半角スペースを挿入します。" IsChecked="{Binding ReplaceHttpsLink, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"/>
-                    <!--<CheckBox Content="したらばの過去ログ応答を302に置換する" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Margin="255.8,301.8,0,0" ToolTip="したらばの過去ログへアクセスした時の応答が301になったのを302で応答するようにします。" TabIndex="10"/>-->
+                    <CheckBox Content="2chのhttpsをhttpに置換する" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="300,327,0,0" Height="20" TabIndex="13" ToolTip="2ch(5ch)のスレや板等のhttpsリンクをhttpに置換します。その際URLの頭に半角スペースを挿入します。" IsChecked="{Binding ReplaceHttpsLink, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"/>
+                    <CheckBox Content="5chのリンクを2chに置換する" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="30,351.8,0,0" Height="20" TabIndex="14" ToolTip="dat内の5ch.netへのリンクを2ch.netに置き換えます。" IsChecked="{Binding Replace5chURI, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"/>
                 </Grid>
             </TabItem>
             <TabItem x:Name="SetTab3"  Header="HTML変換設定" KeyboardNavigation.TabNavigation="Local">
@@ -172,21 +171,6 @@
                             </Style>
                         </CheckBox.Style>
                     </CheckBox>
-                    <!--<CheckBox x:Name="ChunkedResponse" Content="offlaw2置換時ChunkedTransferで返答" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="380,37.4,0,0" Height="20" ToolTip="Offlaw2のアクセス置換時にChunkeエンコードで返答します。問題が起こらなければ有効にする必要は無いです。" IsChecked="{Binding ChunkedResponse, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="5" Visibility="Hidden">
-                        <CheckBox.Style>
-                            <Style TargetType="{x:Type CheckBox}">
-                                <Setter Property="IsEnabled" Value="False"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding OfflawRokkaPermutation}" Value="True">
-                                        <Setter Property="IsEnabled" Value="True"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding KakotoHTML}" Value="False">
-                                        <Setter Property="IsEnabled" Value="False"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </CheckBox.Style>
-                    </CheckBox>-->
                     <GroupBox Header="HTMLtoDatアルゴリズムの外部読み込み" VerticalAlignment="Top" Margin="10,132,10,0" Height="246.4"/>
                     <CheckBox x:Name="CEExternalRead" Content="HTML変換処理を外部ソースコードから読み込む" HorizontalAlignment="Left" Height="20" Margin="30,158.2,0,0" VerticalAlignment="Top" ToolTip="過去ログをHTMLから変換する際の変換処理部を外部ファイルから読み込みます。" TabIndex="7" IsChecked="{Binding CEExternalRead, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}">
                         <CheckBox.Style>
@@ -229,18 +213,6 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                    <!--<Button x:Name="CECompiledTest" Content="テスト" HorizontalAlignment="Left" VerticalAlignment="Top" Width="85" Margin="240,241.38,0,0" Height="25" ToolTip="コンパイルされた結果をテストします。下のテキストボックスに2chスレッドのURLを入力してください。" Command="{Binding Test}" TabIndex="5" Visibility="Hidden">
-                        <Button.Style>
-                            <Style TargetType="{x:Type Button}">
-                                <Setter Property="IsEnabled" Value="False"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding CEExternalRead}" Value="True">
-                                        <Setter Property="IsEnabled" Value="True"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                    </Button>-->
                     <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="30,214.38,0,0" Height="20"><Run Text="変換"/><Run Text=""/><Run Text="テスト用スレ"/><Run Text="の"/><Run Text="URL"/></TextBlock>
                     <TextBox x:Name="TestURI" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" Width="308.383" Margin="166.617,209.38,0,0" ToolTip="この項目は設定として保存されません。" VerticalScrollBarVisibility="Disabled" TabIndex="10" Text="{Binding TestURI, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}"/>
                     <CheckBox x:Name="SkipAliveCheck" Content="dat落ち判定をスキップする" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="30,87,0,0" Height="20" ToolTip="HTMLから変換する前にスレが本当にdat落ちしているかのチェックを行いません。判定がおかしい場合に有効にしてください。" IsChecked="{Binding SkipAliveCheck, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="5">
@@ -285,7 +257,6 @@
                     <GroupBox x:Name="PostUAGroup" Header="User Agent" HorizontalAlignment="Left" Height="99" Margin="10,10,0,0" VerticalAlignment="Top" Width="604"/>
                     <TextBox x:Name="PostUA" HorizontalAlignment="Left" Height="25" Margin="84,51,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="500" ToolTip="書き込み（スレ立て）時に使用するUseAgent。空欄ならアクセス元のUAをそのまま利用します" Text="{Binding UserAgent3, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="1"/>
                     <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="書き込み" VerticalAlignment="Top" Margin="30,56,0,0" Width="50" Height="20"/>
-                    <GroupBox x:Name="PostSettingGroup" Header="書き込み時の動作" HorizontalAlignment="Left" Height="123" Margin="10,121,0,0" VerticalAlignment="Top" Width="604"/>
                     <CheckBox x:Name="AllUAReplace_Copy" Content="2chへの全アクセスのUAを変更" VerticalAlignment="Top" Margin="84,81,335,0" Height="20" ToolTip="2chAPIProxyを通る全ての2ch.netへのアクセス(API、HTML取得を除く)のUAを書き込みUAに変更します" IsChecked="{Binding AllUAReplace, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="3">
                         <CheckBox.Style>
                             <Style TargetType="{x:Type CheckBox}">
@@ -299,8 +270,11 @@
                             </Style>
                         </CheckBox.Style>
                     </CheckBox>
-                    <CheckBox x:Name="PostNoReplace_Copy" Content="書き込みへの関与を最小限にする" Height="20" Margin="410,156,30,0" VerticalAlignment="Top" ToolTip="書き込み（スレ立て）時、5chへの変更、https化、UAの変更、のみを行います。送信用にプロクシを通さず書き込むのとほぼ同じになります。" IsChecked="{Binding PostNoReplace, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="5"/>
-                    <CheckBox x:Name="SetReferrer_Copy" Content="リファラを設定する" Height="20" Margin="237,156,278,0" VerticalAlignment="Top" ToolTip="書き込み時のRefererヘッダに、書き込むスレのURLを常に設定するようにします" IsChecked="{Binding SetReferrer, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="4">
+                    <GroupBox x:Name="PostSettingGroup" Header="書き込み時の動作" HorizontalAlignment="Left" Height="133" Margin="10,121,0,0" VerticalAlignment="Top" Width="604"/>
+                    <CheckBox x:Name="NotReturnMonaticketAndAcorn" Content="Monaticket/Acornクッキーを返さない" Height="20" Margin="33,156,375,0" VerticalAlignment="Top" ToolTip="サーバーから受け取ったMonaticket/どんぐりクッキーを専ブラに対して返送しません。専ブラと異なる書き込みUAを使用している場合に、専ブラのクッキーを上書きしないようにします。" IsChecked="{Binding NotReturnMonaticketAndAcorn, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="6"/>
+                    <CheckBox x:Name="IgnoreReceiveCookie" Content="専ブラからのクッキーを使用しない" Height="20" Margin="354,156,54,0" VerticalAlignment="Top" ToolTip="書き込みにおいて、専ブラから送信されてきたクッキーを使用せずに通信を行います。" IsChecked="{Binding IgnoreReceiveCookie, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="7"/>
+                    <CheckBox x:Name="PostRoninInvalid" Content="書き込み時に浪人を無効化する" HorizontalAlignment="Left" Height="20" Margin="33,181,0,0" VerticalAlignment="Top" IsChecked="{Binding PostRoninInvalid, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="8" ToolTip="書き込み(スレ立て)時に浪人関連の情報を削除して書き込みます。書き込みに浪人を利用したくない場合にご利用ください。"/>
+                    <CheckBox x:Name="SetReferrer_Copy" Content="リファラを設定する" Height="20" Margin="354,181,161,0" VerticalAlignment="Top" ToolTip="書き込み時のRefererヘッダに、書き込むスレのURLを常に設定するようにします" IsChecked="{Binding SetReferrer, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="9">
                         <CheckBox.Style>
                             <Style TargetType="{x:Type CheckBox}">
                                 <Setter Property="FontSize" Value="12px"/>
@@ -313,7 +287,7 @@
                             </Style>
                         </CheckBox.Style>
                     </CheckBox>
-                    <CheckBox x:Name="NotReturnMonaticketAndAcorn" Content="Monaticket/Acornクッキーを返さない" Height="20" Margin="33,194,375,0" VerticalAlignment="Top" ToolTip="サーバーから受け取ったMonaticket/どんぐりクッキーを専ブラに対して返送しません。専ブラと異なる書き込みUAを使用している場合に、専ブラのクッキーを上書きしないようにします。" IsChecked="{Binding NotReturnMonaticketAndAcorn, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="6"/>
+                    <CheckBox x:Name="PostNoReplace_Copy" Content="書き込みへの関与を最小限にする" Height="20" Margin="33,206,407,0" VerticalAlignment="Top" ToolTip="書き込み（スレ立て）時、5chへの変更、https化、UAの変更、のみを行います。送信用にプロクシを通さず書き込むのとほぼ同じになります。" IsChecked="{Binding PostNoReplace, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="10"/>
                     <Button Width="85" VerticalAlignment="Top" ToolTip="全タブの設定変更をファイルへ保存します" TabIndex="13" x:Name="SettingSave4" Margin="10,383.4,0,0" Height="25" HorizontalAlignment="Left" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="UpdateKey">
                         <StackPanel>
                             <TextBlock>変更を保存</TextBlock>
@@ -322,8 +296,6 @@
                             </Popup>
                         </StackPanel>
                     </Button>
-                    <CheckBox x:Name="PostRoninInvalid" Content="書き込み時に浪人を無効化する" HorizontalAlignment="Left" Height="20" Margin="33,156,0,0" VerticalAlignment="Top" IsChecked="{Binding PostRoninInvalid, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="12" ToolTip="書き込み(スレ立て)時に浪人関連の情報を削除して書き込みます。書き込みに浪人を利用したくない場合にご利用ください。"/>
-                    <CheckBox x:Name="IgnoreReceiveCookie" Content="専ブラからのクッキーを使用しない" Height="20" Margin="378,194,30,0" VerticalAlignment="Top" ToolTip="書き込みにおいて、専ブラから送信されてきたクッキーを使用せずに通信を行います。" IsChecked="{Binding IgnoreReceiveCookie, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="14"/>
                 </Grid>
             </TabItem>
         </TabControl>
