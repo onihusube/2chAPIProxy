@@ -1373,20 +1373,6 @@ namespace _2chAPIProxy
                             this.PopupVisible = true;
 
                             break;
-                        case "KeyReset":
-                            var defaultSetting = new AppSetting();
-                            this.Appkey = defaultSetting.Appkey;
-                            this.HMkey = defaultSetting.HMkey;
-                            this.UserAgent1 = defaultSetting.UserAgent1;
-                            this.UserAgent0 = defaultSetting.UserAgent0;
-                            this.UserAgent2 = defaultSetting.UserAgent2;
-                            this.SystemLog = "各キーとUAをリセットしました。";
-
-                            // MonaTicketをリセット
-                            DatProxy.ResetMonaTicket();
-                            // Acornをリセット
-                            DatProxy.ResetAcorn();
-                            break;
                         case "CookieClear":
                             // クッキーのクリア
                             DatProxy.CookieClear();
@@ -1398,23 +1384,6 @@ namespace _2chAPIProxy
                             SaveSettings();
 
                             this.SystemLog = "保持しているクッキーをクリアしました。";
-                            break;
-                        case "UpdateSID":
-                            DatProxy.UpdateAsync()
-                            .ContinueWith(task =>
-                            {
-                                App.Current.Dispatcher.BeginInvoke((Action)(() =>
-                                {
-                                    if (task.IsFaulted == true)
-                                    {
-                                        this.SystemLog = task.Exception.ToString();
-                                    }
-                                    else
-                                    {
-                                        this.SystemLog = "SessionIDを更新しました。（ユーザー操作）";
-                                    }
-                                }));
-                            });
                             break;
                         case "SenburaChoose":
                             System.Windows.Forms.OpenFileDialog GetPath = new System.Windows.Forms.OpenFileDialog();
