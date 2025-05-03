@@ -52,7 +52,7 @@
                         <TextBox x:Name="OutText" Margin="10,10,10,5.4" TextWrapping="NoWrap" SpellCheck.IsEnabled="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnlyCaretVisible="True" Text="{Binding SystemLog, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="12"/>
                     </GroupBox>
                     <Button x:Name="UpdateKey" Content="変更を保存" HorizontalAlignment="Left" Height="25" Margin="158,41.84,0,0" VerticalAlignment="Top" Width="85" ToolTip="現在の設定を保存します" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="UpdateKey" TabIndex="6"/>
-                    <Button x:Name="CookieClear" Content="クッキーをクリア" HorizontalAlignment="Left" Height="25" Margin="248,42,0,0" VerticalAlignment="Top" Width="95" ToolTip="内部で保持しているクッキーをすべて削除します。Monaticketとどんぐりクッキーも削除されます。" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="CookieClear" TabIndex="7"/>
+                    <Button x:Name="CookieClear" Content="クッキーをクリア" HorizontalAlignment="Left" Height="25" Margin="248,42,0,0" VerticalAlignment="Top" Width="85" ToolTip="内部で保持しているクッキーをすべて削除します。Monaticketとどんぐりクッキーも削除されます。" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="CookieClear" TabIndex="7" FontSize="10"/>
                 </Grid>
             </TabItem>
             <TabItem x:Name="SetTab1" Header="動作設定" KeyboardNavigation.TabNavigation="Local">
@@ -270,11 +270,35 @@
                             </Style>
                         </CheckBox.Style>
                     </CheckBox>
-                    <GroupBox x:Name="PostSettingGroup" Header="書き込み時の動作" HorizontalAlignment="Left" Height="133" Margin="10,121,0,0" VerticalAlignment="Top" Width="604"/>
-                    <CheckBox x:Name="NotReturnMonaticketAndAcorn" Content="Monaticket/Acornクッキーを返さない" Height="20" Margin="33,156,375,0" VerticalAlignment="Top" ToolTip="サーバーから受け取ったMonaticket/どんぐりクッキーを専ブラに対して返送しません。専ブラと異なる書き込みUAを使用している場合に、専ブラのクッキーを上書きしないようにします。" IsChecked="{Binding NotReturnMonaticketAndAcorn, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="6"/>
-                    <CheckBox x:Name="IgnoreReceiveCookie" Content="専ブラからのクッキーを使用しない" Height="20" Margin="354,156,54,0" VerticalAlignment="Top" ToolTip="書き込みにおいて、専ブラから送信されてきたクッキーを使用せずに通信を行います。" IsChecked="{Binding IgnoreReceiveCookie, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="7"/>
-                    <CheckBox x:Name="PostRoninInvalid" Content="書き込み時に浪人を無効化する" HorizontalAlignment="Left" Height="20" Margin="33,181,0,0" VerticalAlignment="Top" IsChecked="{Binding PostRoninInvalid, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="8" ToolTip="書き込み(スレ立て)時に浪人関連の情報を削除して書き込みます。書き込みに浪人を利用したくない場合にご利用ください。"/>
-                    <CheckBox x:Name="SetReferrer_Copy" Content="リファラを設定する" Height="20" Margin="354,181,161,0" VerticalAlignment="Top" ToolTip="書き込み時のRefererヘッダに、書き込むスレのURLを常に設定するようにします" IsChecked="{Binding SetReferrer, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="9">
+                    <GroupBox x:Name="CookieSettingGroup" Header="クッキー関連" HorizontalAlignment="Left" Height="94" Margin="10,127,0,0" VerticalAlignment="Top" Width="604"/>
+                    <CheckBox x:Name="IndependentCookieManagement" Content="クッキーを独立管理する" Height="20" Margin="30,161,378,0" VerticalAlignment="Top" ToolTip="専ブラからのクッキーを使用せず、受け取ったMonaticket/どんぐりクッキーを専ブラに対して返送しません。" IsChecked="{Binding IndependentCookieManagement, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="6"/>
+                    <CheckBox x:Name="NotReturnMonaticketAndAcorn" Content="Monaticket/Acornクッキーを返さない" Height="20" Margin="30,186,378,0" VerticalAlignment="Top" ToolTip="サーバーから受け取ったMonaticket/どんぐりクッキーを専ブラに対して返送しません。専ブラと異なる書き込みUAを使用している場合に、専ブラのクッキーを上書きしないようにします。" IsChecked="{Binding NotReturnMonaticketAndAcorn, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="6">
+                        <CheckBox.Style>
+                            <Style TargetType="{x:Type CheckBox}">
+                                <Setter Property="IsEnabled" Value="True"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IndependentCookieManagement}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </CheckBox.Style>
+                    </CheckBox>
+                    <CheckBox x:Name="IgnoreReceiveCookie" Content="専ブラからのクッキーを使用しない" Height="20" Margin="351,186,57,0" VerticalAlignment="Top" ToolTip="書き込みにおいて、専ブラから送信されてきたクッキーを使用せずに通信を行います。" IsChecked="{Binding IgnoreReceiveCookie, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="7">
+                        <CheckBox.Style>
+                            <Style TargetType="{x:Type CheckBox}">
+                                <Setter Property="IsEnabled" Value="True"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IndependentCookieManagement}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </CheckBox.Style>
+                    </CheckBox>
+                    <GroupBox x:Name="PostSettingGroup" Header="書き込み時の動作" HorizontalAlignment="Left" Height="94" Margin="10,244,0,0" VerticalAlignment="Top" Width="604"/>
+                    <CheckBox x:Name="PostRoninInvalid" Content="書き込み時に浪人を無効化する" HorizontalAlignment="Left" Height="20" Margin="30,276,0,0" VerticalAlignment="Top" IsChecked="{Binding PostRoninInvalid, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="8" ToolTip="書き込み(スレ立て)時に浪人関連の情報を削除して書き込みます。書き込みに浪人を利用したくない場合にご利用ください。"/>
+                    <CheckBox x:Name="SetReferrer_Copy" Content="リファラを設定する" Height="20" Margin="351,276,164,0" VerticalAlignment="Top" ToolTip="書き込み時のRefererヘッダに、書き込むスレのURLを常に設定するようにします" IsChecked="{Binding SetReferrer, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="9">
                         <CheckBox.Style>
                             <Style TargetType="{x:Type CheckBox}">
                                 <Setter Property="FontSize" Value="12px"/>
@@ -287,7 +311,7 @@
                             </Style>
                         </CheckBox.Style>
                     </CheckBox>
-                    <CheckBox x:Name="PostNoReplace_Copy" Content="書き込みへの関与を最小限にする" Height="20" Margin="33,206,407,0" VerticalAlignment="Top" ToolTip="書き込み（スレ立て）時、5chへの変更、https化、UAの変更、のみを行います。送信用にプロクシを通さず書き込むのとほぼ同じになります。" IsChecked="{Binding PostNoReplace, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="10"/>
+                    <CheckBox x:Name="PostNoReplace_Copy" Content="書き込みへの関与を最小限にする" Height="20" Margin="30,301,410,0" VerticalAlignment="Top" ToolTip="書き込み（スレ立て）時、5chへの変更、https化、UAの変更、のみを行います。送信用にプロクシを通さず書き込むのとほぼ同じになります。" IsChecked="{Binding PostNoReplace, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="10"/>
                     <Button Width="85" VerticalAlignment="Top" ToolTip="全タブの設定変更をファイルへ保存します" TabIndex="13" x:Name="SettingSave4" Margin="10,383.4,0,0" Height="25" HorizontalAlignment="Left" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="UpdateKey">
                         <StackPanel>
                             <TextBlock>変更を保存</TextBlock>

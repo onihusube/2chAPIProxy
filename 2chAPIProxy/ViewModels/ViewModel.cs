@@ -386,6 +386,12 @@ namespace _2chAPIProxy
             }
             catch (Exception) { }
             SystemLog = "2chAPIProxy起動";
+
+            // 「クッキーを独立管理する」チェックボックスの初期表示調整
+            if (IgnoreReceiveCookie && NotReturnMonaticketAndAcorn)
+            {
+                IndependentCookieManagement = true;
+            }
         }
 
         private void HtmlConverter_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -981,6 +987,12 @@ namespace _2chAPIProxy
                 if (notReturnMonaticketAndAcorn != value)
                 {
                     Setting.NotReturnMonaticket = notReturnMonaticketAndAcorn = value;
+
+                    if (value && IgnoreReceiveCookie)
+                    {
+                        IndependentCookieManagement = true;
+                    }
+
                     NoticePropertyChanged("NotReturnMonaticketAndAcorn");
                 }
             }
@@ -996,7 +1008,32 @@ namespace _2chAPIProxy
                 if (ignoreReceiveCookie != value)
                 {
                     Setting.IgnoreReceiveCookie = ignoreReceiveCookie = value;
+
+                    if (value && NotReturnMonaticketAndAcorn)
+                    {
+                        IndependentCookieManagement = true;
+                    }
+
                     NoticePropertyChanged("IgnoreReceiveCookie");
+                }
+            }
+        }
+
+        private bool independentCookieManagement;
+
+        public bool IndependentCookieManagement
+        {
+            get => independentCookieManagement;
+            set
+            {
+                if (independentCookieManagement != value)
+                {
+                    independentCookieManagement = value;
+
+                    NotReturnMonaticketAndAcorn = value;
+                    IgnoreReceiveCookie = value;
+
+                    NoticePropertyChanged("IndependentCookieManagement");
                 }
             }
         }

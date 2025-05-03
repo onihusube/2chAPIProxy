@@ -7,9 +7,7 @@ http://medaka.5ch.net/test/read.cgi/be/1599094155/
   beがたくさん + あぼーんがある
 http://mevius.5ch.net/test/read.cgi/aasaloon/1609636473/
 http://mao.5ch.net/test/read.cgi/livesaturn/1682610585/
-
-要テスト
 https://hayabusa9.5ch.net/test/read.cgi/news/1658488459
   beではない絵文字リンクがある（beもある）
-お絵描きリンクがあるスレ、↓とか
-https://agree.5ch.net/test/read.cgi/oekaki/1675428467/
+http://nova.5ch.net/test/read.cgi/livegalileo/1647941241/
+  お絵描きリンクがある
