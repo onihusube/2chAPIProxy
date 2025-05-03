@@ -52,7 +52,7 @@
                         <TextBox x:Name="OutText" Margin="10,10,10,5.4" TextWrapping="NoWrap" SpellCheck.IsEnabled="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnlyCaretVisible="True" Text="{Binding SystemLog, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}" TabIndex="12"/>
                     </GroupBox>
                     <Button x:Name="UpdateKey" Content="変更を保存" HorizontalAlignment="Left" Height="25" Margin="158,41.84,0,0" VerticalAlignment="Top" Width="85" ToolTip="現在の設定を保存します" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="UpdateKey" TabIndex="6"/>
-                    <Button x:Name="CookieClear" Content="クッキーをクリア" HorizontalAlignment="Left" Height="25" Margin="248,42,0,0" VerticalAlignment="Top" Width="85" ToolTip="SID取得に必要なAPIキーとUAを最新のデフォルト設定にリセットします。SIDやdatが取得できない場合に試してみてください。" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="CookieClear" TabIndex="7"/>
+                    <Button x:Name="CookieClear" Content="クッキーをクリア" HorizontalAlignment="Left" Height="25" Margin="248,42,0,0" VerticalAlignment="Top" Width="95" ToolTip="内部で保持しているクッキーをすべて削除します。Monaticketとどんぐりクッキーも削除されます。" Command="{Binding OnClick, Mode=OneWay}" CommandParameter="CookieClear" TabIndex="7"/>
                 </Grid>
             </TabItem>
             <TabItem x:Name="SetTab1" Header="動作設定" KeyboardNavigation.TabNavigation="Local">
