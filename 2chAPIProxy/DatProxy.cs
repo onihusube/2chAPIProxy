@@ -1098,14 +1098,23 @@ namespace _2chAPIProxy
                 // feature=confirmed:xxxを追加
                 if (string.IsNullOrEmpty(post_form_feature) == false)
                 {
-                    // 送られてきてない場合のみ
-                    if (post_field_map.ContainsKey("feature") == false)
-                    {
-                        post_field_map["feature"] = $"confirmed%3A{post_form_feature}";
+                    // 送られてきたものを上書き
+                    post_field_map["feature"] = $"confirmed%3A{post_form_feature}";
 
-                        // 一回送ったらいらない（？
-                        post_form_feature = "";
+
+                    // featureをセットする場合、timeもセットする
+                    if (string.IsNullOrEmpty(post_time) == false)
+                    {
+                        post_field_map["time"] = post_time;
                     }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"featureパラメータに対応するtimeパラメータが保存されていません");
+                    }
+
+                    // 一回送ったらいらない（はず？
+                    post_form_feature = "";
+                    post_time = "";
                 }
 
                 if (in_retry)
@@ -1119,12 +1128,6 @@ namespace _2chAPIProxy
                     else
                     {
                         post_field_map["submit"] = "%8F%E3%8BL%91S%82%C4%82%F0%8F%B3%91%F8%82%B5%82%C4%8F%91%82%AB%8D%9E%82%DE";
-                    }
-
-                    if (string.IsNullOrEmpty(post_time) == false)
-                    {
-                        post_field_map["time"] = post_time;
-                        post_time = "";
                     }
                 }
                 else
@@ -1238,13 +1241,22 @@ namespace _2chAPIProxy
                             // X-Chx-Error : E3000 Delete your cookie.
                             // ?
                             // X-Chx-Error : E3100 ...
-                            if (wres.Headers["X-Chx-Error"].Contains("Delete your cookie") || wres.Headers["X-Chx-Error"].Contains("Reject your post") || wres.Headers["X-Chx-Error"].Contains("E3100"))
+                            if (wres.Headers["X-Chx-Error"].Contains("Delete your cookie") || 
+                                wres.Headers["X-Chx-Error"].Contains("Reject your post") || 
+                                wres.Headers["X-Chx-Error"].Contains("E3100"))
                             {
                                 // MonaTicketクッキーの削除
                                 // 本当に削除するのは、次の投稿時
                                 Cookie[monaticket_cookie] = mark_cookie_invalidated;
                                 ResetMonaTicket();
 
+                                need_retry = true;
+                            }
+
+                            // 書き込み確認
+                            // X-Chx-Error : 0000 Confirmation
+                            if (wres.Headers["X-Chx-Error"].Contains("0000 Confirmation"))
+                            {
                                 need_retry = true;
                             }
 
@@ -1266,14 +1278,26 @@ namespace _2chAPIProxy
                             oSession.utilSetResponseBody(resdat);
 
                             // 書き込み確認画面の処理
-                            if (resdat.Contains("<title>■ 書き込み確認 ■</title>"))
+                            if (resdat.Contains("<title>■ 書き込み確認 ■</title>") || need_retry)
                             {
                                 // feature パラメータを抽出しておく
-                                post_form_feature = Regex.Match(resdat, $@"<input type=hidden name={'"'}feature{'"'} value={'"'}confirmed:(\w+?){'"'}>").Groups[1].Value;
+                                var feature_match = Regex.Match(resdat, $@"<input type=hidden name={'"'}feature{'"'} value={'"'}confirmed:(\w+?){'"'}>");
 
-                                System.Diagnostics.Debug.WriteLine($"保存フォームパラメータ(feature): {post_form_feature}");
+                                if (feature_match.Success)
+                                {
+                                    // featureとtimeはペアで扱う
+                                    post_form_feature = feature_match.Groups[1].Value;
+                                    post_time = post_field_map["time"];
 
-                                need_retry = true;
+                                    System.Diagnostics.Debug.WriteLine($"保存フォームパラメータ(feature, time): ({post_form_feature}, {post_time})");
+
+                                    need_retry = true;
+                                }
+                                else
+                                {
+                                    //ViewModel.OnModelNotice($"featureパラメータの抽出に失敗。");
+                                    System.Diagnostics.Debug.WriteLine($"featureパラメータの抽出に失敗");
+                                }
                             }
 
                             System.Diagnostics.Debug.WriteLine($"本文: {resdat}");
