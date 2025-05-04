@@ -760,7 +760,7 @@ namespace _2chAPIProxy
         private string post_form_feature = "";
         private string post_time = "";
 
-        private void ResPost(Session oSession, bool is2ch, bool in_retry = false)
+        private void ResPost(Session oSession, bool is2ch, bool in_confirmation = false, uint retry_count = 0)
         {
             try
             {
@@ -1117,7 +1117,7 @@ namespace _2chAPIProxy
                     post_time = "";
                 }
 
-                if (in_retry)
+                if (in_confirmation)
                 {
                     // submit調整
                     // どちらも"上記全てを承諾して書き込む"にしている
@@ -1170,6 +1170,8 @@ namespace _2chAPIProxy
                 {
                     // リトライの必要性をマーク
                     bool need_retry = false;
+                    // クッキー再取得を区別する
+                    bool cookie_reacquisition = false;
 
                     using (System.IO.Stream PostStream = Write.GetRequestStream())
                     {
@@ -1232,6 +1234,7 @@ namespace _2chAPIProxy
                                 Cookie[acorn_cookie] = mark_cookie_invalidated;
                                 ResetAcorn();
 
+                                cookie_reacquisition = true;
                                 need_retry = true;
                             }
 
@@ -1250,6 +1253,7 @@ namespace _2chAPIProxy
                                 Cookie[monaticket_cookie] = mark_cookie_invalidated;
                                 ResetMonaTicket();
 
+                                cookie_reacquisition = true;
                                 need_retry = true;
                             }
 
@@ -1319,19 +1323,48 @@ namespace _2chAPIProxy
                     }
 
                     // 書き込みリトライ（再帰的にはしない）
-                    if (need_retry == true && in_retry == false)
+                    if (need_retry == true)
                     {
-                        // ちょっと待機
-                        Thread.Sleep(1000);
-
-                        if (oSession.fullUrl.Contains("guid=ON") == false)
+                        if (cookie_reacquisition == true)
                         {
-                            oSession.fullUrl += "?guid=ON";
+                            const uint max_retry = 5;
+
+                            // ループする可能性があるのはこっちだけ
+                            if (retry_count <= max_retry)
+                            {
+                                // ちょっと待機
+                                Thread.Sleep(1000);
+
+                                // Monticket/Acorn再取得リトライ
+                                ResPost(oSession, is2ch, false, retry_count + 1);
+                            }
+                            else
+                            {
+                                ViewModel.OnModelNotice($"リトライ上限（{max_retry}回）に達したので、投稿処理を中断します");
+                                
+                                // 数値根拠（これ+1
+                                // 1. 投稿を拒否（Monaticket切れ）でリトライ（Monaticket再取得
+                                // 2. 書き込み確認でリトライ（Monaticket再取得
+                                // 3. どんぐり期限切れでリトライ（Acorn再取得
+                                // 4. 書き込み確認でリトライ（Acorn再取得
+                            }
                         }
 
-                        ResPost(oSession, is2ch, true);
-                    }
+                        if (in_confirmation == false)
+                        {
+                            // 書き込み確認リトライ
+                            if (oSession.fullUrl.Contains("guid=ON") == false)
+                            {
+                                oSession.fullUrl += "?guid=ON";
+                            }
 
+                            // ちょっと待機
+                            Thread.Sleep(1000);
+
+                            ResPost(oSession, is2ch, true, retry_count + 1);
+                        }
+                    }
+                    
                     return;
                 }
                 catch (WebException err)
