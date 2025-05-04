@@ -1327,13 +1327,18 @@ namespace _2chAPIProxy
                     {
                         if (cookie_reacquisition == true)
                         {
-                            const uint max_retry = 5;
+                            const uint max_retry = 4;
+                            // 数値根拠（これ
+                            // 1. 投稿を拒否（Monaticket切れ）でリトライ（Monaticket再取得
+                            // 2. 書き込み確認でリトライ（Monaticket再取得
+                            // 3. どんぐり期限切れでリトライ（Acorn再取得
+                            // 4. 書き込み確認でリトライ（Acorn再取得
 
                             // ループする可能性があるのはこっちだけ
                             if (retry_count <= max_retry)
                             {
                                 // ちょっと待機
-                                Thread.Sleep(1000);
+                                Thread.Sleep((int)(1000 + 500 * retry_count));
 
                                 // Monticket/Acorn再取得リトライ
                                 ResPost(oSession, is2ch, false, retry_count + 1);
@@ -1342,11 +1347,6 @@ namespace _2chAPIProxy
                             {
                                 ViewModel.OnModelNotice($"リトライ上限（{max_retry}回）に達したので、投稿処理を中断します");
                                 
-                                // 数値根拠（これ+1
-                                // 1. 投稿を拒否（Monaticket切れ）でリトライ（Monaticket再取得
-                                // 2. 書き込み確認でリトライ（Monaticket再取得
-                                // 3. どんぐり期限切れでリトライ（Acorn再取得
-                                // 4. 書き込み確認でリトライ（Acorn再取得
                             }
                         }
 
@@ -1359,7 +1359,7 @@ namespace _2chAPIProxy
                             }
 
                             // ちょっと待機
-                            Thread.Sleep(1000);
+                            Thread.Sleep((int)(1000 + 500 * retry_count));
 
                             ResPost(oSession, is2ch, true, retry_count + 1);
                         }
