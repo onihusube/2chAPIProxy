@@ -966,6 +966,8 @@ namespace _2chAPIProxy
                     original_post_is_utf8 = oSession.RequestHeaders["Content-Type"]?.Contains("UTF-8") ?? false;
                     original_post_is_utf8 |= oSession.RequestHeaders["Content-Type"]?.Contains("utf-8") ?? false;
                 }
+                // submitがUTF-8かチェック
+                original_post_is_utf8 |= post_field_map["submit"].Contains("%E6%9B%B8%E3%81%8D%E8%BE%BC%E3%82%80");
 
                 if (original_post_is_utf8)
                 {
@@ -1129,10 +1131,12 @@ namespace _2chAPIProxy
                     // どちらも"上記全てを承諾して書き込む"にしている
                     if (original_post_is_utf8)
                     {
+                        // UTF-8
                         post_field_map["submit"] = "%E4%B8%8A%E8%A8%98%E5%85%A8%E3%81%A6%E3%82%92%E6%89%BF%E8%AB%BE%E3%81%97%E3%81%A6%E6%9B%B8%E3%81%8D%E8%BE%BC%E3%82%80";
                     }
                     else
                     {
+                        // Shift-JIS
                         post_field_map["submit"] = "%8F%E3%8BL%91S%82%C4%82%F0%8F%B3%91%F8%82%B5%82%C4%8F%91%82%AB%8D%9E%82%DE";
                     }
                 }
@@ -1145,6 +1149,13 @@ namespace _2chAPIProxy
 
                     post_field_map["time"] = new_time_field;
                     post_time = new_time_field;
+
+                    // submit調整
+                    if (original_post_is_utf8)
+                    {
+                        // UTF-8で"書き込む"
+                        post_field_map["submit"] = "%E6%9B%B8%E3%81%8D%E8%BE%BC%E3%82%80";
+                    }
                 }
 
                 //お絵かき用のデータ追加
