@@ -272,7 +272,7 @@
                     </CheckBox>
                     <GroupBox x:Name="CookieSettingGroup" Header="クッキー関連" HorizontalAlignment="Left" Height="94" Margin="10,127,0,0" VerticalAlignment="Top" Width="604"/>
                     <CheckBox x:Name="IndependentCookieManagement" Content="クッキーを独立管理する" Height="20" Margin="30,161,378,0" VerticalAlignment="Top" ToolTip="専ブラからのクッキーを使用せず、受け取ったMonaticket/どんぐりクッキーを専ブラに対して返送しません。" IsChecked="{Binding IndependentCookieManagement, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="6"/>
-                    <CheckBox x:Name="NotReturnMonaticketAndAcorn" Content="Monaticket/Acornクッキーを返さない" Height="20" Margin="30,186,378,0" VerticalAlignment="Top" ToolTip="サーバーから受け取ったMonaticket/どんぐりクッキーを専ブラに対して返送しません。専ブラと異なる書き込みUAを使用している場合に、専ブラのクッキーを上書きしないようにします。" IsChecked="{Binding NotReturnMonaticketAndAcorn, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="6">
+                    <CheckBox x:Name="NotReturnPostCookie" Content="専ブラにクッキーを返さない" Height="20" Margin="30,186,378,0" VerticalAlignment="Top" ToolTip="サーバーから受け取ったクッキーを専ブラに対して返送しません。専ブラと異なる書き込みUAを使用している場合に、専ブラのクッキーを上書きしないようにします。" IsChecked="{Binding NotReturnPostCookie, Mode=TwoWay, NotifyOnTargetUpdated=True, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" TabIndex="6">
                         <CheckBox.Style>
                             <Style TargetType="{x:Type CheckBox}">
                                 <Setter Property="IsEnabled" Value="True"/>

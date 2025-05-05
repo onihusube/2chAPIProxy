@@ -1211,12 +1211,8 @@ namespace _2chAPIProxy
 
                                 if (ViewModel.Setting.NotReturnMonaticket == true)
                                 {
-                                    // Monaticket/Acornクッキーを返さない
-                                    if (cookie.Name == monaticket_cookie || cookie.Name == acorn_cookie)
-                                    {
-                                        System.Diagnostics.Debug.WriteLine($"{cookie.Name} のSet-Cookieをスキップ");
-                                        continue;
-                                    }
+                                    // Set-Cookieのスキップ（専ブラにクッキーを返さない
+                                    continue;
                                 }
 
                                 // set-cookieヘッダの組み立て
@@ -1225,6 +1221,8 @@ namespace _2chAPIProxy
                                 if (!String.IsNullOrEmpty(cookie.Domain)) tc += "; domain=" + ((is2ch) ? (cookie.Domain.Replace("5ch.net", "2ch.net")) : (cookie.Domain));
                                 
                                 oSession.oResponse.headers.Add("Set-Cookie", tc);
+
+                                System.Diagnostics.Debug.WriteLine($"Set-Cookie : {tc}");
                             }
                         }
 

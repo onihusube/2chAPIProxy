@@ -122,8 +122,11 @@ namespace _2chAPIProxy
             addX2chUAHeader = Setting.AddX2chUAHeader;
             addMsToNonce = Setting.AddMsToNonce;
             assumeReqBodyIsUTF8 = Setting.AssumeReqBodyIsUTF8;
-            notReturnMonaticketAndAcorn = Setting.NotReturnMonaticket;
+            notReturnPostCookie = Setting.NotReturnMonaticket;
             ignoreReceiveCookie = Setting.IgnoreReceiveCookie;
+            independentCookieManagement = IgnoreReceiveCookie && NotReturnPostCookie;
+
+            System.Diagnostics.Debug.WriteLine($"Monaticket: {Setting.MonaTicket}");
 
             //スリープ/休止状態時の処理
             Microsoft.Win32.SystemEvents.PowerModeChanged += new Microsoft.Win32.PowerModeChangedEventHandler(PowermodeChanged);
@@ -386,12 +389,6 @@ namespace _2chAPIProxy
             }
             catch (Exception) { }
             SystemLog = "2chAPIProxy起動";
-
-            // 「クッキーを独立管理する」チェックボックスの初期表示調整
-            if (IgnoreReceiveCookie && NotReturnMonaticketAndAcorn)
-            {
-                IndependentCookieManagement = true;
-            }
         }
 
         private void HtmlConverter_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -977,23 +974,23 @@ namespace _2chAPIProxy
             }
         }
 
-        private bool notReturnMonaticketAndAcorn;
+        private bool notReturnPostCookie;
 
-        public bool NotReturnMonaticketAndAcorn
+        public bool NotReturnPostCookie
         {
-            get => notReturnMonaticketAndAcorn;
+            get => notReturnPostCookie;
             set
             {
-                if (notReturnMonaticketAndAcorn != value)
+                if (notReturnPostCookie != value)
                 {
-                    Setting.NotReturnMonaticket = notReturnMonaticketAndAcorn = value;
+                    Setting.NotReturnMonaticket = notReturnPostCookie = value;
 
                     if (value && IgnoreReceiveCookie)
                     {
                         IndependentCookieManagement = true;
                     }
 
-                    NoticePropertyChanged("NotReturnMonaticketAndAcorn");
+                    NoticePropertyChanged("NotReturnPostCookie");
                 }
             }
         }
@@ -1009,7 +1006,7 @@ namespace _2chAPIProxy
                 {
                     Setting.IgnoreReceiveCookie = ignoreReceiveCookie = value;
 
-                    if (value && NotReturnMonaticketAndAcorn)
+                    if (value && NotReturnPostCookie)
                     {
                         IndependentCookieManagement = true;
                     }
@@ -1030,7 +1027,7 @@ namespace _2chAPIProxy
                 {
                     independentCookieManagement = value;
 
-                    NotReturnMonaticketAndAcorn = value;
+                    NotReturnPostCookie = value;
                     IgnoreReceiveCookie = value;
 
                     NoticePropertyChanged("IndependentCookieManagement");
