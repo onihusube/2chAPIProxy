@@ -959,7 +959,13 @@ namespace _2chAPIProxy
                 }
 
                 // 送信されてきたエンコーディング判別
-                bool original_post_is_utf8 = oSession.RequestHeaders["Content-Type"]?.Contains("UTF-8") ?? false;
+                bool original_post_is_utf8 = false;
+                if (oSession.RequestHeaders.Exists("Content-Type"))
+                {
+                    // 大文字小文字でチェック
+                    original_post_is_utf8 = oSession.RequestHeaders["Content-Type"]?.Contains("UTF-8") ?? false;
+                    original_post_is_utf8 |= oSession.RequestHeaders["Content-Type"]?.Contains("utf-8") ?? false;
+                }
 
                 if (original_post_is_utf8)
                 {
@@ -1348,9 +1354,10 @@ namespace _2chAPIProxy
                                 ViewModel.OnModelNotice($"リトライ上限（{max_retry}回）に達したので、投稿処理を中断します");
                                 
                             }
-                        }
 
-                        if (in_confirmation == false)
+                            return;
+                        }
+                        else if (in_confirmation == false)
                         {
                             // 書き込み確認リトライ
                             if (oSession.fullUrl.Contains("guid=ON") == false)
