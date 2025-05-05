@@ -1344,7 +1344,7 @@ namespace _2chAPIProxy
                             if (retry_count <= max_retry)
                             {
                                 // ちょっと待機
-                                Thread.Sleep((int)(1000 + 500 * retry_count));
+                                Thread.Sleep((int)(1000 + 1000 * retry_count));
 
                                 // Monticket/Acorn再取得リトライ
                                 ResPost(oSession, is2ch, false, retry_count + 1);
@@ -1366,7 +1366,7 @@ namespace _2chAPIProxy
                             }
 
                             // ちょっと待機
-                            Thread.Sleep((int)(1000 + 500 * retry_count));
+                            Thread.Sleep((int)(1000 + 1000 * retry_count));
 
                             ResPost(oSession, is2ch, true, retry_count + 1);
                         }
