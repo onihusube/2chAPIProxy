@@ -958,14 +958,10 @@ namespace _2chAPIProxy
                     Write.Headers.Add("Origin", @$"http://{Write.Host}");
                 }
 
-                // 送信されてきたエンコーディング判別
-                bool original_post_is_utf8 = false;
-                if (oSession.RequestHeaders.Exists("Content-Type"))
-                {
-                    // 大文字小文字でチェック
-                    original_post_is_utf8 = oSession.RequestHeaders["Content-Type"]?.Contains("UTF-8") ?? false;
-                    original_post_is_utf8 |= oSession.RequestHeaders["Content-Type"]?.Contains("utf-8") ?? false;
-                }
+                // 送信されてきたエンコーディング判別（どれかに引っかかればUTF-8判定
+                // 大文字小文字でチェック
+                bool original_post_is_utf8 = oSession.RequestHeaders["Content-Type"]?.Contains("UTF-8") ?? false;
+                original_post_is_utf8 |= oSession.RequestHeaders["Content-Type"]?.Contains("utf-8") ?? false;
                 // submitがUTF-8かチェック
                 original_post_is_utf8 |= post_field_map["submit"].Contains("%E6%9B%B8%E3%81%8D%E8%BE%BC%E3%82%80");
 
