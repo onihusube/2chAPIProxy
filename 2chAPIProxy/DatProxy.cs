@@ -858,7 +858,7 @@ namespace _2chAPIProxy
                     Write.UserAgent = WriteUA;
                 }
 
-                if (is_pink == false)
+                if (is_pink == false && BoardSettings.ContainsKey("2chapiproxy_default"))
                 {
                     // デフォルト設定の引き当て（Pink投稿時は共通設定がないときのみ
                     PostSetting ??= BoardSettings["2chapiproxy_default"];
@@ -867,6 +867,8 @@ namespace _2chAPIProxy
                 // デフォルト設定が無かった場合など、リクエストヘッダから拾う
                 if (PostSetting == null)
                 {
+                    PostSetting = new BoardSettings();
+
                     // 個別の設定項目があるやつ
                     if (oSession.RequestHeaders.Exists("Accept") == true)
                     {
