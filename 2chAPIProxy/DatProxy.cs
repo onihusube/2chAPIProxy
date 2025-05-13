@@ -812,14 +812,16 @@ namespace _2chAPIProxy
                 };
 
                 // pinkへの書き込みを識別
-                bool is_pink = oSession.fullUrl.Contains("bbspink.com") && BoardSettings.ContainsKey("2chapiproxy_pink_common");
+                bool is_pink = oSession.fullUrl.Contains("bbspink.com");
+                // pink共通設定の必要性
+                bool exist_pink_common = is_pink && BoardSettings.ContainsKey("2chapiproxy_pink_common");
 
                 // 板毎設定の引き当て
                 BoardSettings PostSetting = null;
                 if (1 < BoardSettings.Count())
                 {
                     // Pink共通設定があれば引き当てておく
-                    if (is_pink)
+                    if (exist_pink_common)
                     {
                         PostSetting = BoardSettings["2chapiproxy_pink_common"];
                     }
@@ -837,7 +839,7 @@ namespace _2chAPIProxy
 
                 // UAの設定
                 // デフォルト→板毎設定→書き込みUAの順に優先
-                if (is_pink)
+                if (exist_pink_common)
                 {
                     // pink共通設定は最優先
                     Write.UserAgent = PostSetting.UserAgent;
@@ -858,7 +860,7 @@ namespace _2chAPIProxy
                     Write.UserAgent = WriteUA;
                 }
 
-                if (is_pink == false && BoardSettings.ContainsKey("2chapiproxy_default"))
+                if (exist_pink_common == false && BoardSettings.ContainsKey("2chapiproxy_default"))
                 {
                     // デフォルト設定の引き当て（Pink投稿時は共通設定がないときのみ
                     PostSetting ??= BoardSettings["2chapiproxy_default"];
@@ -1011,6 +1013,7 @@ namespace _2chAPIProxy
                 // MonaTicketクッキー名
                 const string monaticket_cookie = "MonaTicket";
 
+                if (is_pink == false)
                 {
                     bool ignore_acorn = false;
                     bool ignore_monaticket = false;
@@ -1070,8 +1073,18 @@ namespace _2chAPIProxy
                 Cookie.Remove("SID");
                 // TAKO=ODORIを消す
                 Cookie.Remove("TAKO");
-                // yuki=akariを送らない
-                Cookie.Remove("yuki");
+
+                if (is_pink)
+                {
+                    // Monaticket/Acornを送らない
+                    Cookie.Remove(monaticket_cookie);
+                    Cookie.Remove(acorn_cookie);
+                }
+                else
+                {
+                    // yuki=akariを送らない
+                    Cookie.Remove("yuki");
+                }
 
 
                 //送信クッキーのセット
@@ -1336,7 +1349,7 @@ namespace _2chAPIProxy
                     }
 
                     // 書き込みリトライ（再帰的にはしない）
-                    if (need_retry == true)
+                    if (need_retry == true && is_pink == false)
                     {
                         if (cookie_reacquisition == true)
                         {
