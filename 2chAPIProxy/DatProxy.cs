@@ -1073,6 +1073,8 @@ namespace _2chAPIProxy
                 Cookie.Remove("SID");
                 // TAKO=ODORIを消す
                 Cookie.Remove("TAKO");
+                // BAN=BOONBOONBOONを消す
+                Cookie.Remove("BAN");
 
                 if (is_pink)
                 {
