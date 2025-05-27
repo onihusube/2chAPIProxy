@@ -186,6 +186,12 @@ namespace _2chAPIProxy
                             // HTML取得用URL
                             string threadurl = $@"https://{match.Groups[1].Value}/test/read.cgi/{match.Groups[2].Value}/{thread_key}/";
 
+                            // dat取得UAを変更する
+                            if (string.IsNullOrEmpty(ViewModel.Setting.UserAgent2) == true)
+                            {
+                                oSession.oRequest.headers["User-Agent"] = ViewModel.Setting.UserAgent2;
+                            }
+
                             // レスポンス返し直前に介入する
                             oSession.bBufferResponse = true;
                             SessionStateHandler BRHandler = null;
@@ -1960,6 +1966,15 @@ namespace _2chAPIProxy
 
                         if (gZipRes) oSession.utilGZIPResponse();
                         return;
+                    case 403:
+                        if (accessing_kakolog == false)
+                        {
+                            goto default;
+                        }
+                        else
+                        {
+                            goto case 302;
+                        }
                     case 301:
                     case 404:
                     case 302:
