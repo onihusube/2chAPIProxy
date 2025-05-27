@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -151,6 +151,12 @@ namespace _2chAPIProxy
                             var match = CheckDaturi.Match(oSession.fullUrl);
                             // HTML取得用URL
                             string threaduri = @$"https://{match.Groups[1].Value}.{match.Groups[2].Value}/test/read.cgi/{match.Groups[3].Value}/{match.Groups[4].Value}/";
+
+                            // dat取得UAを変更する
+                            if (string.IsNullOrEmpty(ViewModel.Setting.UserAgent2) == true)
+                            {
+                                oSession.oRequest.headers["User-Agent"] = ViewModel.Setting.UserAgent2;
+                            }
 
                             // レスポンス返し直前に介入する
                             oSession.bBufferResponse = true;

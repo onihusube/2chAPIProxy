@@ -1131,7 +1131,7 @@ namespace _2chAPIProxy
             {
                 if (_UserAgent2 != value)
                 {
-                    DatProxy.APIMediator.DatUA = Setting.UserAgent2 = _UserAgent2 = value.TrimEnd(' ');
+                    Setting.UserAgent2 = _UserAgent2 = value.TrimEnd(' ');
                     NoticePropertyChanged("UserAgent2");
                 }
             }
