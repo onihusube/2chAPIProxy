@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -100,6 +100,9 @@ namespace _2chAPIProxy
             }
         }
 
+        private readonly string domain_5ch_net = ".5ch.net";
+        private readonly string domain_5ch = ".5ch.io";
+
         public DatProxy()
         {
             //Fiddler設定変更
@@ -111,6 +114,18 @@ namespace _2chAPIProxy
             Regex.CacheSize = 75;
             GetHTML = true;
             AllowWANAccese = false;
+
+            //可能であればTLS1.1/1.2/1.3を使用するように
+            try
+            {
+                //可能であればTLS1.2/1.3を使用するように
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)12288;
+            }
+            catch
+            {
+                ViewModel.OnModelNotice("TLS 1.3を利用できません");
+            }
+            // ServicePointManagerの設定はプログラム？で共通。ここで設定すれば本体および他のdllでも設定されている
 
             FiddlerApplication.BeforeRequest += (oSession) =>
             {
@@ -133,10 +148,10 @@ namespace _2chAPIProxy
                         //元のURLが2chか5chか
                         bool is2ch = oSession.fullUrl.Contains(".2ch.net/");
                         //2ch→5ch置換
-                        oSession.fullUrl = oSession.fullUrl.Replace(".2ch.net/", ".5ch.net/");
+                        oSession.fullUrl = oSession.fullUrl.Replace(".2ch.net/", ".5ch.net/").Replace(domain_5ch_net, domain_5ch);
                         if (oSession.oRequest.headers.Exists("Referer"))
                         {
-                            oSession.oRequest.headers["Referer"] = oSession.oRequest.headers["Referer"].Replace(".2ch.net/", ".5ch.net/");
+                            oSession.oRequest.headers["Referer"] = oSession.oRequest.headers["Referer"].Replace(".2ch.net/", ".5ch.net/").Replace(domain_5ch_net, domain_5ch);
                         }
                         if (CheckDaturi.IsMatch(oSession.fullUrl))
                         {
@@ -325,13 +340,14 @@ namespace _2chAPIProxy
                 FiddlerApplication.BeforeResponse -= MRHandler;
                 var html = ooSession.GetResponseBodyAsString();
                 // 板一覧の板URLの前後に""があった場合に消す（大丈夫そうならいらない？）
-                var ItaMatches = Regex.Matches(html, $@"<(?:A HREF|a href)={'"'}(?:https?:)?(//\w+?\.(?:2ch\.net|5ch\.net|bbspink\.com)/\w+/?){'"'}>(.+)</(?:A|a)>");
+                var ItaMatches = Regex.Matches(html, $@"<(?:A HREF|a href)={'"'}(?:https?:)?(//\w+?\.(?:2ch\.net|5ch\.net|5ch\.io|bbspink\.com)/\w+/?){'"'}>(.+)</(?:A|a)>");
                 foreach (Match ita in ItaMatches)
                 {
                     String replace = $"<A HREF=https:{ita.Groups[1].Value}>{ita.Groups[2].Value}</A>";
                     html = html.Replace(ita.Value, replace);
                 }
 
+                html = html.Replace(domain_5ch, domain_5ch_net);
                 if (is2ch) html = html.Replace(".5ch.net/", ".2ch.net/");
                 // 板のhttpsリンクをhttpにする
                 if (ViewModel.Setting.ReplaceHttpsLink) html = html.Replace("https", "http");
@@ -360,12 +376,14 @@ namespace _2chAPIProxy
                 {
                     itenuri = itenuri.Replace($"{'"'}//", $"{'"'}http://");
                     itenuri = itenuri.Replace("https://", "http://");
+                    itenuri = itenuri.Replace(domain_5ch, domain_5ch_net);
                     if (is2ch) itenuri = itenuri.Replace(".5ch.net/", ".2ch.net/");
                     ooSession.ResponseBody = Encoding.GetEncoding("shift_jis").GetBytes(itenuri);
                 }
                 if (!String.IsNullOrEmpty(ooSession.oResponse.headers["Location"]))
                 {
                     string locate = ooSession.oResponse.headers["Location"].Replace("https://", "http://");
+                    locate = locate.Replace(domain_5ch, domain_5ch_net);
                     if (is2ch) locate = locate.Replace(".5ch.net/", ".2ch.net/");
                     ooSession.oResponse.headers["Location"] = locate;
                 }
@@ -613,16 +631,16 @@ namespace _2chAPIProxy
             }
             //beの時、ログインセッション代行処理
             oSession.utilCreateResponseAndBypassServer();
-            HttpWebRequest BeLoginReq = (HttpWebRequest)WebRequest.Create("https://be.5ch.net/log");
+            HttpWebRequest BeLoginReq = (HttpWebRequest)WebRequest.Create($"https://be{domain_5ch}/log");
             BeLoginReq.Method = "POST";
             BeLoginReq.UserAgent = ViewModel.Setting.UserAgent4;
             if (Proxy != "") BeLoginReq.Proxy = new WebProxy(Proxy);
             BeLoginReq.Accept = "text/html";
-            BeLoginReq.Referer = "https://be.5ch.net/";
+            BeLoginReq.Referer = $"https://be{domain_5ch}/";
             BeLoginReq.ContentType = "application/x-www-form-urlencoded";
             BeLoginReq.ServicePoint.Expect100Continue = false;
             BeLoginReq.CookieContainer = new CookieContainer();
-            BeLoginReq.Host = "be.5ch.net";
+            BeLoginReq.Host = $"be{domain_5ch}";
             String reqdata = oSession.GetRequestBodyAsString();
             Byte[] PostData;
             if (Regex.IsMatch(reqdata, @"^mail=.+?@.+?&pass=.+?&login=$"))
@@ -999,7 +1017,7 @@ namespace _2chAPIProxy
                     }
                     else
                     {
-                        referer = oSession.RequestHeaders["Referer"].Replace("2ch.net", "5ch.net");
+                        referer = oSession.RequestHeaders["Referer"].Replace("2ch.net", domain_5ch.Substring(1));
                     }
                 }
                 else
@@ -1243,7 +1261,7 @@ namespace _2chAPIProxy
                                 // set-cookieヘッダの組み立て
                                 if (cookie.Expires != null) tc += "; expires=" + cookie.Expires.ToUniversalTime().ToString("ddd, dd-MMM-yyyy HH:mm:ss", cul) + " GMT";
                                 if (!String.IsNullOrEmpty(cookie.Path)) tc += "; path=" + cookie.Path;
-                                if (!String.IsNullOrEmpty(cookie.Domain)) tc += "; domain=" + ((is2ch) ? (cookie.Domain.Replace("5ch.net", "2ch.net")) : (cookie.Domain));
+                                if (!String.IsNullOrEmpty(cookie.Domain)) tc += "; domain=" + ((is2ch) ? (cookie.Domain.Replace(domain_5ch.Substring(1), "2ch.net")) : (cookie.Domain));
                                 
                                 oSession.oResponse.headers.Add("Set-Cookie", tc);
 
@@ -1637,7 +1655,7 @@ namespace _2chAPIProxy
                 }
                 else
                 {
-                    referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", "5ch.net").Replace("http:", "https:");
+                    referer = oSession.oRequest.headers["Referer"].Replace("2ch.net", domain_5ch.Substring(1)).Replace("http:", "https:");
                 }
                 Write.Referer = referer;
 
@@ -1812,7 +1830,7 @@ namespace _2chAPIProxy
                                 String tc = cookie.ToString();
                                 if (cookie.Expires != null) tc += "; expires=" + cookie.Expires.ToUniversalTime().ToString("ddd, dd-MMM-yyyy HH:mm:ss", cul) + " GMT";
                                 if (!String.IsNullOrEmpty(cookie.Path)) tc += "; path=" + cookie.Path;
-                                if (!String.IsNullOrEmpty(cookie.Domain)) tc += "; domain=" + ((is2ch) ? (cookie.Domain.Replace("5ch.net", "2ch.net")) : (cookie.Domain));
+                                if (!String.IsNullOrEmpty(cookie.Domain)) tc += "; domain=" + ((is2ch) ? (cookie.Domain.Replace(domain_5ch.Substring(1), "2ch.net")) : (cookie.Domain));
                                 oSession.oResponse.headers.Add("Set-Cookie", tc);
                             }
                         }
@@ -1918,6 +1936,7 @@ namespace _2chAPIProxy
         {
             try
             {
+                oSession.oResponse.headers["Set-Cookie"] = oSession.oResponse.headers["Set-Cookie"].Replace(domain_5ch, domain_5ch_net);
                 if (is2ch && string.IsNullOrEmpty(oSession.oResponse.headers["Set-Cookie"]) == false)
                 {
                     // クッキーのホストを変換
@@ -2067,6 +2086,140 @@ namespace _2chAPIProxy
                 ViewModel.OnModelNotice("dat応答介入時にエラーです。\n" + err.ToString());
             }
         }
+
+        private void GetDatNonAPI(ref Session oSession)
+        {
+            try
+            {
+                string uri = oSession.fullUrl;
+                HttpWebRequest get_dat = (HttpWebRequest)WebRequest.Create(oSession.fullUrl);
+                get_dat.Method = "GET";
+                get_dat.ServicePoint.Expect100Continue = false;
+                //ここで指定しないとデコードされない
+                get_dat.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+                // 個別の設定項目があるやつ
+                if (string.IsNullOrEmpty(ViewModel.Setting.UserAgent2) == false)
+                {
+                    get_dat.UserAgent = ViewModel.Setting.UserAgent2;
+                }
+                if (oSession.oRequest.headers.Exists("Host") == true)
+                {
+                    get_dat.Host = oSession.oRequest.host;
+                }
+                if (oSession.oRequest.headers.Exists("Accept") == true)
+                {
+                    get_dat.Accept = oSession.oRequest.headers["Accept"];
+                }
+                if (oSession.oRequest.headers.Exists("Expect") == true)
+                {
+                    get_dat.Expect = oSession.oRequest.headers["Expect"];
+                }
+                if (oSession.oRequest.headers.Exists("Content-Type") == true)
+                {
+                    get_dat.ContentType = oSession.oRequest.headers["Content-Type"];
+                }
+                if (oSession.oRequest.headers.Exists("Connection"))
+                {
+                    get_dat.KeepAlive = true;
+                }
+
+                // 差分取得対応
+                string lastmod = oSession.oRequest.headers["If-Modified-Since"];
+                string hrange = oSession.oRequest.headers["Range"];
+
+                if (String.IsNullOrEmpty(lastmod)) lastmod = "1970/12/1";
+
+                int range = String.IsNullOrEmpty(hrange) switch
+                {
+                    true => -1,
+                    false => int.Parse(Regex.Match(hrange, @"\d+").Value)
+                };
+
+                if (-1 < range)
+                {
+                    if (DateTime.TryParse(lastmod, out DateTime ifModifiedSince))
+                    {
+                        get_dat.IfModifiedSince = ifModifiedSince;
+                    }
+                    else
+                    {
+                        get_dat.IfModifiedSince = DateTime.Parse("1970/12/1");
+                    }
+                    get_dat.AddRange(range);
+                }
+
+                System.Diagnostics.Debug.WriteLine($"オリジナルdatリクエストヘッダ(range:{range}, last:{lastmod})");
+
+                // 残り
+                foreach (var header in oSession.RequestHeaders)
+                {
+                    try
+                    {
+                        if (Regex.IsMatch(header.Name, @"(^HTTPVer$|^Accept$|^User-Agent$|^Expect$|^Content-Type$|^Connection$|^Cookie$|^Host$|^Range$|^If-Modified-Since$)") == true) continue;
+                        get_dat.Headers.Add(header.Name, header.Value);
+                    }
+                    catch (Exception err)
+                    {
+                        System.Diagnostics.Debug.WriteLine("datリクエストヘッダからヘッダ設定構成中のエラー\n" + err.ToString());
+                    }
+                }
+
+                HttpWebResponse dat_response;
+                // リクエスト発行 + レスポンス取得
+                try
+                {
+                    dat_response = (HttpWebResponse)get_dat.GetResponse();
+                }
+                catch (WebException err)
+                {
+                    dat_response = (HttpWebResponse)err.Response;
+                }
+
+                // デバッグ出力、送信ヘッダを出力
+                System.Diagnostics.Debug.WriteLine("datリクエストヘッダ");
+                foreach (var header in get_dat.Headers.AllKeys)
+                {
+                    System.Diagnostics.Debug.WriteLine($"{header}:{get_dat.Headers[header]}");
+                }
+
+                oSession.oResponse.headers.HTTPResponseCode = (int)dat_response.StatusCode;
+                oSession.oResponse.headers.HTTPResponseStatus = dat_response.StatusDescription;
+
+                System.Diagnostics.Debug.WriteLine($"HTTP Status = {oSession.oResponse.headers.HTTPResponseCode} : {oSession.oResponse.headers.HTTPResponseStatus}");
+
+                System.Diagnostics.Debug.WriteLine("datレスポンスヘッダ");
+                foreach (var header_name in dat_response.Headers.AllKeys)
+                {
+                    oSession.oResponse.headers.Add(header_name, dat_response.Headers[header_name]);
+
+                    System.Diagnostics.Debug.WriteLine($"{header_name}: {dat_response.Headers[header_name]}");
+                }
+
+                if (0 < dat_response.ContentLength)
+                {
+                    using (var reader = new System.IO.BinaryReader(dat_response.GetResponseStream()))
+                    {
+                        oSession.ResponseBody = reader.ReadBytes((int)dat_response.ContentLength);
+                    }
+                }
+                System.Diagnostics.Debug.WriteLine($"レスポンス長: {dat_response.ContentLength}");
+                oSession.oResponse.headers["Connection"] = "close";
+
+                if (dat_response != null) dat_response.Close();
+                return;
+            }
+            catch (Exception err)
+            {
+                oSession.oResponse.headers.SetStatus(304, "304 Not Modified");
+                oSession.oResponse.headers["Content-Type"] = "text/html; charset=iso-8859-1";
+                oSession.oResponse.headers["Date"] = DateTime.Now.ToUniversalTime().ToString("R");
+                oSession.oResponse.headers["Connection"] = "close";
+                ViewModel.OnModelNotice("datアクセス部でエラーです。\n" + err.ToString());
+            }
+            return;
+        }
+
 
         private void GetDat(ref Session oSession, bool is2ch)
         {
@@ -2382,7 +2535,7 @@ namespace _2chAPIProxy
                         break;
                 }
                 oSession.oResponse.headers["Date"] = dat.Headers[HttpResponseHeader.Date];
-                oSession.oResponse.headers["Set-Cookie"] = (is2ch) ? (dat.Headers[HttpResponseHeader.SetCookie]?.Replace("5ch.net", "2ch.net")) : (dat.Headers[HttpResponseHeader.SetCookie]);
+                oSession.oResponse.headers["Set-Cookie"] = (is2ch) ? (dat.Headers[HttpResponseHeader.SetCookie]?.Replace(domain_5ch.Substring(1), "2ch.net")) : (dat.Headers[HttpResponseHeader.SetCookie]);
                 oSession.oResponse.headers["Connection"] = "close";
                 dat.Close();
             }
@@ -2418,7 +2571,7 @@ namespace _2chAPIProxy
             try
             {
                 //if (ViewModel.Setting.Use5chnet) URI.Replace("2ch.net", "5ch.net");
-                URI = URI.Replace("2ch.net", "5ch.net");
+                URI = URI.Replace("2ch.net", domain_5ch.Substring(1));
                 using (WebClient get = new WebClient())
                 {
                     get.Headers["User-Agent"] = HtmlConverter.UserAgent;

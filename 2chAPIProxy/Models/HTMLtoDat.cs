@@ -22,7 +22,7 @@ namespace _2chAPIProxy
 
         static public Byte[] Gethtml(String URI, int range, String UA, bool CRReplace, String LastMod = null)
         {
-            URI = URI.Replace("2ch.net", "5ch.net");
+            URI = URI.Replace("2ch.net", "5ch.net").Replace("5ch.net", "5ch.io");
             if (ViewModel.Setting.CEExternalRead)
             {
                 return HTMLTranceOutRegex(URI, range, UA, LastMod);
