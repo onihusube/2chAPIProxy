@@ -28,17 +28,18 @@ namespace _2chAPIProxy
         Dictionary<String, String> Cookie = new Dictionary<string, string>();
         Dictionary<String, IPAuthData> AuthIPList = new Dictionary<string, IPAuthData>();
         Regex Check2churi = new Regex(@"^(\w+?)\.((?:2|5)ch\.net|bbspink\.com)$", RegexOptions.Compiled);
-        Regex CheckDaturi = new Regex(@"^https?:\/\/(\w+?)\.((?:2|5)ch\.net|bbspink\.com)\/(\w+?)\/dat\/(\d+?)\.dat", RegexOptions.Compiled);
-        Regex CheckWriteuri = new Regex(@"^https?:\/\/\w+?(\.(?:2|5)ch.net|\.bbspink.com)(?::\d{2,})?\/test\/(?:sub)?bbs\.cgi", RegexOptions.Compiled);
-        Regex CheckKakouri = new Regex(@"(^https?:\/\/rokka\.((?:2|5)ch\.net|bbspink\.com)\/(\w+?)\/(\w+?)\/(\d+?)\/.+|http:\/\/\w+?.(2|5)ch\.net\/test\/offlaw2\.so.+)", RegexOptions.Compiled);
-        Regex CheckKakouri2 = new Regex(@"^https?:\/\/((?:\w+?)\.(?:(?:2|5)ch\.net|bbspink\.com))\/(\w+?)\/kako\/(?:\d{4}\/\d{5}|\d{3})\/(\d+?)\.dat", RegexOptions.Compiled);
-        Regex CheckOldBe = new Regex(@"^https?://(?:be.(?:2|5)ch.net/(?:test/)?(login|index).php)", RegexOptions.Compiled);
+
+        Regex CheckDaturi = new Regex(@"^https?:\/\/(\w+?)\.((?:2|5)ch\.(net|io)|bbspink\.com)\/(\w+?)\/dat\/(\d+?)\.dat", RegexOptions.Compiled);
+        Regex CheckWriteuri = new Regex(@"^https?:\/\/\w+?(\.(?:2|5)ch.(net|io)|\.bbspink.com)(?::\d{2,})?\/test\/(?:sub)?bbs\.cgi", RegexOptions.Compiled);
+        Regex CheckKakouri = new Regex(@"(^https?:\/\/rokka\.((?:2|5)ch\.(net|io)|bbspink\.com)\/(\w+?)\/(\w+?)\/(\d+?)\/.+|http:\/\/\w+?.(2|5)ch\.net\/test\/offlaw2\.so.+)", RegexOptions.Compiled);
+        Regex CheckKakouri2 = new Regex(@"^https?:\/\/((?:\w+?)\.(?:(?:2|5)ch\.(net|io)|bbspink\.com))\/(\w+?)\/kako\/(?:\d{4}\/\d{5}|\d{3})\/(\d+?)\.dat", RegexOptions.Compiled);
+        Regex CheckOldBe = new Regex(@"^https?://(?:be.(?:2|5)ch.(net|io)/(?:test/)?(login|index).php)", RegexOptions.Compiled);
         Regex CheckShitaraba = new Regex(@"^http://jbbs.(shitaraba.net|livedoor.jp)", RegexOptions.Compiled);
         //Regex CheckShitarabaPost = new Regex(@"^https?://jbbs.(shitaraba.net|livedoor.jp)(/bbs/(rawmode|read).cgi/\w+/\d+/\d+|.+?/write.cgi.*?)", RegexOptions.Compiled);
         Regex CheckShitarabaPost = new Regex(@"^https?://jbbs.(shitaraba.net|livedoor.jp)/.+?/write.cgi", RegexOptions.Compiled);
         //Regex CheckItauri = new Regex(@"^https?:\/\/(\w+?)\.(2ch\.net|bbspink\.com)\/(\w+?)/?$", RegexOptions.Compiled);
-        Regex CheckItauri = new Regex(@"^https?://\w+?\.((?:2|5)ch\.net|bbspink\.com)/\w+(/?$|/subject.txt$)", RegexOptions.Compiled);
-        Regex BBSMenuReplace = new Regex(@"^https?://menu\.(?:2|5)ch\.net/bbsmenu.html", RegexOptions.Compiled);
+        Regex CheckItauri = new Regex(@"^https?://\w+?\.((?:2|5)ch\.(net|io)|bbspink\.com)/\w+(/?$|/subject.txt$)", RegexOptions.Compiled);
+        Regex BBSMenuReplace = new Regex(@"^https?://menu\.(?:2|5)ch\.(net|io)/bbsmenu.html", RegexOptions.Compiled);
         volatile bool SIDNowUpdate = false;
 
 
