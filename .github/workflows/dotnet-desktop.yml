@@ -67,27 +67,22 @@ jobs:
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1.2
 
-    - name: Install Microsoft.NETFramework.ReferenceAssemblies via NuGet
+    - name: Install .NET Framework 4.0 reference assemblies
       shell: powershell
       run: |
-        nuget install Microsoft.NETFramework.ReferenceAssemblies -OutputDirectory packages -Version 1.0.3
-        $pkg = Get-ChildItem packages | Where-Object { $_.Name -like 'Microsoft.NETFramework.ReferenceAssemblies*' } | Select-Object -First 1
-        $refPath = Get-ChildItem -Path $pkg.FullName -Recurse -Directory | Where-Object { $_.Name -match 'net40' -and ($_.FullName -match '\\ref$' -or $_.FullName -match '\\lib$' -or $_.FullName -match 'ref\\net40' -or $_.FullName -match 'lib\\net40') } | Select-Object -First 1
-        if (-not $refPath) { Write-Host "Could not find net40 reference folder; listing package contents:"; Get-ChildItem -Path $pkg.FullName -Recurse; exit 1 }
-        Write-Host "Found reference assemblies at: $($refPath.FullName)"
-        Add-Content -Path $env:GITHUB_ENV -Value "FrameworkPathOverride=$($refPath.FullName)"
+        $ProgressPreference='SilentlyContinue';$t="$env:TEMP\net40";Invoke-WebRequest https://www.nuget.org/api/v2/package/Microsoft.NETFramework.ReferenceAssemblies.net40/1.0.3 -OutFile "$t.zip";Expand-Archive "$t.zip" $t -Force;Copy-Item "$t\build\.NETFramework\*" "${env:ProgramFiles(x86)}\Reference Assemblies\Microsoft\Framework\.NETFramework\" -Recurse -Force
 
     - name: Restore Packages
       run: nuget restore 2chAPIProxy.sln
 
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
-      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration /p:FrameworkPathOverride="$env:FrameworkPathOverride"
+      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
 
     - name: Build solution
-      run: msbuild 2chAPIProxy.sln -t:rebuild -property:Configuration=Release /p:FrameworkPathOverride="$env:FrameworkPathOverride"
+      run: msbuild 2chAPIProxy.sln -t:rebuild -property:Configuration=Release
       
     - uses: actions/upload-artifact@v4
       with:
