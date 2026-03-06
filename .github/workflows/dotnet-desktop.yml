@@ -60,7 +60,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Install .NET Framework 4.0 targeting pack
-      run: choco install netfx-4.0-devpack -y
+      run: choco install netfx-4.0.1-devpack -y
 
     # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Setup MSBuild.exe
