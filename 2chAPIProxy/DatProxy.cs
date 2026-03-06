@@ -474,7 +474,6 @@ namespace _2chAPIProxy
         {
             try
             {
-                oSession.fullUrl = oSession.fullUrl.Replace(".5ch.net/", ".2ch.net/");
                 System.Threading.Thread HtmlTranceThread = null;
                 bool offlowperm;
                 String err = "";
@@ -487,14 +486,18 @@ namespace _2chAPIProxy
                     oSession.utilCreateResponseAndBypassServer();
                     String URI = oSession.fullUrl;
                     String Host = oSession.oRequest.headers["Host"].Replace(".5ch.net", ".2ch.net");
-                    String Referer = oSession.oRequest.headers["Referer"].Replace(".5ch.net", ".2ch.net"); ;
+                    String Referer = oSession.oRequest.headers["Referer"].Replace(".5ch.net", ".2ch.net");
                     HtmlTranceThread = new System.Threading.Thread(() =>
                     {
                         String ThreadURI;
                         try
                         {
+                            // ref: https://www.xmisao.com/2014/02/09/2ch-viewer-rokka-ruby.html
+                            // ここの処理は大分怪しい（動いていた記憶はあるものの・・・
                             if (URI.Contains("offlaw2"))
                             {
+                                // offlaw2の場合
+                                // url形式: http://<サーバ>/test/offlaw2.so?shiro=kuma&bbs=<板名>&key=<スレッド番号>
                                 ThreadURI = Referer;
                                 if (ThreadURI.IndexOf(@"2ch.net/test/read.cgi/") < 0)
                                 {
@@ -502,17 +505,21 @@ namespace _2chAPIProxy
                                         sever = Host,
                                         ita = Regex.Match(URI, @"&bbs=(.\w+?)&").Groups[1].Value,
                                         key = Regex.Match(URI, @"&key=(.\d+)").Groups[1].Value;
-                                    ThreadURI = @"http://" + sever + @"/test/read.cgi/" + ita + @"/" + key + @"/";
+                                    ThreadURI = sever + @"/test/read.cgi/" + ita + @"/" + key + @"/";
                                 }
                             }
                             else
                             {
+                                // Rokkaの場合
+                                // url形式: http://rokka.<サーバ>/<ホスト名>/<板名>/<スレッド番号>/<オプション>?sid=<セッションID>
                                 err = "Success Archive\n";
                                 var group = CheckKakouri.Match(URI).Groups;
-                                ThreadURI = @"http://" + group[3].Value + "." + group[2].Value + @"/test/read.cgi/" + group[4].Value + @"/" + group[5].Value + @"/";
+                                ThreadURI = $"{group[3].Value}.{group[2].Value}/test/read.cgi/{group[4].Value}/{group[5].Value}/";
                             }
-                            //Htmldat = HTMLtoDat.Gethtml(ThreadURI, -1, "", CRReplace);
-                            Htmldat = HtmlConverter.Gethtml(ThreadURI, -1, "", CRReplace);
+
+                            string http_head = (ViewModel.Setting.UseTLSWrite) ? "https://" : "http://";
+                            ThreadURI = ThreadURI.Replace(".2ch.net", domain_5ch_net).Replace(domain_5ch_net, domain_5ch);
+                            Htmldat = HtmlConverter.Gethtml(http_head + ThreadURI, -1, "", CRReplace);
                         }
                         catch (System.Threading.ThreadAbortException)
                         {
@@ -530,10 +537,12 @@ namespace _2chAPIProxy
                     {
                         try
                         {
+                            string http_head = (ViewModel.Setting.UseTLSWrite) ? "https://" : "http://";
+
                             var group = CheckKakouri2.Match(URI).Groups;
-                            String ThreadURI = "http://" + group[1].Value + "/test/read.cgi/" + group[2].Value + "/" + group[3].Value + "/";
-                            //Htmldat = HTMLtoDat.Gethtml(ThreadURI, -1, "", CRReplace);
-                            Htmldat = HtmlConverter.Gethtml(ThreadURI, -1, "", CRReplace);
+                            String ThreadURI = group[1].Value + "/test/read.cgi/" + group[2].Value + "/" + group[3].Value + "/";
+                            
+                            Htmldat = HtmlConverter.Gethtml(http_head + ThreadURI, -1, "", CRReplace);
                         }
                         catch (System.Threading.ThreadAbortException)
                         {
@@ -2034,12 +2043,11 @@ namespace _2chAPIProxy
                             {
                                 try
                                 {
-                                    //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-                                    //sw.Start();
-                                    //Htmldat = HTMLtoDat.Gethtml(uri, range, UA, CRReplace, (last != "1970/12/1") ? (last) : (null));
+                                    if (thread_url.EndsWith("/") == false)
+                                    {
+                                        thread_url += "/";
+                                    }
                                     Htmldat = HtmlConverter.Gethtml(thread_url, range, UA, CRReplace, (last != "1970/12/1") ? (last) : (null));
-                                    //sw.Stop();
-                                    //System.Diagnostics.Debug.WriteLine("処理時間：" + sw.ElapsedMilliseconds + "ms");
                                 }
                                 catch (System.Threading.ThreadAbortException)
                                 {
