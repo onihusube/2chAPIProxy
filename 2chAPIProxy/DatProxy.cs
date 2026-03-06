@@ -29,17 +29,15 @@ namespace _2chAPIProxy
         Dictionary<String, IPAuthData> AuthIPList = new Dictionary<string, IPAuthData>();
         Regex Check2churi = new Regex(@"^(\w+?)\.((?:2|5)ch\.net|bbspink\.com)$", RegexOptions.Compiled);
 
-        Regex CheckDaturi = new Regex(@"^https?:\/\/(\w+?)\.((?:2|5)ch\.(net|io)|bbspink\.com)\/(\w+?)\/dat\/(\d+?)\.dat", RegexOptions.Compiled);
-        Regex CheckWriteuri = new Regex(@"^https?:\/\/\w+?(\.(?:2|5)ch.(net|io)|\.bbspink.com)(?::\d{2,})?\/test\/(?:sub)?bbs\.cgi", RegexOptions.Compiled);
-        Regex CheckKakouri = new Regex(@"(^https?:\/\/rokka\.((?:2|5)ch\.(net|io)|bbspink\.com)\/(\w+?)\/(\w+?)\/(\d+?)\/.+|http:\/\/\w+?.(2|5)ch\.net\/test\/offlaw2\.so.+)", RegexOptions.Compiled);
-        Regex CheckKakouri2 = new Regex(@"^https?:\/\/((?:\w+?)\.(?:(?:2|5)ch\.(net|io)|bbspink\.com))\/(\w+?)\/kako\/(?:\d{4}\/\d{5}|\d{3})\/(\d+?)\.dat", RegexOptions.Compiled);
-        Regex CheckOldBe = new Regex(@"^https?://(?:be.(?:2|5)ch.(net|io)/(?:test/)?(login|index).php)", RegexOptions.Compiled);
+        Regex CheckDaturi = new Regex(@"^https?:\/\/(\w+?)\.((?:2|5)ch\.(?:net|io)|bbspink\.com)\/(\w+?)\/dat\/(\d+?)\.dat", RegexOptions.Compiled);
+        Regex CheckWriteuri = new Regex(@"^https?:\/\/\w+?(\.(?:2|5)ch.(?:net|io)|\.bbspink.com)(?::\d{2,})?\/test\/(?:sub)?bbs\.cgi", RegexOptions.Compiled);
+        Regex CheckKakouri = new Regex(@"(^https?:\/\/rokka\.((?:2|5)ch\.(?:net|io)|bbspink\.com)\/(\w+?)\/(\w+?)\/(\d+?)\/.+|http:\/\/\w+?.(2|5)ch\.(?:net|io)\/test\/offlaw2\.so.+)", RegexOptions.Compiled);
+        Regex CheckKakouri2 = new Regex(@"^https?:\/\/((?:\w+?)\.(?:(?:2|5)ch\.(?:net|io)|bbspink\.com))\/(\w+?)\/kako\/(?:\d{4}\/\d{5}|\d{3})\/(\d+?)\.dat", RegexOptions.Compiled);
+        Regex CheckOldBe = new Regex(@"^https?://(?:be.(?:2|5)ch.(?:net|io)/(?:test/)?(login|index).php)", RegexOptions.Compiled);
         Regex CheckShitaraba = new Regex(@"^http://jbbs.(shitaraba.net|livedoor.jp)", RegexOptions.Compiled);
-        //Regex CheckShitarabaPost = new Regex(@"^https?://jbbs.(shitaraba.net|livedoor.jp)(/bbs/(rawmode|read).cgi/\w+/\d+/\d+|.+?/write.cgi.*?)", RegexOptions.Compiled);
         Regex CheckShitarabaPost = new Regex(@"^https?://jbbs.(shitaraba.net|livedoor.jp)/.+?/write.cgi", RegexOptions.Compiled);
-        //Regex CheckItauri = new Regex(@"^https?:\/\/(\w+?)\.(2ch\.net|bbspink\.com)\/(\w+?)/?$", RegexOptions.Compiled);
-        Regex CheckItauri = new Regex(@"^https?://\w+?\.((?:2|5)ch\.(net|io)|bbspink\.com)/\w+(/?$|/subject.txt$)", RegexOptions.Compiled);
-        Regex BBSMenuReplace = new Regex(@"^https?://menu\.(?:2|5)ch\.(net|io)/bbsmenu.html", RegexOptions.Compiled);
+        Regex CheckItauri = new Regex(@"^https?://\w+?\.((?:2|5)ch\.(?:net|io)|bbspink\.com)/\w+(/?$|/subject.txt$)", RegexOptions.Compiled);
+        Regex BBSMenuReplace = new Regex(@"^https?://menu\.(?:2|5)ch\.(?:net|io)/bbsmenu.html", RegexOptions.Compiled);
         volatile bool SIDNowUpdate = false;
 
 
@@ -149,7 +147,7 @@ namespace _2chAPIProxy
                         //元のURLが2chか5chか
                         bool is2ch = oSession.fullUrl.Contains(".2ch.net/");
                         //2ch→5ch置換
-                        oSession.fullUrl = oSession.fullUrl.Replace(".2ch.net/", ".5ch.net/").Replace(domain_5ch_net, domain_5ch);
+                        oSession.fullUrl = oSession.fullUrl.Replace(".2ch.net/", domain_5ch_net).Replace(domain_5ch_net, domain_5ch);
                         if (oSession.oRequest.headers.Exists("Referer"))
                         {
                             oSession.oRequest.headers["Referer"] = oSession.oRequest.headers["Referer"].Replace(".2ch.net/", ".5ch.net/").Replace(domain_5ch_net, domain_5ch);
@@ -486,7 +484,7 @@ namespace _2chAPIProxy
                     oSession.utilCreateResponseAndBypassServer();
                     String URI = oSession.fullUrl;
                     String Host = oSession.oRequest.headers["Host"].Replace(".5ch.net", ".2ch.net");
-                    String Referer = oSession.oRequest.headers["Referer"].Replace(".5ch.net", ".2ch.net");
+                    String Referer = oSession.oRequest.headers["Referer"].Replace(domain_5ch, ".2ch.net");
                     HtmlTranceThread = new System.Threading.Thread(() =>
                     {
                         String ThreadURI;
@@ -1019,7 +1017,7 @@ namespace _2chAPIProxy
                 String referer = oSession.RequestHeaders["Referer"];
                 if (oSession.fullUrl.Contains("guid=ON") == false)
                 {
-                    if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.net|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
+                    if (IsResPost && SetReferrer && Regex.IsMatch(referer, @"https?://\w+\.(?:(?:2|5)ch\.(net|io)|bbspink\.com)/test/read\.cgi/\w+/\d{9,}") == false)
                     {
                         var bbs = post_field_map["bbs"];
                         var key = post_field_map["key"];
@@ -1027,7 +1025,7 @@ namespace _2chAPIProxy
                     }
                     else
                     {
-                        referer = oSession.RequestHeaders["Referer"].Replace("2ch.net", domain_5ch.Substring(1));
+                        referer = oSession.RequestHeaders["Referer"].Replace(".2ch.net", domain_5ch_net).Replace(domain_5ch_net, domain_5ch);
                     }
                 }
                 else
