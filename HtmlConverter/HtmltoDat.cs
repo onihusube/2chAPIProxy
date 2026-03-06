@@ -102,7 +102,7 @@ namespace _2chAPIProxy.HtmlConverter
             System.Diagnostics.Debug.WriteLine($"{URI} をHTML変換開始");
             System.Diagnostics.Debug.WriteLine($"Range:{range}, UA:{this.UserAgent}, CRReplace:{CRReplace}, LastMod:{LastMod}");
 
-            URI = URI.Replace("2ch.net", "5ch.net");
+            URI = URI.Replace("2ch.net", "5ch.net").Replace("5ch.net", "5ch.io");
             URI += "1-";
 
             if (this.IsExternalConverterUse)
