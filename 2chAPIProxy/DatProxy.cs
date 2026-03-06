@@ -1262,7 +1262,15 @@ namespace _2chAPIProxy
                                 // set-cookieヘッダの組み立て
                                 if (cookie.Expires != null) tc += "; expires=" + cookie.Expires.ToUniversalTime().ToString("ddd, dd-MMM-yyyy HH:mm:ss", cul) + " GMT";
                                 if (!String.IsNullOrEmpty(cookie.Path)) tc += "; path=" + cookie.Path;
-                                if (!String.IsNullOrEmpty(cookie.Domain)) tc += "; domain=" + ((is2ch) ? (cookie.Domain.Replace(domain_5ch.Substring(1), "2ch.net")) : (cookie.Domain));
+                                if (!String.IsNullOrEmpty(cookie.Domain))
+                                {
+                                    var response_domain = cookie.Domain.Replace(domain_5ch.Substring(1), domain_5ch_net.Substring(1));
+                                    if (is2ch)
+                                    {
+                                        response_domain = response_domain.Replace(domain_5ch.Substring(1), "2ch.net");
+                                    }
+                                    tc += $"; domain={response_domain}";
+                                }
                                 
                                 oSession.oResponse.headers.Add("Set-Cookie", tc);
 
