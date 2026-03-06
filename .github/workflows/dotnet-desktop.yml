@@ -50,7 +50,7 @@ jobs:
       matrix:
         configuration: [Release]
 
-    runs-on: windows-2019
+    runs-on: windows-2025
     env:
       Solution_Name: 2chAPIProxy.sln                         # Replace with your solution name, i.e. MyWpfApp.sln.
 
