@@ -59,8 +59,6 @@ jobs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - name: Install .NET Framework 4.0 targeting pack
-      run: choco install netfx-4.0.1-devpack -y
 
     # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Setup MSBuild.exe
@@ -68,18 +66,28 @@ jobs:
 
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1.2
-      
+
+    - name: Install Microsoft.NETFramework.ReferenceAssemblies via NuGet
+      shell: powershell
+      run: |
+        nuget install Microsoft.NETFramework.ReferenceAssemblies -OutputDirectory packages -Version 1.0.3
+        $pkg = Get-ChildItem packages | Where-Object { $_.Name -like 'Microsoft.NETFramework.ReferenceAssemblies*' } | Select-Object -First 1
+        $refPath = Get-ChildItem -Path $pkg.FullName -Recurse -Directory | Where-Object { $_.Name -match 'net40' -and ($_.FullName -match '\\ref$' -or $_.FullName -match '\\lib$' -or $_.FullName -match 'ref\\net40' -or $_.FullName -match 'lib\\net40') } | Select-Object -First 1
+        if (-not $refPath) { Write-Host "Could not find net40 reference folder; listing package contents:"; Get-ChildItem -Path $pkg.FullName -Recurse; exit 1 }
+        Write-Host "Found reference assemblies at: $($refPath.FullName)"
+        Add-Content -Path $env:GITHUB_ENV -Value "FrameworkPathOverride=$($refPath.FullName)"
+
     - name: Restore Packages
       run: nuget restore 2chAPIProxy.sln
-      
+
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
-      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
+      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration /p:FrameworkPathOverride="$env:FrameworkPathOverride"
       env:
         Configuration: ${{ matrix.configuration }}
-        
+
     - name: Build solution
-      run: msbuild 2chAPIProxy.sln -t:rebuild -property:Configuration=Release
+      run: msbuild 2chAPIProxy.sln -t:rebuild -property:Configuration=Release /p:FrameworkPathOverride="$env:FrameworkPathOverride"
       
     - uses: actions/upload-artifact@v4
       with:
