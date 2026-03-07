@@ -150,7 +150,7 @@ namespace _2chAPIProxy
                         oSession.fullUrl = oSession.fullUrl.Replace(".2ch.net/", ".5ch.net/").Replace(domain_5ch_net, domain_5ch);
                         if (oSession.oRequest.headers.Exists("Referer"))
                         {
-                            oSession.oRequest.headers["Referer"] = oSession.oRequest.headers["Referer"].Replace(".2ch.net/", ".5ch.net/").Replace(domain_5ch_net, domain_5ch);
+                            oSession.oRequest.headers["Referer"] = oSession.oRequest.headers["Referer"].Replace(".2ch.net", domain_5ch_net).Replace(domain_5ch_net, domain_5ch);
                         }
                         if (CheckDaturi.IsMatch(oSession.fullUrl))
                         {
