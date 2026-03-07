@@ -271,20 +271,14 @@ namespace _2chAPIProxy
                         {
                             //スレタイ検索(dig.2ch.net)
                             oSession.fullUrl = oSession.fullUrl.Replace("http://", "https://");
-                            if (ViewModel.Setting.Replace5chURI || ViewModel.Setting.ReplaceHttpsLink)
+                            oSession.bBufferResponse = true;
+                            SessionStateHandler BRHandler = null;
+                            BRHandler = (ooSession) =>
                             {
-                                oSession.bBufferResponse = true;
-                                SessionStateHandler BRHandler = null;
-                                BRHandler = (ooSession) =>
-                                {
-                                    FiddlerApplication.BeforeResponse -= BRHandler;
-                                    //ooSession.ResponseBody = Encoding.UTF8.GetBytes(HTMLtoDat.ResContentReplace(ooSession.GetResponseBodyAsString()));
-                                    ooSession.ResponseBody = Encoding.UTF8.GetBytes(HtmlConverter.ResContentReplace(ooSession.GetResponseBodyAsString()));
-                                };
-                                FiddlerApplication.BeforeResponse += BRHandler;
-                                return;
-                            }
-                            oSession.Ignore();
+                                FiddlerApplication.BeforeResponse -= BRHandler;
+                                ooSession.ResponseBody = Encoding.UTF8.GetBytes(_2chAPIProxy.HtmlConverter.CommonMethods.ResContentReplace(ooSession.GetResponseBodyAsString(), ViewModel.Setting.Replace5chURI, ViewModel.Setting.ReplaceHttpsLink));
+                            };
+                            FiddlerApplication.BeforeResponse += BRHandler;
                             return;
                         }
                         //APIや書き込み等以外のアクセス時の処理
@@ -1952,7 +1946,7 @@ namespace _2chAPIProxy
         {
             try
             {
-                oSession.oResponse.headers["Set-Cookie"] = oSession.oResponse.headers["Set-Cookie"].Replace(domain_5ch, domain_5ch_net);
+                oSession.oResponse.headers["Set-Cookie"] = oSession.oResponse.headers["Set-Cookie"].Replace(domain_5ch.Substring(1), domain_5ch_net.Substring(1));
                 if (is2ch && string.IsNullOrEmpty(oSession.oResponse.headers["Set-Cookie"]) == false)
                 {
                     // クッキーのホストを変換
@@ -1962,27 +1956,21 @@ namespace _2chAPIProxy
                 switch (oSession.responseCode)
                 {
                     case 206:
-                        // 差分取得
-                        if (ViewModel.Setting.Replace5chURI || ViewModel.Setting.ReplaceHttpsLink)
                         {
+                            // 差分取得
                             var resdat = Encoding.GetEncoding("Shift_JIS").GetString(oSession.responseBodyBytes);
-                            resdat = HtmlConverter.ResContentReplace(resdat);
+                            resdat = _2chAPIProxy.HtmlConverter.CommonMethods.ResContentReplace(resdat, ViewModel.Setting.Replace5chURI, ViewModel.Setting.ReplaceHttpsLink);
                             oSession.ResponseBody = Encoding.GetEncoding("Shift_JIS").GetBytes(resdat);
+                            return;
                         }
-                        return;
                     case 200:
                         // 全件取得
-                        if (ViewModel.Setting.Replace5chURI || ViewModel.Setting.ReplaceHttpsLink || CRReplace)
                         {
                             // 全件取得時のみgzip圧縮されている
                             oSession.utilDecodeResponse();
 
                             var resdat = Encoding.GetEncoding("Shift_JIS").GetString(oSession.responseBodyBytes);
-
-                            if (ViewModel.Setting.Replace5chURI || ViewModel.Setting.ReplaceHttpsLink)
-                            {
-                                resdat = HtmlConverter.ResContentReplace(resdat);
-                            }
+                            resdat = _2chAPIProxy.HtmlConverter.CommonMethods.ResContentReplace(resdat, ViewModel.Setting.Replace5chURI, ViewModel.Setting.ReplaceHttpsLink);
 
                             if (CRReplace)
                             {

@@ -193,7 +193,8 @@ namespace _2chAPIProxy.HtmlConverter
         }
 
 
-        static Regex CheckResContent = new Regex(@"((?:h?ttps?|sssp)://\w+?\.)5ch\.net(/test/read\.cgi/\w+?/\d{9,}?|/ico/\w+?\.gif|/[a-zA-Z0-9]+)", RegexOptions.Compiled);
+        static Regex CheckIOLink = new Regex(@"((?:h?ttps?|sssp)://[A-Za-z0-9_-]+?\.)5ch\.io", RegexOptions.Compiled);
+        static Regex Check5chNetLink = new Regex(@"((?:h?ttps?|sssp)://[A-Za-z0-9_-]+?\.)5ch\.net(/test/read\.cgi/\w+/\d{9,}(?:/(?:\d+(?:-\d*)?|l\d+))?/?|/ico/\w+\.gif|/[A-Za-z0-9]+)", RegexOptions.Compiled);
         static Regex CheckHttpsLink  = new Regex(@"(h?ttp)s(://\w+\.(?:(?:2|5)ch.net|bbspink\.com)/)", RegexOptions.Compiled);
 
         /// <summary>
@@ -205,14 +206,27 @@ namespace _2chAPIProxy.HtmlConverter
         {
             StringBuilder datb = new StringBuilder(dat);
 
+            // 5ch.io -> 5ch.net置換
+            // これは必ず行う（とりあえず）ので、以降の置換は.netだけを考慮すればよい
+            {
+                var replace = CheckIOLink.Matches(dat);
+                foreach (Match link in replace)
+                {
+                    datb.Replace(link.Groups[0].Value, $" {link.Groups[1].Value}5ch.net");
+                }
+            }
+
+            // 5ch.net -> 2ch.net置換
             if (is5chURIReplace)
             {
-                var replace = CheckResContent.Matches(dat);
+                var replace = Check5chNetLink.Matches(datb.ToString());
                 foreach (Match link in replace)
                 {
                     datb.Replace(link.Groups[0].Value, link.Groups[1].Value + "2ch.net" + link.Groups[2].Value);
                 }
             }
+
+            // https -> http置換
             if (isHttpsReplace)
             {
                 var replace = CheckHttpsLink.Matches(datb.ToString());
