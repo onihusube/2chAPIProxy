@@ -147,7 +147,7 @@ namespace _2chAPIProxy
                         //元のURLが2chか5chか
                         bool is2ch = oSession.fullUrl.Contains(".2ch.net/");
                         //2ch→5ch置換
-                        oSession.fullUrl = oSession.fullUrl.Replace(".2ch.net/", domain_5ch_net).Replace(domain_5ch_net, domain_5ch);
+                        oSession.fullUrl = oSession.fullUrl.Replace(".2ch.net/", ".5ch.net/").Replace(domain_5ch_net, domain_5ch);
                         if (oSession.oRequest.headers.Exists("Referer"))
                         {
                             oSession.oRequest.headers["Referer"] = oSession.oRequest.headers["Referer"].Replace(".2ch.net/", ".5ch.net/").Replace(domain_5ch_net, domain_5ch);
