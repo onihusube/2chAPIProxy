@@ -193,7 +193,6 @@ namespace _2chAPIProxy.HtmlConverter
         }
 
 
-        static Regex CheckIOLink = new Regex(@"((?:h?ttps?|sssp)://[A-Za-z0-9_-]+?\.)5ch\.io", RegexOptions.Compiled);
         static Regex Check5chNetLink = new Regex(@"((?:h?ttps?|sssp)://[A-Za-z0-9_-]+?\.)5ch\.net(/test/read\.cgi/\w+/\d{9,}(?:/(?:\d+(?:-\d*)?|l\d+))?/?|/ico/\w+\.gif|/[A-Za-z0-9]+)", RegexOptions.Compiled);
         static Regex CheckHttpsLink  = new Regex(@"(h?ttp)s(://\w+\.(?:(?:2|5)ch.net|bbspink\.com)/)", RegexOptions.Compiled);
 
@@ -206,15 +205,8 @@ namespace _2chAPIProxy.HtmlConverter
         {
             StringBuilder datb = new StringBuilder(dat);
 
-            // 5ch.io -> 5ch.net置換
-            // これは必ず行う（とりあえず）ので、以降の置換は.netだけを考慮すればよい
-            {
-                var replace = CheckIOLink.Matches(dat);
-                foreach (Match link in replace)
-                {
-                    datb.Replace(link.Groups[0].Value, $" {link.Groups[1].Value}5ch.net");
-                }
-            }
+            // 5ch.io -> 5ch.net置換においては、文字が増えるため辻褄を合わせるのが難しい...
+            // https置換と組み合わせれば行けなくもないが...
 
             // 5ch.net -> 2ch.net置換
             if (is5chURIReplace)
