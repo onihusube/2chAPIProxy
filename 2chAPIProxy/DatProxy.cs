@@ -179,6 +179,7 @@ namespace _2chAPIProxy
                             {
                                 FiddlerApplication.BeforeResponse -= BRHandler;
                                 intervene_in_dat_response(ref ooSession, is2ch, threaduri, false);
+                                ooSession.Ignore();
                             };
                             FiddlerApplication.BeforeResponse += BRHandler;
 
@@ -213,6 +214,7 @@ namespace _2chAPIProxy
                             {
                                 FiddlerApplication.BeforeResponse -= BRHandler;
                                 intervene_in_dat_response(ref ooSession, is2ch, threadurl, true);
+                                ooSession.Ignore();
                             };
                             FiddlerApplication.BeforeResponse += BRHandler;
 
