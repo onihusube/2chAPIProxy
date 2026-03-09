@@ -852,7 +852,7 @@ namespace _2chAPIProxy
 
                 // 板毎設定の引き当て
                 BoardSettings PostSetting = null;
-                if (1 < BoardSettings.Count())
+                if (1 <= BoardSettings.Count())
                 {
                     // Pink共通設定があれば引き当てておく
                     if (exist_pink_common)
@@ -1397,7 +1397,8 @@ namespace _2chAPIProxy
                     {
                         if (cookie_reacquisition == true)
                         {
-                            const uint max_retry = 4;
+                            // TODO: monaticket期限切れ対策（リトライで取得すると焼かれる）
+                            const uint max_retry = 0;
                             // 数値根拠（これ
                             // 1. 投稿を拒否（Monaticket切れ）でリトライ（Monaticket再取得
                             // 2. 書き込み確認でリトライ（Monaticket再取得
@@ -1405,7 +1406,7 @@ namespace _2chAPIProxy
                             // 4. 書き込み確認でリトライ（Acorn再取得
 
                             // ループする可能性があるのはこっちだけ
-                            if (retry_count <= max_retry)
+                            if (retry_count < max_retry)
                             {
                                 // ちょっと待機（基本3s
                                 Thread.Sleep((int)(3000 + 1000 * retry_count));
